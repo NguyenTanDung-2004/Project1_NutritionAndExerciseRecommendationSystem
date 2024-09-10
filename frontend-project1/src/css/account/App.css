@@ -1,0 +1,19 @@
+*{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    }
+
+    #root > div.divMain{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100vw;
+        height: 80vh;
+        padding-left: 50px;
+        padding-right: 50px;
+    }
+body{
+    background: linear-gradient(to right, #1445FE33, #F0EDED);
+
+}
