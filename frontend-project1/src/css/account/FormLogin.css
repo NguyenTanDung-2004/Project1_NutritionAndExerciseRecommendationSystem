@@ -6,7 +6,8 @@
 
 #root > div > .divRight{
     flex: 1;
-    margin-left: 30px;
+    display: flex;
+    justify-content: center;
 }
 
 #root > div > .divRight div.divFormLogin{
@@ -29,6 +30,9 @@
 
 #root > div > .divRight div.divFormLogin .divInput {
     position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
 #root > div > .divRight div.divFormLogin .divInput input{
@@ -39,12 +43,18 @@
     outline: none;
     border: 0.5px solid #595858;
     padding-left: 10px;
+    font-size: 16px;
+    font-family: "Inter", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
+    font-weight: 450;
 }
 
 #root > div > .divRight div.divFormLogin .divInput i{
     position: absolute;
     right: 10px;
-    top: calc(50% - 8px);
+    top: calc(50% + 2px);
+    cursor: pointer;
 }
 
 #root > div > div.divRight > div > p{

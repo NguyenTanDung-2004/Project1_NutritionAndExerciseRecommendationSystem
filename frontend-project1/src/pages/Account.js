@@ -1,9 +1,14 @@
 import React from "react";
 import App from "../component/account/App"
+import { EmailProvider, PasswordProvider } from "../context/account/Context";
 
 function CreatePage(){
     return (
-        <App/>
+        <EmailProvider>
+        <PasswordProvider>
+            <App/>
+        </PasswordProvider>
+        </EmailProvider>
     );
 }
 
