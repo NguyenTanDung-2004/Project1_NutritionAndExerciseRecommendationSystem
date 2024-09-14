@@ -34,4 +34,9 @@ public class User {
     private float bloodPressure;
     private float hearBeat;
     private float bloodSugar;
+    //
+    private float bloodPressure1;
+    private float bloodSugar1;
+    //
+    private String code; // code to reset email.
 }
