@@ -16,7 +16,11 @@ import lombok.NoArgsConstructor;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public enum ResponseCode {
 
-    CreateAccountSuccessfully(1000, "create account successfully!");
+    CreateAccountSuccessfully(1000, "create account successfully!"),
+    CompleteAccountSuccessfully(1000, "complete account successfully!"),
+    SendEmailSuccessfully(1000, "send email successfully!"),
+    UpdatePasswordSuccessfully(1000, "update password successfully!"),
+    LoginSuccessfully(1000, "login successfully!");
 
     private int code;
     private String message;

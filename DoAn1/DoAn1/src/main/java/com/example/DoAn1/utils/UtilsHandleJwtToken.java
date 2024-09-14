@@ -3,6 +3,7 @@ package com.example.DoAn1.utils;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.Optional;
 
 import javax.crypto.spec.SecretKeySpec;
 
@@ -31,9 +32,6 @@ import com.nimbusds.jwt.SignedJWT;
 public class UtilsHandleJwtToken {
     @Value("${jwt.scretKey}")
     private String secretKey;
-
-    @Autowired
-    private UtilsUserService utilsUserService;
 
     public String createToken(User user) {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS256);
