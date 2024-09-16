@@ -7,7 +7,7 @@ import "../../css/home_out/Main2.css";
 
 const Main2 = () => {
   return (
-    <div className="main2">
+    <div id="main2">
       <span className="main2-title">Our Services</span>
       <div className="card-list">
         <ServiceCard

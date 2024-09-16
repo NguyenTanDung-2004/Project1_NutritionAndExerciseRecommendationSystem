@@ -8,6 +8,17 @@ const Header = () => {
   const handleItemClick = (id, event) => {
     event.preventDefault();
     setActiveItem(id);
+
+    const toMain =
+      id === "category-home"
+        ? "main1"
+        : id === "category-services"
+        ? "main2"
+        : "main3";
+    const element = document.getElementById(toMain);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   return (
@@ -20,7 +31,7 @@ const Header = () => {
         <div className="header-line"></div>
         <div className="category">
           <a
-            href="#"
+            href="#main1"
             id="category-home"
             className={`category-item ${
               activeItem === "category-home" ? "active" : ""
@@ -30,7 +41,7 @@ const Header = () => {
             Home
           </a>
           <a
-            href="#"
+            href="#main2"
             id="category-services"
             className={`category-item ${
               activeItem === "category-services" ? "active" : ""
@@ -40,7 +51,7 @@ const Header = () => {
             Services
           </a>
           <a
-            href="#"
+            href="#main3"
             id="category-contact"
             className={`category-item ${
               activeItem === "category-contact" ? "active" : ""

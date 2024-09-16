@@ -7,7 +7,7 @@ import "../../css/home_out/Main1.css";
 
 const Main1 = () => {
   return (
-    <div className="main1">
+    <div id="main1">
       <Header></Header>
       <div className="main1-content">
         <HomeLeft></HomeLeft>

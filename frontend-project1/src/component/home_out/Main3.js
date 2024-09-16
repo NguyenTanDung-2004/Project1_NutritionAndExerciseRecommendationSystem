@@ -3,7 +3,7 @@ import "../../css/home_out/Main3.css";
 
 const Main3 = () => {
   return (
-    <div className="main3">
+    <div id="main3">
       <span className="main3-text">
         Subscribe to our newsletter to get the latest updates and healthcare
         tips.

@@ -5,7 +5,7 @@ import LogoImg from "../../img/home_out/logo.png";
 const Main4 = (props) => {
   console.log(props);
   return (
-    <div className="main4">
+    <div id="main4">
       <div className="main4-body">
         <div className="main4-logo">
           <img src={LogoImg} alt="logo.png" />

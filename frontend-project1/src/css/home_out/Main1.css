@@ -3,7 +3,7 @@
   padding: 0;
   box-sizing: border-box;
 }
-.main1 {
+#main1 {
   background-image: url("../../img/home_out/bg-img.png");
   background-repeat: no-repeat;
   background-size: cover;
@@ -18,7 +18,7 @@
   padding-left: 180px;
   padding-top: 120px;
 }
-.main1 .main1-btn {
+#main1 .main1-btn {
   margin-top: 30px;
   display: flex;
   flex-direction: row;
