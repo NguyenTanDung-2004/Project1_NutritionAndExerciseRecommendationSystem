@@ -6,6 +6,7 @@
 
 .home_in {
   padding: 0 100px;
+  padding-top: 30px;
   height: 100vh;
   overflow-x: hidden;
   overflow-y: hidden;
@@ -13,11 +14,7 @@
 .home_in .main {
   display: flex;
 }
-.home_in .main .navigation-bar {
-  margin-top: 80px;
-  margin-right: 100px;
-}
 .home_in .main .body {
-  margin-top: 40px;
+  margin: 50px 120px 0 120px;
   display: flex;
 }

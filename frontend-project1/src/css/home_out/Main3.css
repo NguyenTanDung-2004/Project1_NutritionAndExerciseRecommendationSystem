@@ -47,7 +47,8 @@
   color: blue;
   height: 46px;
 }
-#main3 .form-group input:focus {
+#main3 .form-group input:focus,
+#main3 .form-group textarea:focus-visible {
   outline-color: var(--color-health-care);
 }
 #main3 .form-group input[type="text"] {

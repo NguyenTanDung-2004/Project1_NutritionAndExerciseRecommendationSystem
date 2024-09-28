@@ -1,6 +1,6 @@
 import React from "react";
-import Header from "./Header";
-import NavigationBar from "./NavigationBar";
+import Header from "../header/Header";
+import NavigationBar from "../navigationBar/NavigationBar";
 import "../../css/home_in/App.css";
 import DivLeft from "./DivLeft";
 import Services from "./Services";
@@ -14,9 +14,7 @@ const App = () => {
         notifications={10}
       ></Header>
       <div className="main">
-        <div className="navigation-bar">
-          <NavigationBar></NavigationBar>
-        </div>
+        <NavigationBar itemClicked="Home"></NavigationBar>
         <div className="body">
           <DivLeft></DivLeft>
           <Services></Services>

@@ -1,0 +1,74 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+:root {
+  --color-health-care: #1445fe;
+}
+.list-dishes {
+  width: 740px;
+}
+.list-dishes .list-info {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+}
+.list-dishes .list-info .count-dish {
+  margin-left: 10px;
+  font-style: italic;
+}
+.list-dishes .list-main {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 30px;
+}
+.list-dishes .dropdown {
+  position: relative;
+  font-size: 14px;
+}
+.list-dishes .dropdown:hover .dropdown-btn {
+  color: var(--color-health-care);
+}
+
+.list-dishes .dropdown-btn {
+  background-color: white;
+  border: 1px solid black;
+  border-radius: 20px;
+  padding: 8px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+
+  font-size: 14px;
+}
+
+.list-dishes .dropdown-btn .arrow {
+  margin-left: 8px;
+}
+
+.list-dishes .dropdown-menu {
+  position: absolute;
+  top: 100%;
+  width: 100%;
+  left: 0;
+  background-color: white;
+  border: 1px solid black;
+  border-radius: 8px;
+  margin-top: 10px;
+  padding: 0;
+  list-style: none;
+  display: none;
+}
+.display-block {
+  display: block !important;
+}
+.list-dishes .dropdown-menu li {
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
+.list-dishes .dropdown-menu li:hover {
+  background-color: lightgray;
+  border-radius: 8px;
+}

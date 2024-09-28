@@ -1,7 +1,7 @@
 const listNavigation = [
   {
-    label: "Account",
-    link: "/",
+    label: "Home",
+    link: "/home_in",
     icon: "fa-solid fa-user",
   },
   {
@@ -10,8 +10,8 @@ const listNavigation = [
     icon: "fa-solid fa-person-running",
   },
   {
-    label: "Foods",
-    link: "/",
+    label: "Nutritional regimen",
+    link: "/nutritional_regimen",
     icon: "fa-solid fa-utensils",
   },
   {
