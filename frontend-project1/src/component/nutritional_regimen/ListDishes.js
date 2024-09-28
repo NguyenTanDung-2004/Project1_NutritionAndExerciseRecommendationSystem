@@ -1,83 +1,58 @@
 import React, { useEffect, useState } from "react";
 import "../../css/nutritional_regimen/ListDishes.css";
 import CardDish from "./CardDish";
-
-const DishesData = [
-  {
-    id: "1",
-    type: "Main dish",
-    img: "https://i.ibb.co/kxVPqYg/bunbo.png",
-    name: "BÚN BÒ",
-    time: "1h 41m",
-    calo: 350,
-    likes: 1000,
-    rating: 3,
-  },
-  {
-    id: "2",
-    type: "Side dish",
-    img: "https://i.ibb.co/kxVPqYg/bunbo.png",
-    name: "GỎI CUỐN",
-    time: "30m",
-    calo: 150,
-    likes: 1000,
-    rating: 4.2,
-  },
-  {
-    id: "3",
-    type: "Main dish",
-    img: "https://i.ibb.co/kxVPqYg/bunbo.png",
-    name: "PHỞ BÒ",
-    time: "2h",
-    calo: 400,
-    likes: 1000,
-    rating: 5,
-  },
-  {
-    id: "4",
-    type: "Dessert",
-    img: "https://i.ibb.co/kxVPqYg/bunbo.png",
-    name: "CHÈ BƯỞI",
-    time: "1h",
-    calo: 250,
-    likes: 1000,
-    rating: 4.5,
-  },
-  {
-    id: "5",
-    type: "Lunch",
-    img: "https://i.ibb.co/kxVPqYg/bunbo.png",
-    name: "NEM RÁN",
-    time: "45m",
-    calo: 300,
-    likes: 1000,
-    rating: 3.8,
-  },
-  {
-    id: "6",
-    type: "Main dish",
-    img: "https://i.ibb.co/kxVPqYg/bunbo.png",
-    name: "CƠM TẤM",
-    time: "1h 15m",
-    calo: 550,
-    likes: 1000,
-    rating: 4.9,
-  },
-];
+import DishesData from "./ListDishesData";
 
 const sortsData = ["All", "New", "Old", "Rating"];
 
 const ListDishes = () => {
+  const [currentPage, setCurrentPage] = useState(1);
   const [sortOption, setSortOption] = useState("All");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  // pagination
+  const itemsPerPage = 10;
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = DishesData.slice(indexOfFirstItem, indexOfLastItem);
+
+  const totalPages = Math.ceil(DishesData.length / itemsPerPage);
+
+  // change page
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  // handle button prev - next
+  const goToPrevPage = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
+  };
+  const goToNextPage = () => {
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+  };
+
+  // display 3 pages
+  const getDisplayedPages = () => {
+    if (currentPage === 1) {
+      return [1, 2, 3].filter((page) => page <= totalPages);
+    } else if (currentPage === totalPages) {
+      return [totalPages - 2, totalPages - 1, totalPages].filter(
+        (page) => page > 0
+      );
+    } else {
+      return [currentPage - 1, currentPage, currentPage + 1];
+    }
+  };
+
+  // pagination
 
   const handleSortChange = (sort) => {
     setSortOption(sort);
     setIsDropdownOpen(false);
   };
 
+  // sort
   const sortedDishes = () => {
-    let sorted = [...DishesData];
+    let sorted = [...currentItems];
     if (sortOption === "All") return sorted;
     if (sortOption === "New") {
       //
@@ -102,6 +77,7 @@ const ListDishes = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+  // sort
 
   return (
     <>
@@ -143,6 +119,33 @@ const ListDishes = () => {
               rating={dish.rating}
             ></CardDish>
           ))}
+        </div>
+        <div className="pagination">
+          <button
+            className="btn-prev"
+            disabled={currentPage === 1}
+            onClick={goToPrevPage}
+          >
+            <i class="fa-solid fa-angle-left"></i>
+          </button>
+
+          {getDisplayedPages().map((page) => (
+            <button
+              key={page}
+              className={`btn-page ${currentPage === page ? "active" : ""}`}
+              onClick={() => paginate(page)}
+            >
+              {page}
+            </button>
+          ))}
+
+          <button
+            className="btn-next"
+            disabled={currentPage === totalPages}
+            onClick={goToNextPage}
+          >
+            <i class="fa-solid fa-angle-right"></i>
+          </button>
         </div>
       </div>
     </>

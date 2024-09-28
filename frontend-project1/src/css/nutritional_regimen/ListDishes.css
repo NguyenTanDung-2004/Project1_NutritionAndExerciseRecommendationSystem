@@ -72,3 +72,48 @@
   background-color: lightgray;
   border-radius: 8px;
 }
+
+/* pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 50px;
+}
+.pagination button {
+  padding: 8px 14px;
+  margin: 0 5px;
+  cursor: pointer;
+  border-radius: 4px;
+  box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.25);
+}
+.pagination button:hover {
+  box-shadow: 2px 4px 4px 0 rgba(20, 69, 254, 0.5);
+}
+.pagination button i {
+  font-size: 20px;
+}
+.pagination .btn-prev,
+.pagination .btn-next {
+  border: none;
+  background-color: var(--color-health-care);
+  color: white;
+  margin: 0 18px;
+}
+
+.pagination .btn-page {
+  border: 2px solid var(--color-health-care);
+  font-size: 18px;
+  background-color: white;
+  margin: 0 6px;
+}
+.pagination .btn-page.active {
+  background-color: var(--color-health-care);
+  color: white;
+}
+
+.pagination button[disabled] {
+  background-color: #d9d9d9;
+  cursor: not-allowed;
+  box-shadow: none;
+}
