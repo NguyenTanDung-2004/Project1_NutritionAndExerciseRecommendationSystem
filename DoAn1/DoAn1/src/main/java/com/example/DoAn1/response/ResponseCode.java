@@ -20,7 +20,8 @@ public enum ResponseCode {
     CompleteAccountSuccessfully(1000, "complete account successfully!"),
     SendEmailSuccessfully(1000, "send email successfully!"),
     UpdatePasswordSuccessfully(1000, "update password successfully!"),
-    LoginSuccessfully(1000, "login successfully!");
+    LoginSuccessfully(1000, "login successfully!"),
+    CreateFoodSuccessfully(1000, "create food successfully!");
 
     private int code;
     private String message;

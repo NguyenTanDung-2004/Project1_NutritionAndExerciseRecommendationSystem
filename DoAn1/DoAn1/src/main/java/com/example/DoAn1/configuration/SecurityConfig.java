@@ -34,7 +34,8 @@ public class SecurityConfig {
                         "/user/Complete",
                         "/user/SendCodeUpdatePassword",
                         "/user/UpdatePassword",
-                        "/user/Login"
+                        "/user/Login",
+                        "/food/createFood"
         };
 
         private final String[] PostAdmin = {
@@ -64,12 +65,14 @@ public class SecurityConfig {
                 // Disable CSRF protection
                 httpSecurity.csrf(csrf -> csrf.disable());
 
-                // Allowed frontend can access
+                // // Allowed frontend can access
                 httpSecurity.cors(cors -> cors.configurationSource(request -> {
                         CorsConfiguration corsConfig = new CorsConfiguration();
-                        corsConfig.setAllowedOrigins(Collections.singletonList("http://localhost:3000")); // Adjust as
-                                                                                                          // necessary
-                        corsConfig.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                        corsConfig.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
+                        // Adjust as
+                        // necessary
+                        corsConfig.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE",
+                                        "OPTIONS"));
                         corsConfig.setAllowedHeaders(Collections.singletonList("*"));
                         corsConfig.setAllowCredentials(true);
                         return corsConfig;

@@ -6,11 +6,15 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.util.HashSet;
 
 @Entity
 @Table(name = "[user]")
@@ -39,4 +43,9 @@ public class User {
     private float bloodSugar1;
     //
     private String code; // code to reset email.
+
+    // relationship n - n with food
+    @ManyToMany
+    @JoinTable(name = "user_like_food", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "food_id"))
+    private java.util.Set<Food> likedFoods = new HashSet<>();
 }

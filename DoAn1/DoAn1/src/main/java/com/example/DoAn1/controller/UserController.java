@@ -1,5 +1,7 @@
 package com.example.DoAn1.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -8,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.DoAn1.entities.Food;
+import com.example.DoAn1.repository.FoodRepository;
 import com.example.DoAn1.request.UserCompleteRequest;
 import com.example.DoAn1.request.UserCreationRequest;
 import com.example.DoAn1.request.UserUpdatePasswordRequest;
@@ -47,9 +51,14 @@ public class UserController {
         return this.userService.updatePassword(userUpdatePasswordRequest);
     }
 
+    @Autowired
+    private FoodRepository foodRepository;
+
     @PostMapping("/Login")
     public ResponseEntity login(@RequestParam(name = "email") String email,
             @RequestParam(name = "password") String password, HttpServletResponse httpServletResponse) {
-        return this.userService.login(password, email, httpServletResponse);
+        List<Food> list = this.foodRepository.findAll();
+        return ResponseEntity.ok().body(list);
+        // return this.userService.login(password, email, httpServletResponse);
     }
 }
