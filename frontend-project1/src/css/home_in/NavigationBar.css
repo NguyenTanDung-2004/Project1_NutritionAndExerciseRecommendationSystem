@@ -24,7 +24,7 @@
   transition: all 0.3s ease;
 }
 .navigation-item:hover {
-  box-shadow: 0 10px 10px rgba(4, 58, 177, 0.25);
+  box-shadow: 2px 7px 10px #1445fe;
 }
 .navigation-item.active {
   box-shadow: 2px 7px 10px #1445fe;

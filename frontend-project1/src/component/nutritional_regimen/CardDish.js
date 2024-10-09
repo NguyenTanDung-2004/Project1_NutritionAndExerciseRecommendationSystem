@@ -6,7 +6,7 @@ import IconCalo from "../../img/nutritional_regimen/icon-calo.png";
 import StarVoted from "../../img/nutritional_regimen/star-voted.png";
 import Star from "../../img/nutritional_regimen/star.png";
 
-const CardDish = ({ type, name, img, time, calo, likes, rating }) => {
+const CardDish = ({ type, name, img, time, calo, likes, rating, onClick }) => {
   const renderRating = (rating) => {
     const stars = [];
     for (let i = 1; i <= 5; i++) {
@@ -18,7 +18,11 @@ const CardDish = ({ type, name, img, time, calo, likes, rating }) => {
   };
   return (
     <>
-      <div style={{ backgroundColor: "#FFF9E4" }} className="dish-container">
+      <div
+        style={{ backgroundColor: "#FFF9E4" }}
+        className="dish-container"
+        onClick={onClick}
+      >
         <span className="type">{type}</span>
         <div className="dish-body">
           <div className="dish-left">

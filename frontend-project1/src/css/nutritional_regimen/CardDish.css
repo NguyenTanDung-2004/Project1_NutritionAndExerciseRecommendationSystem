@@ -29,34 +29,36 @@
   justify-content: space-between;
   gap: 4px;
 }
-.dish-left .name {
+.dish-body .dish-left {
+  width: 60%;
+}
+.dish-body .dish-left .name {
   font-family: "Inter", sans-serif;
   color: black;
-  font-size: 30px;
+  font-size: 24px;
   font-weight: bold;
-  width: 170px;
-  text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
+  text-overflow: ellipsis;
 }
-.dish-left img {
+.dish-body .dish-left img {
   width: 124px;
   height: 100px;
 }
-.dish-right {
+.dish-body .dish-right {
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 160px;
 }
 
-.dish-info {
+.dish-body .dish-info {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.dish-info span {
+.dish-body .dish-info span {
   display: flex;
   align-items: center;
   font-family: "Inter", sans-serif;
@@ -64,20 +66,20 @@
   font-size: 12px;
 }
 
-.dish-info img {
+.dish-body .dish-info img {
   width: 16px;
   height: 16px;
   margin-right: 6px;
 }
 
-.dish-rating {
+.dish-body .dish-rating {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 2px;
 }
 
-.dish-rating img {
+.dish-body .dish-rating img {
   width: 18px;
   height: 18px;
 }
