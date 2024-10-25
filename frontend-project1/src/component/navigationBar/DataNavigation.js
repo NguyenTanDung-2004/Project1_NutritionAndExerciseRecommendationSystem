@@ -5,8 +5,8 @@ const listNavigation = [
     icon: "fa-solid fa-user",
   },
   {
-    label: "Challenges",
-    link: "/",
+    label: "Workout",
+    link: "/workout",
     icon: "fa-solid fa-person-running",
   },
   {
