@@ -3,9 +3,6 @@
   padding: 0;
   box-sizing: border-box;
 }
-:root {
-  --color-health-care: #1445fe;
-}
 .workout {
   padding: 0 100px;
   padding-top: 30px;

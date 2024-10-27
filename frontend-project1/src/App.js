@@ -7,6 +7,7 @@ import HomeIn from "./pages/HomeIn";
 import NutritionalRegimen from "./pages/NutritionalRegimen";
 import DishDetails from "./pages/DishDetails";
 import Workout from "./pages/Workout";
+import WorkoutDetails from "./pages/WorkoutDetails";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/nutritional_regimen" element={<NutritionalRegimen />} />
         <Route path="/nutritional_regimen/:id" element={<DishDetails />} />
         <Route path="/workout" element={<Workout />} />
+        <Route path="/workout/:id" element={<WorkoutDetails />} />
       </Routes>
     </Router>
   );
