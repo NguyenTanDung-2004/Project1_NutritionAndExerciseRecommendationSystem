@@ -2,9 +2,9 @@ import React from "react";
 import StarVoted from "../../img/workout/star-voted.svg";
 import Star from "../../img/workout/star.svg";
 import IconTime from "../../img/workout/time.svg";
-import "../../css/workout/CardWorkout.css";
+import "../../css/workout_details/CardRecommend.css";
 
-const CardWorkout = ({ name, image, rating, calo, time, onClick }) => {
+const CardRecommend = ({ name, image, rating, calo, time, onClick }) => {
   const renderRating = (rating) => {
     const stars = [];
     for (let i = 1; i <= 5; i++) {
@@ -17,11 +17,11 @@ const CardWorkout = ({ name, image, rating, calo, time, onClick }) => {
 
   return (
     <>
-      <div className="card-workout" onClick={onClick}>
-        <div className="card-workout__container">
+      <div className="card-recommend" onClick={onClick}>
+        <div className="card-recommend__container">
           <img src={image} alt="" />
         </div>
-        <div className="card-workout__info">
+        <div className="card-recommend__info">
           <div className="card-info__top">
             <div className="card-info__item">{calo} calo / set</div>
 
@@ -46,4 +46,4 @@ const CardWorkout = ({ name, image, rating, calo, time, onClick }) => {
   );
 };
 
-export default CardWorkout;
+export default CardRecommend;
