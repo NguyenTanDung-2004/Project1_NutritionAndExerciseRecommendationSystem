@@ -8,6 +8,7 @@ import NutritionalRegimen from "./pages/NutritionalRegimen";
 import DishDetails from "./pages/DishDetails";
 import Workout from "./pages/Workout";
 import WorkoutDetails from "./pages/WorkoutDetails";
+import Profile from "./pages/Profile";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         <Route path="/nutritional_regimen/:id" element={<DishDetails />} />
         <Route path="/workout" element={<Workout />} />
         <Route path="/workout/:id" element={<WorkoutDetails />} />
+        <Route path="/profile" element={<Profile />} />
       </Routes>
     </Router>
   );

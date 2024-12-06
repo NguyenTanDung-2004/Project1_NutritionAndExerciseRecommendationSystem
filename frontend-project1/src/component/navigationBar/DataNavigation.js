@@ -2,7 +2,7 @@ const listNavigation = [
   {
     label: "Home",
     link: "/home_in",
-    icon: "fa-solid fa-user",
+    icon: "fa-solid fa-house",
   },
   {
     label: "Workout",
@@ -18,6 +18,11 @@ const listNavigation = [
     label: "Statistics",
     link: "/",
     icon: "fa-solid fa-chart-line",
+  },
+  {
+    label: "Profile",
+    link: "/profile",
+    icon: "fa-solid fa-user",
   },
 ];
 

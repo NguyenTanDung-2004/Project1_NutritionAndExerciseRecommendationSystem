@@ -1,13 +1,20 @@
 import React from "react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 import "../../css/home_in/Header.css";
 import LogoImg from "../../img/home_out/logo.png";
-import AvatarDefault from "../../img/home_in/avatar-default.png";
+import AvatarDefault from "../../img/profile/default-avatar.png";
 
 const Header = (props) => {
+  const navigate = useNavigate(); // Sử dụng hook useNavigate
+
+  const handleAvatarClick = () => {
+    navigate("/profile"); // Điều hướng đến trang /profile
+  };
+
   return (
     <div className="header-in">
       <div className="circle-container">
-        <img className="logo" src={LogoImg} alt="" />
+        <img className="logo" src={LogoImg} alt="Logo" />
       </div>
       <div className="sliding-text-container">
         <div className="sliding-text">
@@ -21,8 +28,16 @@ const Header = (props) => {
             <span className="notification-count">{props.notifications}</span>
           )}
         </div>
-        <div className="circle-container avatar">
-          <img className="avatar" src={props.avatar || AvatarDefault} alt="" />
+        <div
+          className="circle-container avatar"
+          onClick={handleAvatarClick} // Thêm sự kiện click
+          style={{ cursor: "pointer" }} // Đổi con trỏ thành dạng chỉ tay
+        >
+          <img
+            className="avatar"
+            src={props.avatar || AvatarDefault}
+            alt="Avatar"
+          />
         </div>
       </div>
     </div>
