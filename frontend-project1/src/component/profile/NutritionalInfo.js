@@ -43,10 +43,6 @@ const NutritionalInfo = () => {
 
   const [isDietDropdownOpen, setIsDietDropdownOpen] = useState(false);
 
-  const handleDateChange = (event) => {
-    setSelectedDate(event.target.value);
-  };
-
   const handleAddMeal = (meal) => {
     alert(`Thêm món ăn cho ${meal.label}`);
   };
@@ -54,6 +50,10 @@ const NutritionalInfo = () => {
   const handleDietChange = (diet) => {
     setNutritionData((prevData) => ({ ...prevData, diet }));
     setIsDietDropdownOpen(false);
+  };
+
+  const handleDateChange = (event) => {
+    setSelectedDate(event.target.value);
   };
 
   const formatDate = (date) => {

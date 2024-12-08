@@ -159,17 +159,16 @@ const App = () => {
   return (
     <>
       <div className="dish-details">
-        <div className="dish-details__header">
+        <div className="px-6 md:px-[100px] pt-[30px]">
           <Header
             username="Phan Giang"
             text="May this website help you achieve your health goals."
             notifications={10}
-          ></Header>
+          />
+          <NavigationBar itemClicked="Nutritional regimen" />
         </div>
 
         <div className="first">
-          <NavigationBar itemClicked="Nutritional regimen"></NavigationBar>
-
           <DishOverview
             type="Main dish"
             name="BÚN BÒ"

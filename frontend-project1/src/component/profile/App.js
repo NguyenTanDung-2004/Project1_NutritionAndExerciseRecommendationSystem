@@ -25,7 +25,7 @@ const Profile = () => {
 
   return (
     <>
-      <div className="px-6 md:px-[100px] pt-5">
+      <div className="px-6 md:px-[100px] pt-[30px]">
         <Header
           username="Phan Giang"
           text="May this website help you achieve your health goals."

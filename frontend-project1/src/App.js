@@ -9,6 +9,7 @@ import DishDetails from "./pages/DishDetails";
 import Workout from "./pages/Workout";
 import WorkoutDetails from "./pages/WorkoutDetails";
 import Profile from "./pages/Profile";
+import History from "./pages/History";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
         <Route path="/workout" element={<Workout />} />
         <Route path="/workout/:id" element={<WorkoutDetails />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/history" element={<History />} />
       </Routes>
     </Router>
   );
