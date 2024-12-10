@@ -21,8 +21,8 @@ const App = () => {
       </div>
 
       <div className="mx-6 md:mx-[200px] mt-10 flex flex-col  gap-5">
-        <div className="w-full flex justify-between">
-          <div className="text-2xl text-black font-semibold">
+        <div className="w-full flex justify-between mt-5">
+          <div className="text-2xl text-black font-bold">
             Lịch sử và thống kê
           </div>
 

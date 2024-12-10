@@ -15,6 +15,11 @@ const listNavigation = [
     icon: "fa-solid fa-utensils",
   },
   {
+    label: "Goals",
+    link: "/goals",
+    icon: "fa-solid fa-bullseye",
+  },
+  {
     label: "History",
     link: "/history",
     icon: "fa-solid fa-chart-line",
