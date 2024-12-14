@@ -12,6 +12,7 @@ import Profile from "./pages/Profile";
 import History from "./pages/History";
 import Goals from "./pages/Goals";
 import GoalDetails from "./pages/GoalDetails";
+import Challenges from "./pages/Challenges";
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
         <Route path="/history" element={<History />} />
         <Route path="/goals" element={<Goals />} />
         <Route path="/goals/:id" element={<GoalDetails />} />
+        <Route path="/challenges" element={<Challenges />} />
       </Routes>
     </Router>
   );

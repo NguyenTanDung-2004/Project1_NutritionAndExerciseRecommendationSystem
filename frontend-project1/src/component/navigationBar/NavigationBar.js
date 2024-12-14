@@ -14,6 +14,7 @@ const NavigationBar = ({ itemClicked }) => {
           }`}
         >
           <i className={item.icon}></i>
+
           <span className="tooltip">{item.label}</span>
         </a>
       ))}
