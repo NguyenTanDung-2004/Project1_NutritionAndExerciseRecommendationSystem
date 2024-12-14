@@ -165,7 +165,11 @@ const App = () => {
             text="May this website help you achieve your health goals."
             notifications={10}
           />
-          <NavigationBar itemClicked="Nutritional regimen" />
+
+          <NavigationBar
+            itemClicked="Nutritional regimen"
+            className="relative z-20"
+          />
         </div>
 
         <div className="first">
