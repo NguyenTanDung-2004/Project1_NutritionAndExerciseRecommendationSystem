@@ -1,10 +1,10 @@
 import { useState } from "react";
 
 const SortDropdown = ({ onSortChange }) => {
-  const options = ["BMI tăng dần", "BMI giảm dần", "Sắp xếp"];
+  const options = ["Cao xuống thấp", "Thấp đến cao"];
 
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedOption, setSelectedOption] = useState("Sắp xếp");
+  const [selectedOption, setSelectedOption] = useState("Cao xuống thấp");
 
   const openDropdown = () => {
     setIsOpen(!isOpen);
@@ -21,7 +21,7 @@ const SortDropdown = ({ onSortChange }) => {
   };
 
   return (
-    <div className="relative w-[140px]" onMouseLeave={closeDropdown}>
+    <div className="relative w-[160px]" onMouseLeave={closeDropdown}>
       <div
         className="text-xs text-[#2b3034e6] font-semibold gap-4 flex items-center justify-between border border-solid border-[#d5d5d5] bg-[#fcfdfd] rounded-lg h-[38px] px-4 cursor-pointer w-full"
         onClick={openDropdown}
