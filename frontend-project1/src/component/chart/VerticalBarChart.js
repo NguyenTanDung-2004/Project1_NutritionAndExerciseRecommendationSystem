@@ -49,13 +49,13 @@ const VerticalBarChart = ({ data, unit }) => {
       },
       y: {
         beginAtZero: true,
-        grace: "10%", // Thêm khoảng cách trên đầu cột để tránh avatar bị che
+        grace: "1%", // Thêm khoảng cách trên đầu cột để tránh avatar bị che
       },
     },
   };
 
   return (
-    <div className="relative w-[400px] max-w-md mx-auto h-[400px]">
+    <div className="relative w-[400px] max-w-md mx-auto h-[300px]">
       {/* Chart */}
       <Bar data={chartData} options={options} />
 

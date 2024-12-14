@@ -1,14 +1,14 @@
 import React from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useNavigate } from "react-router-dom";
 import "../../css/home_in/Header.css";
 import LogoImg from "../../img/home_out/logo.png";
 import AvatarDefault from "../../img/profile/default-avatar.png";
 
 const Header = (props) => {
-  const navigate = useNavigate(); // Sử dụng hook useNavigate
+  const navigate = useNavigate();
 
   const handleAvatarClick = () => {
-    navigate("/profile"); // Điều hướng đến trang /profile
+    navigate("/profile");
   };
 
   return (
@@ -29,9 +29,8 @@ const Header = (props) => {
           )}
         </div>
         <div
-          className="circle-container avatar"
-          onClick={handleAvatarClick} // Thêm sự kiện click
-          style={{ cursor: "pointer" }} // Đổi con trỏ thành dạng chỉ tay
+          className="circle-container avatar cursor-pointer"
+          onClick={handleAvatarClick}
         >
           <img
             className="avatar"

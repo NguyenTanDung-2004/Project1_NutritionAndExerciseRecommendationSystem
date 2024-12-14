@@ -84,29 +84,25 @@ const App = () => {
             </button>
           </div>
 
-          <div className=" w-[400px] bg-white flex items-center rounded-xl px-3 py-2 shadow-md">
-            <span className="mr-4 text-gray-500">
-              <i className="fas fa-search"></i>
-            </span>
-
-            <input
-              type="text"
-              placeholder="Tìm kiếm theo tên bài tập"
-              value={searchTerm}
-              onChange={handleSearchChange}
-              className="outline-none text-sm flex-1"
-            />
-          </div>
+          {activeView === "list" && (
+            <div className=" w-[400px] bg-white  flex items-center rounded-xl px-3 py-2 border border-solid border-[#d5d5d5] bg-[#fcfdfd]">
+              <span className="mr-4 text-gray-500">
+                <i className="fas fa-search"></i>
+              </span>
+              <input
+                type="text"
+                placeholder="Tìm kiếm theo tên bài tập"
+                value={searchTerm}
+                onChange={handleSearchChange}
+                className="outline-none text-sm flex-1"
+              />
+            </div>
+          )}
 
           {activeView === "list" && (
             <div className="flex items-center gap-4">
               <SortList onSortChange={handleSortChange} />
               <FilterList onFilterChange={handleFilterChange} />
-            </div>
-          )}
-          {activeView === "rank" && (
-            <div className="flex items-center gap-4">
-              <SortRank onSortChange={handleSortChange} />
             </div>
           )}
         </div>
