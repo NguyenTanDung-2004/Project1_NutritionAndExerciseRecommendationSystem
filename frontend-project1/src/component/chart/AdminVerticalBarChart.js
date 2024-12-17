@@ -11,7 +11,7 @@ import {
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
-const VerticalBarChart = ({ data, unit }) => {
+const AdminVerticalBarChart = ({ data, unit }) => {
   const labels = data.map((item) => item.name);
   const scores = data.map((item) => item.score);
   const avatars = data.map((item) => item.avatar);
@@ -55,7 +55,7 @@ const VerticalBarChart = ({ data, unit }) => {
   };
 
   return (
-    <div className="relative w-[400px] max-w-md mx-auto h-[300px]">
+    <div className="relative w-[600px] max-w-md mx-auto h-[360px]">
       {/* Chart */}
       <Bar data={chartData} options={options} />
 
@@ -84,4 +84,4 @@ const VerticalBarChart = ({ data, unit }) => {
   );
 };
 
-export default VerticalBarChart;
+export default AdminVerticalBarChart;
