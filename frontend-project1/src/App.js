@@ -13,6 +13,7 @@ import History from "./pages/History";
 import Goals from "./pages/Goals";
 import GoalDetails from "./pages/GoalDetails";
 import Challenges from "./pages/Challenges";
+import AdminStatistics from "./pages/AdminStatistics";
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
         <Route path="/goals" element={<Goals />} />
         <Route path="/goals/:id" element={<GoalDetails />} />
         <Route path="/challenges" element={<Challenges />} />
+        <Route path="/dashboard/statistic" element={<AdminStatistics />} />
       </Routes>
     </Router>
   );
