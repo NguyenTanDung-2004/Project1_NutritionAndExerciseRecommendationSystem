@@ -3,7 +3,7 @@ import App from "../component/admin/workoutInfo/App";
 
 const AdminInfoWorkout = () => {
   return (
-    <div>
+    <div className="overflow-hidden">
       <App />
     </div>
   );

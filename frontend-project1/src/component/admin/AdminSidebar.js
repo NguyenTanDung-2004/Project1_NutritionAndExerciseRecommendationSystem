@@ -21,7 +21,7 @@ const NavItem = ({ iconClass, label, href, isActive, onClick }) => {
   );
 };
 
-const Sidebar = () => {
+const Sidebar = ({ className }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -55,7 +55,9 @@ const Sidebar = () => {
   };
 
   return (
-    <aside className="flex flex-col w-[16%] bg-white min-h-screen px-5 pt-5">
+    <aside
+      className={` flex flex-col w-[250px] bg-white min-h-screen px-5 pt-5 ${className}`}
+    >
       <nav className="space-y-1">
         {navItems.map((item) => (
           <NavItem
@@ -69,7 +71,7 @@ const Sidebar = () => {
         ))}
       </nav>
 
-      <div className="mt-[230px] pb-5">
+      <div className="mt-[220px]">
         <NavItem
           iconClass="fa-solid fa-arrow-right-from-bracket"
           label="Đăng xuất"
