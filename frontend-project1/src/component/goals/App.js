@@ -34,7 +34,7 @@ const App = () => {
       startDate: "01/12/2024",
       endDate: "07/12/2024",
       type: "Giảm cân",
-      status: "Đang thực hiện",
+      status: "Đã kết thúc",
     },
     {
       id: "2",

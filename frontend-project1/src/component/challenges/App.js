@@ -7,7 +7,6 @@ import ListChallenges from "./list/ListChallenges";
 import Rank from "./rank/Rank";
 import FilterList from "./list/Filter";
 import SortList from "./list/Sort";
-import SortRank from "./rank/Sort";
 
 const App = () => {
   const [activeView, setActiveView] = useState("list");

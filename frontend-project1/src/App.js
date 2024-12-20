@@ -14,6 +14,13 @@ import Goals from "./pages/Goals";
 import GoalDetails from "./pages/GoalDetails";
 import Challenges from "./pages/Challenges";
 import AdminStatistics from "./pages/AdminStatistics";
+import AdminChallenges from "./pages/AdminChallenges";
+import AdminWorkout from "./pages/AdminWorkout";
+import AdminDish from "./pages/AdminDish";
+import AdminProfile from "./pages/AdminProfile";
+import AdminAddChallenges from "./pages/AdminAddChallenges";
+import AdminInfoWorkout from "./pages/AdminInfoWorkout";
+import AdminInfoDish from "./pages/AdminInfoDish";
 
 function App() {
   return (
@@ -32,6 +39,16 @@ function App() {
         <Route path="/goals/:id" element={<GoalDetails />} />
         <Route path="/challenges" element={<Challenges />} />
         <Route path="/dashboard/statistic" element={<AdminStatistics />} />
+        <Route path="/dashboard/workout" element={<AdminWorkout />} />
+        <Route path="/dashboard/dish" element={<AdminDish />} />
+        <Route path="/dashboard/challenges" element={<AdminChallenges />} />
+        <Route path="/dashboard/profile" element={<AdminProfile />} />
+        <Route path="/dashboard/workout/:id" element={<AdminInfoWorkout />} />
+        <Route path="/dashboard/dish/:id" element={<AdminInfoDish />} />
+        <Route
+          path="/dashboard/challenges/:id"
+          element={<AdminAddChallenges />}
+        />
       </Routes>
     </Router>
   );
