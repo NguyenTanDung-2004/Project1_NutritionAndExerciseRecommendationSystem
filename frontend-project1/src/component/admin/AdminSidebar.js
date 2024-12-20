@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const NavItem = ({ iconClass, label, href, isActive, onClick }) => {
   return (
@@ -21,21 +22,36 @@ const NavItem = ({ iconClass, label, href, isActive, onClick }) => {
 };
 
 const Sidebar = () => {
-  const [activePath, setActivePath] = useState("/statistic");
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const navItems = [
-    { iconClass: "fa fa-chart-bar", label: "Thống kê", href: "/statistic" },
+    {
+      iconClass: "fa fa-chart-bar",
+      label: "Thống kê",
+      href: "/dashboard/statistic",
+    },
     {
       iconClass: "fa-solid fa-person-running",
       label: "Bài tập",
-      href: "/bai-tap",
+      href: "/dashboard/workout",
     },
-    { iconClass: "fa fa-utensils", label: "Món ăn", href: "/mon-an" },
-    { iconClass: "fa fa-user", label: "Profile", href: "/profile" },
+    { iconClass: "fa fa-utensils", label: "Món ăn", href: "/dashboard/dish" },
+    {
+      iconClass: "fa-solid fa-list",
+      label: "Thử thách",
+      href: "/dashboard/challenges",
+    },
+    { iconClass: "fa fa-user", label: "Profile", href: "/dashboard/profile" },
   ];
 
   const handleNavigation = (href) => {
-    setActivePath(href);
+    navigate(href);
+  };
+
+  const handleLogout = () => {
+    console.log("Logging out...");
+    navigate("/home_out");
   };
 
   return (
@@ -47,11 +63,19 @@ const Sidebar = () => {
             iconClass={item.iconClass}
             label={item.label}
             href={item.href}
-            isActive={activePath === item.href}
+            isActive={location.pathname.startsWith(item.href)}
             onClick={() => handleNavigation(item.href)}
           />
         ))}
       </nav>
+
+      <div className="mt-[230px] pb-5">
+        <NavItem
+          iconClass="fa-solid fa-arrow-right-from-bracket"
+          label="Đăng xuất"
+          onClick={handleLogout}
+        />
+      </div>
     </aside>
   );
 };
