@@ -9,7 +9,7 @@ const Layout = ({ children }) => {
 
       <div className="flex max-md:flex-col h-[calc(100vh-80px)]">
         <AdminSidebar className="sticky top-[80px]" />
-        <main className="bg-[#F5F6FA] flex flex-col p-8 w-full max-md:ml-0 max-md:w-full overflow-y-auto">
+        <main className="bg-[#F5F6FA] flex flex-col px-8 pt-8 w-full max-md:ml-0 max-md:w-full overflow-y-auto">
           {children}
         </main>
       </div>

@@ -46,7 +46,7 @@ function App() {
         <Route path="/dashboard/workout/:id" element={<AdminInfoWorkout />} />
         <Route path="/dashboard/dish/:id" element={<AdminInfoDish />} />
         <Route
-          path="/dashboard/challenges/:id"
+          path="/dashboard/challenges/add"
           element={<AdminAddChallenges />}
         />
       </Routes>
