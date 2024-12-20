@@ -5,7 +5,9 @@ import Table from "./list/Table";
 const App = () => {
   return (
     <Layout>
-      <Table />
+      <div>
+        <Table />
+      </div>
     </Layout>
   );
 };

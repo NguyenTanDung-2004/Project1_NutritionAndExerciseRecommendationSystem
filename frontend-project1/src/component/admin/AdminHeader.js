@@ -2,7 +2,7 @@ import React from "react";
 import LogoImg from "../../img/home_out/logo.png";
 import AvatarDefault from "../../img/profile/default-avatar.png";
 
-const Header = () => {
+const Header = ({ className }) => {
   return (
     <>
       <header className="flex flex-wrap gap-10 justify-between items-center py-4 px-12 w-full bg-white min-h-[80px] max-md:pl-5">

@@ -4,13 +4,12 @@ import AdminSidebar from "./AdminSidebar";
 
 const Layout = ({ children }) => {
   return (
-    <div className="flex overflow-hidden flex-col bg-stale-100">
+    <div className="flex flex-col bg-stale-100 min-h-screen overflow-hidden">
       <Header />
 
-      <div className="flex max-md:flex-col">
-        <AdminSidebar />
-
-        <main className="bg-[#F5F6FA] flex flex-col p-8 w-full max-md:ml-0 max-md:w-full">
+      <div className="flex max-md:flex-col h-[calc(100vh-80px)]">
+        <AdminSidebar className="sticky top-[80px]" />
+        <main className="bg-[#F5F6FA] flex flex-col p-8 w-full max-md:ml-0 max-md:w-full overflow-y-auto">
           {children}
         </main>
       </div>
