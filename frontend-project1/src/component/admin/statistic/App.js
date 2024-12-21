@@ -97,6 +97,8 @@ const App = () => {
   const normal = 26; // Giá trị cho "Bình thường"
   const satisfied = 82; // Giá trị cho "Hài lòng"
 
+  const pieLabels = ["Tệ", "Bình thường", "Hài lòng"];
+
   return (
     <Layout>
       <div className="flex flex-col gap-4">
@@ -172,6 +174,7 @@ const App = () => {
               bad={bad}
               normal={normal}
               satisfied={satisfied}
+              labels={PieChartComponent}
             />
 
             <div className=" flex flex-col gap-3">

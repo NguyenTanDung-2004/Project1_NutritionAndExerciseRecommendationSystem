@@ -6,21 +6,17 @@ import GeneralInfo from "./GeneralInfo";
 import NutritionalInfo from "./NutritionalInfo";
 import AccountInfo from "./AccountInfo";
 import EditHealthModal from "./EditHealthModal";
-import EditNutritionModal from "./EditNutritionModal";
 
 const Profile = () => {
   const [activeTab, setActiveTab] = useState("general");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalType, setModalType] = useState("");
 
-  const handleOpenModal = (type) => {
-    setModalType(type);
+  const handleOpenModal = () => {
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setModalType("");
   };
 
   return (
@@ -63,16 +59,14 @@ const Profile = () => {
               Dinh dưỡng
             </button>
 
-            <button
-              onClick={() =>
-                handleOpenModal(
-                  activeTab === "general" ? "general" : "nutritional"
-                )
-              }
-              className="ml-auto h-9 w-9 hover:text-[#1445FE] text-black  rounded-lg mr-"
-            >
-              <i className="fa-solid fa-pen"></i>
-            </button>
+            {activeTab === "general" && (
+              <button
+                onClick={() => handleOpenModal()}
+                className="ml-auto h-9 w-9 hover:text-[#1445FE] text-black  rounded-lg mr-"
+              >
+                <i className="fa-solid fa-pen"></i>
+              </button>
+            )}
           </div>
 
           {/* Nội dung hiển thị */}
@@ -80,12 +74,7 @@ const Profile = () => {
         </div>
       </div>
 
-      {isModalOpen && modalType === "general" && (
-        <EditHealthModal onClose={handleCloseModal} />
-      )}
-      {isModalOpen && modalType === "nutritional" && (
-        <EditNutritionModal onClose={handleCloseModal} />
-      )}
+      {isModalOpen && <EditHealthModal onClose={handleCloseModal} />}
 
       <Footer />
     </>

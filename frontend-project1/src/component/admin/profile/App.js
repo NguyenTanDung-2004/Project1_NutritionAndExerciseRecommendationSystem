@@ -35,6 +35,16 @@ const App = ({ avt }) => {
     }
   };
 
+  const handleSave = () => {
+    setWeightChange(0);
+    setNameChange(false);
+    alert(`
+    Thay đổi thông tin:
+        Tên: ${name}
+        Ảnh: ${avatar}
+     `);
+  };
+
   const handleShowPasswordModal = () => {
     setShowPasswordModal(true);
   };
@@ -44,16 +54,6 @@ const App = ({ avt }) => {
     setCurrentPassword("");
     setNewPassword("");
     setConfirmPassword("");
-  };
-
-  const handleSave = () => {
-    setWeightChange(0);
-    setNameChange(false);
-    alert(`
-    Thay đổi thông tin:
-        Tên: ${name}
-        Ảnh: ${avatar}
-     `);
   };
 
   const handleCurrentPasswordChange = (e) => {

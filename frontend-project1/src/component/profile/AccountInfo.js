@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import DefaultAvatar from "../../img/profile/default-avatar.png";
+import ChangePasswordModal from "./ChangePasswordModal";
 
 const AccountInfo = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -11,6 +12,10 @@ const AccountInfo = () => {
     dob: "2004-03-29",
     avatar: "",
   });
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -36,6 +41,28 @@ const AccountInfo = () => {
 
       reader.readAsDataURL(file);
     }
+  };
+
+  // Đổi mật khẩu
+  const handleShowPasswordModal = () => {
+    setShowPasswordModal(true);
+  };
+
+  const handleHidePasswordModal = () => {
+    setShowPasswordModal(false);
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+  };
+
+  const handleCurrentPasswordChange = (e) => {
+    setCurrentPassword(e.target.value);
+  };
+  const handleNewPasswordChange = (e) => {
+    setNewPassword(e.target.value);
+  };
+  const handleConfirmPasswordChange = (e) => {
+    setConfirmPassword(e.target.value);
   };
 
   return (
@@ -179,13 +206,27 @@ const AccountInfo = () => {
               <span className="w-1/3 font-medium text-[#ABABAB]">
                 Mật khẩu:
               </span>
-              <button className="px-6 py-1 bg-[#C3CFFD] text-[#022094] hover:bg-opacity-80 text-xs rounded-lg font-semibold">
+              <button
+                onClick={handleShowPasswordModal}
+                className="px-6 py-1 bg-[#C3CFFD] text-[#022094] hover:bg-opacity-80 text-xs rounded-lg font-semibold"
+              >
                 Đổi mật khẩu
               </button>
             </div>
           </div>
         </div>
       </div>
+
+      <ChangePasswordModal
+        isOpen={showPasswordModal}
+        onClose={handleHidePasswordModal}
+        currentPassword={currentPassword}
+        newPassword={newPassword}
+        confirmPassword={confirmPassword}
+        onCurrentPasswordChange={handleCurrentPasswordChange}
+        onNewPasswordChange={handleNewPasswordChange}
+        onConfirmPasswordChange={handleConfirmPasswordChange}
+      />
     </div>
   );
 };
