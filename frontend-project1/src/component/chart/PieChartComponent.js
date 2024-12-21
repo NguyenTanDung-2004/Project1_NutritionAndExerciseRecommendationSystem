@@ -11,9 +11,9 @@ import {
 
 ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale);
 
-const PieChartComponent = ({ bad, normal, satisfied }) => {
+const PieChartComponent = ({ bad, normal, satisfied, labels }) => {
   const data = {
-    labels: ["Tệ", "Bình thường", "Hài lòng"],
+    labels: labels,
     datasets: [
       {
         data: [bad, normal, satisfied],

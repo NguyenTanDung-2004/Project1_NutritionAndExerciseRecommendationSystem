@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import HeartProgress from "./HeartProgress";
 import LineProgress from "./LineProgress";
+import EditNutritionModal from "./EditNutritionModal";
 
 const NutritionalInfo = () => {
   const today = new Date().toISOString().split("T")[0];
@@ -42,9 +43,12 @@ const NutritionalInfo = () => {
   ];
 
   const [isDietDropdownOpen, setIsDietDropdownOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedMeal, setSelectedMeal] = useState("");
 
   const handleAddMeal = (meal) => {
-    alert(`Thêm món ăn cho ${meal.label}`);
+    setSelectedMeal(meal.label);
+    setIsEditModalOpen(true);
   };
 
   const handleDietChange = (diet) => {
@@ -60,12 +64,13 @@ const NutritionalInfo = () => {
     const [year, month, day] = date.split("-");
     return `${day}/${month}/${year}`;
   };
+  const handleCloseModal = () => {
+    setIsEditModalOpen(false);
+    setSelectedMeal("");
+  };
 
   return (
     <div className="w-full h-auto flex flex-col gap-3 ">
-      <div className="bg-[#A2F4F3]"></div>
-      <div className="bg-[#B2DFFF]"></div>
-      <div className="bg-[#6CE75B]"></div>
       <div className="bg-white flex items-center gap-4 rounded-lg py-1.5 px-4">
         <div className="relative">
           <input
@@ -227,6 +232,12 @@ const NutritionalInfo = () => {
           </div>
         </div>
       </div>
+      {isEditModalOpen && (
+        <EditNutritionModal
+          onClose={handleCloseModal}
+          mealLabel={selectedMeal}
+        />
+      )}
     </div>
   );
 };
