@@ -1,4 +1,3 @@
-// src/components/editnutrition/DetailCardModal.jsx
 import React, { useState, useEffect, useRef } from "react";
 import PieChartComponent from "../../chart/PieChartComponent";
 
@@ -10,6 +9,10 @@ const DetailCardModal = ({ onClose, mealId, mealLabel }) => {
   const [modifiedProtein, setModifiedProtein] = useState(0);
   const [modifiedFat, setModifiedFat] = useState(0);
   const [modifiedCarb, setModifiedCarb] = useState(0);
+  const [proteinPercentage, setProteinPercentage] = useState(0);
+  const [fatPercentage, setFatPercentage] = useState(0);
+  const [carbPercentage, setCarbPercentage] = useState(0);
+
   const [exerciseTimes, setExerciseTimes] = useState({
     walk: 30,
     run: 20,
@@ -37,6 +40,12 @@ const DetailCardModal = ({ onClose, mealId, mealLabel }) => {
     setModifiedProtein(hardcodedMeal.protein);
     setModifiedFat(hardcodedMeal.fat);
     setModifiedCarb(hardcodedMeal.carb);
+    calculatePercentages(
+      parseFloat(hardcodedMeal.weight.replace(/[^0-9.]/g, "")),
+      hardcodedMeal.fat,
+      hardcodedMeal.protein,
+      hardcodedMeal.carb
+    );
   }, [mealId]);
 
   const handleWeightChange = (e) => {
@@ -61,6 +70,21 @@ const DetailCardModal = ({ onClose, mealId, mealLabel }) => {
     if (!editable && weightInputRef.current) {
       weightInputRef.current.focus();
     }
+    if (!editable) {
+      calculatePercentages(
+        modifiedWeight,
+        modifiedFat,
+        modifiedProtein,
+        modifiedCarb
+      );
+    } else {
+      calculatePercentages(
+        parseFloat(meal.weight.replace(/[^0-9.]/g, "")),
+        meal.fat,
+        meal.protein,
+        meal.carb
+      );
+    }
   };
 
   const calculateModifiedNutrients = (newWeight) => {
@@ -81,18 +105,25 @@ const DetailCardModal = ({ onClose, mealId, mealLabel }) => {
         swim: Math.round(19 * ratio),
         ride: Math.round(21 * ratio),
       });
+
+      calculatePercentages(
+        newWeight,
+        (meal.fat * ratio).toFixed(1),
+        (meal.protein * ratio).toFixed(1),
+        (meal.carb * ratio).toFixed(1)
+      );
     }
   };
-  const calculatePercentage = (value) => {
-    if (!meal || !modifiedWeight) return 0;
-    const baseWeight = parseFloat(meal.weight.replace(/[^0-9.]/g, ""));
-    const newPercentage = (parseFloat(value) / baseWeight) * 100;
-    const newPercentageFromModifiedWeight =
-      (parseFloat(value) / modifiedWeight) * 100;
-    if (editable) {
-      return Math.round(newPercentageFromModifiedWeight) || 0;
-    }
-    return Math.round(newPercentage) || 0;
+
+  const calculatePercentages = (weight, fat, protein, carb) => {
+    const total = parseFloat(fat) + parseFloat(protein) + parseFloat(carb);
+    const fatPercent = (parseFloat(fat) / total) * 100 || 0;
+    const proteinPercent = (parseFloat(protein) / total) * 100 || 0;
+    const carbPercent = (parseFloat(carb) / total) * 100 || 0;
+
+    setFatPercentage(fatPercent);
+    setProteinPercentage(proteinPercent);
+    setCarbPercentage(carbPercent);
   };
   const handleAddToMeal = () => {
     alert(`Món ăn đã được thêm vào ${mealLabel}`);
@@ -101,9 +132,6 @@ const DetailCardModal = ({ onClose, mealId, mealLabel }) => {
 
   if (!meal) return null;
 
-  const proteinPercentage = editable ? modifiedProtein : meal.protein;
-  const fatPercentage = editable ? modifiedFat : meal.fat;
-  const carbPercentage = editable ? modifiedCarb : meal.carb;
   const pieLabels = ["Chất béo", "Chất đạm", "Carb"];
 
   return (

@@ -71,6 +71,9 @@ const NutritionalInfo = () => {
 
   return (
     <div className="w-full h-auto flex flex-col gap-3 ">
+      <div className="bg-[#A2F4F3]  hidden"></div>
+      <div className=" bg-[#B2DFFF] hidden"></div>
+      <div className=" bg-[#6CE75B] hidden"></div>
       <div className="bg-white flex items-center gap-4 rounded-lg py-1.5 px-4">
         <div className="relative">
           <input

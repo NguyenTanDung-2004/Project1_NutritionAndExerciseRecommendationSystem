@@ -4,7 +4,7 @@ import AdminVerticalBarChart from "../../chart/AdminVerticalBarChart";
 import DishList from "./DishList";
 import WorkoutList from "./WorkoutList";
 import InfoCard from "./InfoCard";
-import PieChartComponent from "../../chart/PieChartComponent";
+import AdminPieChart from "../../chart/AdminPieChart";
 
 const App = () => {
   const top3Point = [
@@ -169,12 +169,12 @@ const App = () => {
           <h1 className="text-base font-bold text-[#202224]">
             CHỈ SỐ HÀI LÒNG CỦA NGƯỜI DÙNG
           </h1>
-          <div className="bg-white flex justify-center items-center h-fit flex-wrap gap-20 rounded-lg p-4">
-            <PieChartComponent
+          <div className="bg-white flex justify-center items-center h-fit flex-wrap gap-20 rounded-lg p-4 mb-2">
+            <AdminPieChart
               bad={bad}
               normal={normal}
               satisfied={satisfied}
-              labels={PieChartComponent}
+              labels={pieLabels}
             />
 
             <div className=" flex flex-col gap-3">

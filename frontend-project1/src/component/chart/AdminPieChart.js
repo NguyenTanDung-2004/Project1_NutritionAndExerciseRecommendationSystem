@@ -11,7 +11,7 @@ import {
 
 ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale);
 
-const PieChartComponent = ({ bad, normal, satisfied, labels }) => {
+const AdminPieChart = ({ bad, normal, satisfied, labels }) => {
   const data = {
     labels: labels,
     datasets: [
@@ -33,7 +33,10 @@ const PieChartComponent = ({ bad, normal, satisfied, labels }) => {
       tooltip: {
         callbacks: {
           label: (context) => {
-            return `${context.label}: ${context.raw.toFixed(2)}%`;
+            return `${context.label}: ${context.raw} (${(
+              (context.raw / (bad + normal + satisfied)) *
+              100
+            ).toFixed(2)}%)`;
           },
         },
       },
@@ -47,4 +50,4 @@ const PieChartComponent = ({ bad, normal, satisfied, labels }) => {
   );
 };
 
-export default PieChartComponent;
+export default AdminPieChart;
