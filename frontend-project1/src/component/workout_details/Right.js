@@ -23,6 +23,7 @@ const Right = ({
   limitation,
   link,
   recommend,
+  challengeData,
 }) => {
   const [heart, setHeart] = useState(FullHeart);
   const navigate = useNavigate();
@@ -41,18 +42,37 @@ const Right = ({
     return stars;
   };
   const handleClick = (id) => {
-    navigate(`/workout/${id}`);
+    navigate(`/workout/${id}`, { state: { challengeData: null } }); // Pass null to clear state
   };
   return (
     <>
       <div className="workout-details__right">
-        <div className="heart-corner">
-          <img
-            src={heart}
-            alt="Heart Icon"
-            onClick={() => handleClickHeart()}
-          />
-        </div>
+        {challengeData ? (
+          <div className="w-full flex justify-center gap-4 mt-4 text-center">
+            <div className="flex flex-col items-center">
+              <span className="text-xl font-bold text-[[#1445FE]">
+                {challengeData.point}
+              </span>
+              <span className="text-sm text-gray-500">Điểm</span>
+            </div>
+            <div className="flex flex-col items-center">
+              <span className="text-xl font-bold text-[#1445FE]">
+                {challengeData.soLanTap}
+              </span>
+              <span className="text-sm text-gray-500">Số lần tập</span>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="heart-corner">
+              <img
+                src={heart}
+                alt="Heart Icon"
+                onClick={() => handleClickHeart()}
+              />
+            </div>
+          </>
+        )}
 
         <div className="workout-details__right-main">
           <div className="workout-details__right-type">

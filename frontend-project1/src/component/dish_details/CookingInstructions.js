@@ -62,22 +62,6 @@ const CookingInstructions = ({ first, second, third, video, img1, img2 }) => {
               </ul>
             </div>
           </div>
-
-          <div className="cooking-instructions__item">
-            <div className="cooking-instructions__img">
-              <img src={img2} alt="" />
-            </div>
-
-            <div className="cooking-instructions__text">
-              <span>Mẹo nhỏ</span>
-
-              <ul>
-                {third.map((ingredient, index) => (
-                  <li key={index}>{ingredient}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
         </div>
 
         <span className="cooking-instructions__footer1">Thưởng thức nào !</span>

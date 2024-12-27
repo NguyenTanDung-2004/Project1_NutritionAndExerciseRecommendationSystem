@@ -4,18 +4,23 @@ import WorkOutImg from "../../img/home_out/workout.png";
 import NutritionalImg from "../../img/home_in/diet-recom.png";
 import StatisticImg from "../../img/home_in/statistic.png";
 import AccountImg from "../../img/home_in/avatar-default.png";
+import GoalImg from "../../img/home_in/goals.png";
+import { Link } from "react-router-dom";
 
 const Services = () => {
-  // slider - bottom service
   const items = [
-    { id: 1, label: "Practices", img: WorkOutImg },
-    { id: 2, label: "Nutritional regimen", img: NutritionalImg },
-    { id: 3, label: "Statistics", img: StatisticImg },
-    { id: 4, label: "My profile", img: AccountImg },
-    { id: 5, label: "My profile", img: AccountImg },
-    { id: 6, label: "My profile", img: AccountImg },
-    { id: 7, label: "Statistics", img: StatisticImg },
+    { id: 1, label: "Workout", img: WorkOutImg, link: "/workout" },
+    {
+      id: 2,
+      label: "Nutritional regimen",
+      img: NutritionalImg,
+      link: "/nutritional_regimen",
+    },
+    { id: 3, label: "Goals", img: GoalImg, link: "/goals" },
+    { id: 4, label: "Statistics", img: StatisticImg, link: "/history" },
+    { id: 5, label: "My profile", img: AccountImg, link: "/profile" },
   ];
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const handleSlider = () => {
     setCurrentIndex((prevIndex) =>
@@ -25,11 +30,6 @@ const Services = () => {
 
   const displayedItems = items.slice(currentIndex, currentIndex + 3);
 
-  // // Tính toán khoảng cách của button
-  // const itemWidth = 240;
-  // const rightPosition = (3 - displayedItems.length) * itemWidth - 10;
-
-  // end slider
   const today = new Date();
 
   const formattedDate = today.toLocaleDateString("en-GB", {
@@ -45,10 +45,10 @@ const Services = () => {
             <div className="blue-point"></div>
             <span>Your health data</span>
           </div>
-          <div className="main-container">
+          <Link to="/profile" className="main-container">
             <div className="item">
               <div className="div-icon">
-                <i class="fa-solid fa-user-nurse"></i>
+                <i className="fa-solid fa-user-nurse"></i>
               </div>
               <div className="item-content">
                 <div className="item-label">BMI</div>
@@ -57,32 +57,32 @@ const Services = () => {
             </div>
             <div className="item">
               <div className="div-icon">
-                <i class="fa-solid fa-heart"></i>
+                <i className="fa-solid fa-heart"></i>
               </div>
               <div className="item-content">
-                <div className="item-label">Heart rate</div>
+                <div className="item-label">Nhịp tim</div>
                 <div className="item-details">100 bpm</div>
               </div>
             </div>
             <div className="item">
               <div className="div-icon">
-                <i class="fa-solid fa-droplet"></i>
+                <i className="fa-solid fa-droplet"></i>
               </div>
               <div className="item-content">
-                <div className="item-label">Blood pressure</div>
+                <div className="item-label">Huyết áp</div>
                 <div className="item-details">80-90 mmHg</div>
               </div>
             </div>
             <div className="item">
               <div className="div-icon">
-                <i class="fa-solid fa-eye-dropper"></i>
+                <i className="fa-solid fa-eye-dropper"></i>
               </div>
               <div className="item-content">
-                <div className="item-label">Glucose level</div>
+                <div className="item-label">Glucozo level</div>
                 <div className="item-details">230/ml</div>
               </div>
             </div>
-          </div>
+          </Link>
         </div>
         <div className="challenges">
           <div className="label">
@@ -90,24 +90,25 @@ const Services = () => {
             <span>Challenges</span>
           </div>
           <div className="main-container">
-            <div className="day-container">
-              <i class="fa-regular fa-calendar"></i>
-              <span>{formattedDate}</span>
-            </div>
-            <div className="ranking">
-              <div className="item">
-                <span>1. Phan Giang</span>
+            <Link to="/challenges">
+              {" "}
+              {/* Link only wraps content inside main-container*/}
+              <div className="day-container">
+                <i className="fa-regular fa-calendar"></i>
+                <span>{formattedDate}</span>
               </div>
-              <div className="item">
-                <span>2. Phan Giang</span>
+              <div className="ranking">
+                <div className="item">
+                  <span>1. Phan Giang</span>
+                </div>
+                <div className="item">
+                  <span>2. Phan Giang</span>
+                </div>
+                <div className="item">
+                  <span>3. Phan Giang</span>
+                </div>
               </div>
-              <div className="item">
-                <span>3. Phan Giang</span>
-              </div>
-              <div className="item">
-                <span>4. Nguyen Tan Dung</span>
-              </div>
-            </div>
+            </Link>
           </div>
         </div>
       </div>
@@ -118,18 +119,15 @@ const Services = () => {
               <div className="blue-point"></div>
               <span>{item.label}</span>
             </div>
-            <div className="main-container">
+            <Link to={item.link} className="main-container">
               <img src={item.img} alt={item.label} />
-            </div>
+            </Link>
           </div>
         ))}
 
-        <div
-          className="arrow-container"
-          // style={{ right: `${rightPosition}px` }}
-        >
+        <div className="arrow-container">
           <button onClick={handleSlider}>
-            <i class="fa-solid fa-arrow-right-arrow-left"></i>
+            <i className="fa-solid fa-arrow-right-arrow-left"></i>
           </button>
         </div>
       </div>

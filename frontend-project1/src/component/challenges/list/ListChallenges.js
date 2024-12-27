@@ -98,8 +98,10 @@ const ListChallenges = ({ searchTerm, filterType, sortType }) => {
   ];
 
   const navigate = useNavigate();
-  const handleClick = (id) => {
-    navigate(`/workout/${id}`);
+  const handleClick = (challenge) => {
+    navigate(`/workout/${challenge.id}`, {
+      state: { challengeData: challenge },
+    });
   };
 
   const filteredChallenges = challenges.filter(
@@ -129,7 +131,7 @@ const ListChallenges = ({ searchTerm, filterType, sortType }) => {
     <div className="mt-5 w-full flex flex-col gap-8">
       {sortedChallenges.map((challenge, index) => (
         <Card
-          onClick={() => handleClick(challenge.id)}
+          onClick={() => handleClick(challenge)}
           key={index}
           {...challenge}
         />

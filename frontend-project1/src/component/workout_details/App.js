@@ -8,7 +8,8 @@ import Left from "./Left";
 import Right from "./Right";
 
 const App = () => {
-  const { pathname } = useLocation();
+  const { pathname, state } = useLocation();
+  const challengeData = state?.challengeData;
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -96,6 +97,7 @@ const App = () => {
           limitation="bệnh tim, bệnh tay, bệnh khớp, bệnh cột sống "
           link="https://www.youtube.com/watch?v=cbKkB3POqaY"
           recommend={recommend}
+          challengeData={challengeData}
         />
       </div>
 
