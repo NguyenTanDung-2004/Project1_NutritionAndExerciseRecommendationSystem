@@ -4,7 +4,7 @@ import data from "./ListWorkoutData";
 import CardWorkout from "./CardWorkout";
 import { useNavigate } from "react-router-dom";
 
-const ListWorkout = () => {
+const ListWorkout = ({ data }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const navigate = useNavigate(); // => chi tiết bài tập
 

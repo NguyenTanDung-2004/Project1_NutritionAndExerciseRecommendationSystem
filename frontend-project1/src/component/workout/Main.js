@@ -3,6 +3,7 @@ import "../../css/workout/Main.css";
 import Button from "./Button";
 import CategoryList from "./CategoryList";
 import ListWorkout from "./ListWorkout";
+import data from "./ListWorkoutData";
 
 const Main = () => {
   const [activeButton, setActiveButton] = useState("FOR YOU");
@@ -50,7 +51,7 @@ const Main = () => {
 
         <CategoryList />
 
-        <ListWorkout />
+        <ListWorkout data={data} />
       </div>
     </>
   );
