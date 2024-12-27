@@ -16,7 +16,7 @@ const GoalOverview = ({ id }) => {
   };
 
   const comment = {
-    calo: "+200",
+    calo: "200",
     kgChange: "+0.5",
     kgNeed: "-0.5",
     time: "2 ngày",
