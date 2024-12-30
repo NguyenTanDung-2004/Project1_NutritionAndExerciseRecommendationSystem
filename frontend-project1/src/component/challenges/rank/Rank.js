@@ -1,26 +1,57 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import VerticalBarChart from "../../chart/VerticalBarChart";
 import Table from "./Table";
 
 const Rank = () => {
-  const top3Point = [
-    {
-      name: "Giang",
-      avatar: "https://i.ibb.co/xY1yTJX/default-avatar.jpg",
-      score: 100,
-    },
-    { name: "Bob", avatar: "https://via.placeholder.com/42", score: 80 },
-    { name: "Charlie", avatar: "https://via.placeholder.com/40", score: 60 },
-  ];
-  const top3LanTap = [
-    {
-      name: "Dũng",
-      avatar: "https://i.ibb.co/xY1yTJX/default-avatar.jpg",
-      score: 25,
-    },
-    { name: "Bob", avatar: "https://via.placeholder.com/42", score: 18 },
-    { name: "Charlie", avatar: "https://via.placeholder.com/40", score: 15 },
-  ];
+  const [rankData, setRankData] = useState(null);
+  const apiUrl = process.env.REACT_APP_API_URL;
+
+  useEffect(() => {
+    const fetchRankData = async () => {
+      try {
+        const response = await fetch(`${apiUrl}/challenge/getDataInRankTab`, {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+          },
+          credentials: "include",
+        });
+        if (!response.ok) {
+          const text = await response.text();
+          console.log(text);
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setRankData(data);
+      } catch (err) {
+        console.error("Error fetching rank data:", err);
+      }
+    };
+    fetchRankData();
+  }, [apiUrl]);
+
+  if (!rankData) {
+    return <div className="text-center">Loading ...</div>;
+  }
+
+  // Chuyển đổi dữ liệu top 3 điểm
+  const top3Point =
+    rankData?.listUserInRanks
+      .sort((a, b) => b.currentPoint - a.currentPoint)
+      .slice(0, 3)
+      .map((user) => ({
+        name: user.name || "User",
+        avatar: user.linkImage || "https://via.placeholder.com/42",
+        score: user.currentPoint,
+      })) || [];
+
+  // Chuyển đổi dữ liệu top 3 lần tập
+  const top3LanTap =
+    rankData?.top3Exercise.map((exercise, index) => ({
+      name: `Top ${index + 1}`,
+      avatar: exercise.linkRemovedImage || "https://via.placeholder.com/42",
+      score: exercise.numberOfUsers || 0,
+    })) || [];
 
   return (
     <div className="flex flex-col gap-6">
@@ -61,7 +92,11 @@ const Rank = () => {
       </div>
 
       <div className="w-full">
-        <Table />
+        <Table
+          listUserInRanks={rankData?.listUserInRanks || []}
+          currentPoint={rankData?.currentPoint || 0}
+          currentRank={rankData?.currentRank || 0}
+        />
       </div>
     </div>
   );

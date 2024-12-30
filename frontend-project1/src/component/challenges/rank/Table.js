@@ -10,122 +10,7 @@ const columns = [
   { header: "TỔNG ĐIỂM", className: "flex-1 hidden md:table-cell " },
 ];
 
-const data = [
-  {
-    stt: "001",
-    name: "Phan Nguyễn Trà Giang",
-    avatar: "https://i.ibb.co/xY1yTJX/default-avatar.jpg",
-    bmi: 22.5,
-    totalPoints: 100,
-  },
-  {
-    stt: "002",
-    name: "Nguyễn Thị Mai Lan",
-    avatar: "https://i.ibb.co/xY1yTJX/default-avatar.jpg",
-    bmi: 24.1,
-    totalPoints: 98,
-  },
-  {
-    stt: "003",
-    name: "Lê Văn Hải",
-    avatar: "https://i.ibb.co/xY1yTJX/default-avatar.jpg",
-    bmi: 19.3,
-    totalPoints: 95,
-  },
-  {
-    stt: "004",
-    name: "Trần Thị Lan Anh",
-    avatar: "https://i.ibb.co/xY1yTJX/default-avatar.jpg",
-    bmi: 21.4,
-    totalPoints: 92,
-  },
-  {
-    stt: "005",
-    name: "Vũ Minh Tuấn",
-    avatar: "https://i.ibb.co/xY1yTJX/default-avatar.jpg",
-    bmi: 25.0,
-    totalPoints: 89,
-  },
-  {
-    stt: "006",
-    name: "Phạm Quang Hieu",
-    avatar: "https://i.ibb.co/xY1yTJX/default-avatar.jpg",
-    bmi: 20.5,
-    totalPoints: 85,
-  },
-  {
-    stt: "007",
-    name: "Hoàng Thị Thảo",
-    avatar: "https://i.ibb.co/xY1yTJX/default-avatar.jpg",
-    bmi: 22.2,
-    totalPoints: 80,
-  },
-  {
-    stt: "008",
-    name: "Nguyễn Hoàng Hải",
-    avatar: "https://i.ibb.co/xY1yTJX/default-avatar.jpg",
-    bmi: 23.3,
-    totalPoints: 75,
-  },
-  {
-    stt: "009",
-    name: "Lê Quang Đoàn",
-    avatar: "https://i.ibb.co/xY1yTJX/default-avatar.jpg",
-    bmi: 18.7,
-    totalPoints: 70,
-  },
-  {
-    stt: "010",
-    name: "Nguyễn Thanh Bình",
-    avatar: "https://i.ibb.co/xY1yTJX/default-avatar.jpg",
-    bmi: 26.1,
-    totalPoints: 65,
-  },
-  {
-    stt: "011",
-    name: "Trần Thị Cẩm Tú",
-    avatar: "https://i.ibb.co/xY1yTJX/default-avatar.jpg",
-    bmi: 21.9,
-    totalPoints: 60,
-  },
-  {
-    stt: "012",
-    name: "Lý Minh Anh",
-    avatar: "https://i.ibb.co/xY1yTJX/default-avatar.jpg",
-    bmi: 19.0,
-    totalPoints: 55,
-  },
-  {
-    stt: "013",
-    name: "Đặng Minh Tuấn",
-    avatar: "https://i.ibb.co/xY1yTJX/default-avatar.jpg",
-    bmi: 24.3,
-    totalPoints: 50,
-  },
-  {
-    stt: "014",
-    name: "Vũ Thị Bảo Ngọc",
-    avatar: "https://i.ibb.co/xY1yTJX/default-avatar.jpg",
-    bmi: 22.1,
-    totalPoints: 45,
-  },
-  {
-    stt: "015",
-    name: "Phan Quang Hưng",
-    avatar: "https://i.ibb.co/xY1yTJX/default-avatar.jpg",
-    bmi: 20.8,
-    totalPoints: 40,
-  },
-  {
-    stt: "016",
-    name: "Trần Minh Trí",
-    avatar: "https://i.ibb.co/xY1yTJX/default-avatar.jpg",
-    bmi: 22.8,
-    totalPoints: 35,
-  },
-];
-
-const Table = () => {
+const Table = ({ listUserInRanks, currentPoint, currentRank }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortType, setSortType] = useState("Cao xuống thấp");
@@ -138,19 +23,23 @@ const Table = () => {
     setSortType(sort);
   };
 
+  if (!listUserInRanks) {
+    return <div className="text-center">Loading table ...</div>;
+  }
+
   // Lọc dữ liệu theo searchTerm (tên)
-  const filteredData = data.filter((user) =>
+  const filteredData = listUserInRanks?.filter((user) =>
     user.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Sắp xếp dữ liệu
   const sortedData = [...filteredData].sort((a, b) => {
     if (sortType === "Thấp đến cao") {
-      return a.totalPoints - b.totalPoints;
+      return a.currentPoint - b.currentPoint;
     } else if (sortType === "Cao xuống thấp") {
-      return b.totalPoints - a.totalPoints;
+      return b.currentPoint - a.currentPoint;
     }
-    return b.totalPoints - a.totalPoints;
+    return b.currentPoint - a.currentPoint;
   });
 
   // Pagination
@@ -200,7 +89,13 @@ const Table = () => {
       {/* table */}
       <div className="mt-4 flex overflow-hidden flex-col justify-center w-full max-md:max-w-full">
         {currentData.map((user, index) => (
-          <Row key={user.id} {...user} />
+          <Row
+            key={user.name + index}
+            {...user}
+            stt={(currentPage - 1) * itemsPerPage + index + 1}
+            bmi={user.bmi === "NaN" || !user.bmi ? "-" : user.bmi} // Xử lý BMI ở đây
+            totalPoints={user.currentPoint}
+          />
         ))}
       </div>
 
