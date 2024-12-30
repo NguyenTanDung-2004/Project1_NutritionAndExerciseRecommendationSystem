@@ -73,7 +73,7 @@ const GoalChart = ({ data }) => {
           label: function (context) {
             const label = context.dataset.label || "";
             const value = context.raw || 0;
-            return `${label}: ${value} kcal`;
+            return `${label}: ${value} `;
           },
         },
       },

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Header from "../header/Header";
 import NavigationBar from "../navigationBar/NavigationBar";
 import Footer from "../footer/Footer";
@@ -13,8 +13,43 @@ const App = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("Lọc");
   const [sortType, setSortType] = useState("Sắp xếp");
-
+  const [currentUserRank, setCurrentUserRank] = useState({
+    currentRank: 0,
+    maxRank: 0,
+    currentPoint: 0,
+  });
+  const [rankData, setRankData] = useState(null);
   const percentage = 10;
+  const apiUrl = process.env.REACT_APP_API_URL;
+
+  useEffect(() => {
+    const fetchRankData = async () => {
+      try {
+        const response = await fetch(`${apiUrl}/challenge/getDataInRankTab`, {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+          },
+          credentials: "include",
+        });
+        if (!response.ok) {
+          const text = await response.text();
+          console.log(text);
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setRankData(data);
+        setCurrentUserRank({
+          currentRank: data.currentRank || 0,
+          maxRank: data.maxRank || 0,
+          currentPoint: data.currentPoint || 0,
+        });
+      } catch (err) {
+        console.error("Error fetching rank data:", err);
+      }
+    };
+    fetchRankData();
+  }, [apiUrl]);
 
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
@@ -25,6 +60,15 @@ const App = () => {
   const handleSortChange = (sort) => {
     setSortType(sort);
   };
+
+  const filteredRankData = rankData
+    ? {
+        ...rankData,
+        listUserInRanks: rankData.listUserInRanks.filter(
+          (user) => user.currentPoint > 0
+        ),
+      }
+    : null;
 
   return (
     <div className="bg-[#F3F2F7]">
@@ -51,10 +95,10 @@ const App = () => {
 
           <div className="w-full flex justify-between">
             <div className="text-sm text-[#595858] font-medium ">
-              Vị trí 90/100
+              Vị trí {currentUserRank.currentRank}/{currentUserRank.maxRank}
             </div>
             <div className="text-sm text-[#1445FE] font-semibold ">
-              100 điểm
+              {currentUserRank.currentPoint} điểm
             </div>
           </div>
         </div>
@@ -114,7 +158,7 @@ const App = () => {
               sortType={sortType}
             />
           )}
-          {activeView === "rank" && <Rank />}
+          {activeView === "rank" && <Rank rankData={filteredRankData} />}
         </div>
       </div>
 

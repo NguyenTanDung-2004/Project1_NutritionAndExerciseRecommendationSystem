@@ -1,7 +1,8 @@
 import React from "react";
 import LineProgress from "../LineProgress";
+import { differenceInDays, format } from "date-fns";
 
-const GoalOverview = ({ goal }) => {
+const GoalOverview = ({ goal, dailyData, goalDays }) => {
   if (!goal) {
     return null;
   }
@@ -15,12 +16,45 @@ const GoalOverview = ({ goal }) => {
       ? "bg-[#1A78F2] text-[#1A78F2]"
       : "bg-[#595858] text-[#595858]";
 
-  const comment = {
-    calo: "200",
-    kgChange: "+0.5",
-    kgNeed: "-0.5",
-    time: "2 ngày",
+  let comment = {
+    calo: 0,
+    kgChange: "0",
+    kgNeed: "0",
+    time: "0 ngày",
   };
+
+  if (dailyData && goalDays) {
+    let totalCalories = 0;
+    let currentCalories = 0;
+
+    for (const day of goalDays) {
+      const formattedDate = day.date;
+      if (dailyData[formattedDate]) {
+        totalCalories += dailyData[formattedDate].totalCalories || 0;
+        currentCalories += dailyData[formattedDate].currentCalories || 0;
+      }
+    }
+
+    const caloChange = totalCalories - (currentCalories || 0);
+    const kgChange = caloChange / 7700;
+    const today = new Date();
+    const endDate = new Date(goal.endDate.split("/").reverse().join("/"));
+    const startDate = new Date(goal.startDate.split("/").reverse().join("/"));
+    let dayLeft = differenceInDays(endDate, today);
+    if (endDate < today) {
+      dayLeft = 0;
+    }
+
+    const targetValue = parseFloat(goal.target);
+    const kgNeed = -kgChange + targetValue;
+
+    comment = {
+      calo: parseFloat(caloChange.toFixed(2)),
+      kgChange: `${kgChange > 0 ? "+" : ""}${parseFloat(kgChange.toFixed(2))}`,
+      kgNeed: `${kgNeed > 0 ? "+" : ""}${parseFloat(kgNeed.toFixed(2))}`,
+      time: `${dayLeft} ngày`,
+    };
+  }
 
   const hasComment =
     comment &&

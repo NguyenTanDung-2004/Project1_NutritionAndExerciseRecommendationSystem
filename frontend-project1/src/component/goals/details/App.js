@@ -13,6 +13,7 @@ const App = () => {
   const [dailyData, setDailyData] = useState({});
 
   const goal = location.state?.goal;
+  const apiUrl = process.env.REACT_APP_API_URL;
 
   const handleBackClick = () => {
     navigate("/goals");
@@ -30,16 +31,13 @@ const App = () => {
       return [];
     }
     const days = [];
-    let currentDate = convertToDate(endDate);
-    const stopDate = convertToDate(startDate);
+    let currentDate = convertToDate(startDate);
+    const stopDate = convertToDate(endDate);
 
-    while (currentDate >= stopDate) {
-      const formattedDate = `Ngày ${currentDate.getDate()} - ${format(
-        currentDate,
-        "dd/MM/yyyy"
-      )}`;
+    while (currentDate <= stopDate) {
+      const formattedDate = `${format(currentDate, "dd/MM/yyyy")}`;
       days.push({ date: formattedDate, dateObj: new Date(currentDate) });
-      currentDate.setDate(currentDate.getDate() - 1);
+      currentDate.setDate(currentDate.getDate() + 1);
     }
 
     return days;
@@ -47,45 +45,43 @@ const App = () => {
 
   // Lấy danh sách các ngày
   const goalDays = generateGoalDays(goal?.startDate, goal?.endDate);
-
   useEffect(() => {
     const fetchDailyData = async () => {
       if (goalDays.length === 0) {
         return;
       }
+      const newDailyData = {};
       try {
-        const newDailyData = {};
         for (const day of goalDays) {
           const dateObj = day.dateObj;
           const formattedDate = day.date;
-          const response = await fetch(
-            `http://localhost:8080/userHistory/getDataForDateReport?day=${dateObj.getDate()}&month=${
-              dateObj.getMonth() + 1
-            }&year=${dateObj.getFullYear()}`,
-            {
-              method: "GET",
-              headers: {
-                Accept: "application/json",
-              },
-              credentials: "include",
+          try {
+            const response = await fetch(
+              `${apiUrl}/userHistory/getDataForDateReport?day=${dateObj.getDate()}&month=${
+                dateObj.getMonth() + 1
+              }&year=${dateObj.getFullYear()}`,
+              {
+                method: "GET",
+                headers: {
+                  Accept: "application/json",
+                },
+                credentials: "include",
+              }
+            );
+            if (!response.ok) {
+              const text = await response.text();
+              console.log(text);
+              throw new Error(`HTTP error! status: ${response.status}`);
             }
-          );
-          if (!response.ok) {
-            const text = await response.text();
-            console.log(text);
-            throw new Error(`HTTP error! status: ${response.status}`);
+            const data = await response.json();
+            newDailyData[formattedDate] = data;
+          } catch (err) {
+            console.error(
+              `Error fetching list user target for date ${formattedDate}:`,
+              err
+            );
+            continue;
           }
-          const data = await response.json();
-          newDailyData[formattedDate] = {
-            requiredProtein: 100,
-            requiredFat: 50,
-            requiredCarb: 200,
-            consumedProtein: data.protein,
-            consumedFat: data.fat,
-            consumedCarb: data.carb,
-            burned: data.currentBurned,
-            totalCalories: data.totalCalories,
-          };
         }
         setDailyData(newDailyData);
       } catch (err) {
@@ -94,7 +90,7 @@ const App = () => {
     };
 
     fetchDailyData();
-  }, [goalDays]);
+  }, [goalDays, apiUrl]);
 
   return (
     <div className="bg-[#F3F2F7]">
@@ -130,10 +126,17 @@ const App = () => {
             <i className="fa-solid fa-arrow-left-long text-xl"></i>
           </button>
         </div>
-        {goal && <GoalOverview goal={goal} />}
+        {goal && (
+          <GoalOverview goal={goal} dailyData={dailyData} goalDays={goalDays} />
+        )}
         {/* Hiển thị từng ngày mục tiêu */}
         {goalDays.map((day, index) => (
-          <GoalDay key={index} date={day.date} data1={dailyData[day.date]} />
+          <GoalDay
+            key={index}
+            date={day.date}
+            index={index + 1}
+            dailyData={dailyData[day.date]}
+          />
         ))}
       </div>
       <Footer />

@@ -92,6 +92,7 @@ const Table = ({ listUserInRanks, currentPoint, currentRank }) => {
           <Row
             key={user.name + index}
             {...user}
+            avatar={user.linkImage}
             stt={(currentPage - 1) * itemsPerPage + index + 1}
             bmi={user.bmi === "NaN" || !user.bmi ? "-" : user.bmi} // Xử lý BMI ở đây
             totalPoints={user.currentPoint}
