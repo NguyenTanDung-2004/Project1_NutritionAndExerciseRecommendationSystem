@@ -7,7 +7,7 @@
   --color-health-care: #1445fe;
 }
 .list-workout {
-  padding: 0 150px;
+  padding: 0 250px;
   display: flex;
   flex-direction: column;
 }
