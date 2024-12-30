@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../../css/nutritional_regimen/ListDishes.css";
 import CardDish from "./CardDish";
 import { useNavigate } from "react-router-dom";
@@ -10,13 +10,18 @@ const ListDishes = ({ data }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const itemsPerPage = 10;
-  console.log("Data in ListDishes:", data);
-
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = data?.slice(indexOfFirstItem, indexOfLastItem) || [];
-
   const totalPages = Math.ceil((data?.length || 0) / itemsPerPage);
+  const [currentItems, setCurrentItems] = useState([]);
+
+  useEffect(() => {
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    setCurrentItems(data?.slice(indexOfFirstItem, indexOfLastItem) || []);
+  }, [currentPage, data]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [data]);
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
   const goToPrevPage = () => {
@@ -45,12 +50,10 @@ const ListDishes = ({ data }) => {
   const sortedDishes = () => {
     let sorted = [...currentItems];
     if (sortOption === "All") return sorted;
-    if (sortOption === "New") {
-      // code sắp xếp mới
-    } else if (sortOption === "Old") {
-      sorted.reverse();
-    } else if (sortOption === "Rating") {
+    if (sortOption === "Rating Cao -> Thấp") {
       sorted.sort((a, b) => b.rating - a.rating);
+    } else if (sortOption === "Rating Thấp -> Cao") {
+      sorted.sort((a, b) => a.rating - b.rating);
     }
     return sorted;
   };
@@ -62,23 +65,25 @@ const ListDishes = ({ data }) => {
   return (
     <div className="list-dishes">
       <div className="list-info">
-        <span className="count-dish">{data?.length || 0} dishes</span>
+        <span className="count-dish">{data?.length || 0} bài tập</span>
         <div className="dropdown">
           <button
             className="dropdown-btn"
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           >
-            Sort by: {sortOption}
+            Sắp xếp: {sortOption}
             <span className="arrow">▼</span>
           </button>
           <ul
             className={`dropdown-menu ${isDropdownOpen ? "display-block" : ""}`}
           >
-            {["All", "New", "Old", "Rating"].map((sort, index) => (
-              <li key={index} onClick={() => handleSortChange(sort)}>
-                {sort}
-              </li>
-            ))}
+            {["All", "Rating Cao -> Thấp", "Rating Thấp -> Cao"].map(
+              (sort, index) => (
+                <li key={index} onClick={() => handleSortChange(sort)}>
+                  {sort}
+                </li>
+              )
+            )}
           </ul>
         </div>
       </div>
@@ -101,8 +106,8 @@ const ListDishes = ({ data }) => {
 
       <div className="pagination">
         <button
-          className="btn-prev"
-          disabled={currentPage === 1}
+          className={`btn-prev ${data?.length === 0 ? "disabled" : ""}`}
+          disabled={currentPage === 1 || data?.length === 0}
           onClick={goToPrevPage}
         >
           <i className="fa-solid fa-angle-left"></i>
@@ -117,8 +122,8 @@ const ListDishes = ({ data }) => {
           </button>
         ))}
         <button
-          className="btn-next"
-          disabled={currentPage === totalPages}
+          className={`btn-next ${data?.length === 0 ? "disabled" : ""}`}
+          disabled={currentPage === totalPages || data?.length === 0}
           onClick={goToNextPage}
         >
           <i className="fa-solid fa-angle-right"></i>

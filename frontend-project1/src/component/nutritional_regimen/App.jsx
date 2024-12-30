@@ -31,6 +31,8 @@ const App = () => {
         calo: item.calories,
         likes: item.numberOfLikes,
         rating: item.stars,
+        level: item.level,
+        diet: item.diet,
       }));
     } else {
       console.log("Data is not an array:", data);
@@ -132,20 +134,20 @@ const App = () => {
 
                 <div className="button-filter">
                   <Button
-                    label="FOR YOU"
+                    label="DÀNH CHO BẠN"
                     onClick={() => handleButtonClick("FOR YOU")}
                     isActive={activeButton === "FOR YOU"}
                   />
 
                   <Button
-                    label="ALL"
+                    label="TẤT CẢ"
                     onClick={() => handleButtonClick("ALL")}
                     isActive={activeButton === "ALL"}
                   />
                 </div>
 
-                <a href="#" className="link-to-discover">
-                  Discover
+                <a href="#discover" className="link-to-discover">
+                  Khám phá
                 </a>
               </div>
               <div className="right">

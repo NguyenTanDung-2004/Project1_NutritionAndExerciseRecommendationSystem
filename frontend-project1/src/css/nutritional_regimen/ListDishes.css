@@ -24,6 +24,7 @@
   gap: 30px;
 }
 .list-dishes .dropdown {
+  width: 250px;
   position: relative;
   font-size: 14px;
 }
@@ -51,7 +52,7 @@
   position: absolute;
   top: 100%;
   width: 100%;
-  left: 0;
+  right: 0;
   background-color: white;
   border: 1px solid black;
   border-radius: 8px;
