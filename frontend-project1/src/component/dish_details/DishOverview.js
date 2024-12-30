@@ -2,9 +2,11 @@ import React, { useState } from "react";
 import "../../css/dish_details/DishOverview.css";
 import StarVoted from "../../img/nutritional_regimen/star-voted.png";
 import Star from "../../img/nutritional_regimen/star.png";
-import FullHeart from "../../img/dish_details/icon-no-heart.png";
-import NoHeart from "../../img/nutritional_regimen/icon-heart.png";
+import NoHeart from "../../img/dish_details/icon-no-heart.png";
+import FullHeart from "../../img/nutritional_regimen/icon-heart.png";
 import { useNavigate } from "react-router-dom";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const DishOverview = ({
   type,
@@ -16,12 +18,69 @@ const DishOverview = ({
   fat,
   carb,
   rating,
+  liked,
+  foodId,
 }) => {
-  const [heart, setHeart] = useState(FullHeart);
+  const [heart, setHeart] = useState(liked === 1 ? FullHeart : NoHeart);
   const navigate = useNavigate();
 
-  const handleClickHeart = () => {
-    heart === FullHeart ? setHeart(NoHeart) : setHeart(FullHeart);
+  let currentResponse = null;
+
+  const getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(";").shift();
+    return null;
+  };
+
+  const handleClickHeart = async () => {
+    if (liked === 0 && heart === NoHeart) {
+      const url = `http://localhost:8080/food/likeFood`;
+      const token = getCookie("jwtToken");
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify([foodId]),
+          credentials: "include",
+        });
+        if (!response.ok) {
+          const text = await response.text();
+          console.log(text);
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        if (data.code === 1000) {
+          toast.success("Đã thêm món ăn vào yêu thích", {
+            position: "top-right",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+          });
+        }
+        setHeart(FullHeart);
+      } catch (err) {
+        console.error("Error like food:", err);
+        toast.error("Lỗi hệ thống", {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+      }
+    }
   };
 
   const renderRating = (rating) => {
@@ -95,6 +154,8 @@ const DishOverview = ({
             </div>
           </div>
         </div>
+
+        <ToastContainer />
       </div>
     </>
   );

@@ -63,7 +63,7 @@ const Right = ({
         }
         const data = await response.json();
         if (data.code === 1000) {
-          toast.success(data.message, {
+          toast.success("Đã thêm bài tập vào yêu thích", {
             position: "top-right",
             autoClose: 2000,
             hideProgressBar: false,

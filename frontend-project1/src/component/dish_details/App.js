@@ -1,115 +1,121 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import "../../css/dish_details/App.css";
 import Header from "../header/Header";
 import NavigationBar from "../navigationBar/NavigationBar";
 import Footer from "../footer/Footer";
-import "../../css/dish_details/App.css";
+import { useLocation } from "react-router-dom";
 import DishOverview from "./DishOverview";
 import BasicInfo from "./BasicInfo";
 import NutritionDetails from "./NutritionDetails";
 import CookingInstructions from "./CookingInstructions";
 import RecommendDish from "./RecommendDish";
 import UserReviews from "./UserReviews";
-import { useLocation } from "react-router-dom";
 import NavigationDishDetail from "./NavigationDishDetail";
 
 const App = () => {
   const { pathname } = useLocation();
+  const [dishDetails, setDishDetails] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const foodId = pathname.split("/").pop();
+  const types = [
+    "Món chính",
+    "Món phụ",
+    "Món ăn vặt",
+    "Món ăn sáng",
+    "Đồ uống",
+  ];
+  const methods = [
+    "nước uống",
+    "xào",
+    "rang",
+    "nướng",
+    "canh",
+    "kho",
+    "hấp",
+    "hầm",
+    "chiên dầu",
+    "chiên không dầu",
+    "pha chế",
+    "luộc",
+  ];
+  const diets = [
+    "Ít tinh bột",
+    "Ít chất béo",
+    "Nhiều đạm",
+    "Thuần chay",
+    "Ăn chay (trứng, sữa)",
+    "Healthy",
+    "Bình thường",
+  ];
+  const levels = ["Dễ", "Trung bình", "Khó"];
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname]);
 
-  const nutritionList = [
-    "Thịt bò (bắp hoặc nạm): 50g, 125 calo",
-    "Bún tươi: 100g, 110 calo",
-    "Nước dùng (hầm từ xương bò, sá, hành tím, gừng): 200ml, 30 calo",
-    "Chả bò hoặc giò lụa: 20g, 40 calo",
-    "Rau sống (xà lách, giá đỗ, rau thơm, hành lá): 50g, 10 calo",
-    "Ớt sa tế (gia vị): 5g, 25 calo",
-    "Hành tím phi: 5g, 15 calo",
-  ];
+  useEffect(() => {
+    const fetchDishDetails = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await fetch(
+          `http://localhost:8080/food/getFoodDetail?foodId=${foodId}`,
+          {
+            method: "GET",
+            headers: {
+              Accept: "application/json",
+            },
+            credentials: "include",
+          }
+        );
+        if (!response.ok) {
+          const text = await response.text();
+          console.log(text);
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          await response.text();
+          throw new Error("Response is not in JSON format!");
+        }
 
-  const first = [
-    "Xương bò rửa sạch, chặt khúc.",
-    "Hành tây, tỏi, gừng băm nhỏ.",
-    "Cà chua rửa sạch, bổ múi cau.",
-    "Thịt bắp bò rửa sạch, thái mỏng.",
-    "Rau thơm nhặt sạch, rửa kỹ.",
-    "Bún trụng sơ qua nước sôi.",
-  ];
-  const second = [
-    "Xào thịt: Phi thơm tỏi, cho thịt bò đã thái mỏng vào xào chín tái.",
-    "Trình bày: Cho bún ra tô, xếp thịt bò lên trên. Chan nước dùng nóng hổi.",
-    "Thêm topping: Rắc hành phi, tiêu, hành lá thái nhỏ.",
-    "Thưởng thức: Bày kèm rau sống, chanh, ớt, tỏi băm. Pha thêm mắm, đường, ớt tùy khẩu vị.",
-  ];
-  const third = [
-    "Để tăng hương vị, bạn có thể thêm chút hành phi hoặc tiêu xay.",
-    "Nếu thích ăn cay, hãy cho thêm ớt tươi băm hoặc ớt bột.",
-  ];
-
-  const recommendDishes = [
-    {
-      id: "1",
-      type: "Main dish",
-      img: "https://i.ibb.co/kxVPqYg/bunbo.png",
-      name: "BÚN BÒ",
-      time: "1h 41m",
-      calo: 350,
-      likes: 1000,
-      rating: 3,
-    },
-    {
-      id: "2",
-      type: "Side dish",
-      img: "https://i.ibb.co/kxVPqYg/bunbo.png",
-      name: "GỎI CUỐN",
-      time: "30m",
-      calo: 150,
-      likes: 1000,
-      rating: 4.2,
-    },
-    {
-      id: "3",
-      type: "Main dish",
-      img: "https://i.ibb.co/kxVPqYg/bunbo.png",
-      name: "PHỞ BÒ",
-      time: "2h",
-      calo: 400,
-      likes: 1000,
-      rating: 5,
-    },
-    {
-      id: "4",
-      type: "Dessert",
-      img: "https://i.ibb.co/kxVPqYg/bunbo.png",
-      name: "CHÈ BƯỞI",
-      time: "1h",
-      calo: 250,
-      likes: 1000,
-      rating: 4.5,
-    },
-    {
-      id: "5",
-      type: "Lunch",
-      img: "https://i.ibb.co/kxVPqYg/bunbo.png",
-      name: "NEM RÁN",
-      time: "45m",
-      calo: 300,
-      likes: 1000,
-      rating: 3.8,
-    },
-    {
-      id: "6",
-      type: "Main dish",
-      img: "https://i.ibb.co/kxVPqYg/bunbo.png",
-      name: "CƠM TẤM",
-      time: "1h 15m",
-      calo: 550,
-      likes: 1000,
-      rating: 4.9,
-    },
-  ];
+        const data = await response.json();
+        setDishDetails({
+          ...data,
+          type: types[data.type - 1] || "N/A",
+          method: methods[data.method - 1] || "N/A",
+          diet: diets[data.diet - 1] || "N/A",
+          level: levels[data.level - 1] || "N/A",
+          listIngredient:
+            data.listIngredient?.map(
+              (item, index) =>
+                `${item}: ${data.listWeightIngredient?.[index]}g, ${data.listCaloriesIngredient?.[index]} calo`
+            ) || [],
+          listStep: data.listStep || [],
+          linkImage:
+            data?.listLinkImage?.length > 0
+              ? data.listLinkImage[data.listLinkImage.length - 1]
+              : null,
+          img1:
+            data?.listLinkImage?.[1] ||
+            "https://i.ibb.co/QkXghSy/basic-info.png",
+          img2:
+            data?.listLinkImage?.[2] ||
+            "https://i.ibb.co/QkXghSy/basic-info.png",
+          realType: data?.type,
+          flagLiked: data?.flagLiked,
+          stars: data?.stars,
+        });
+      } catch (err) {
+        setError(err);
+        console.error("Error fetching dish details:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDishDetails();
+  }, [pathname]);
 
   const reviews = [
     {
@@ -156,6 +162,10 @@ const App = () => {
     },
   ];
 
+  if (loading) return <p>Loading dish detail...</p>;
+  if (error) return <p>Error: {error.message}</p>;
+  if (!dishDetails) return null;
+
   return (
     <>
       <div className="dish-details">
@@ -174,46 +184,52 @@ const App = () => {
 
         <div className="first">
           <DishOverview
-            type="Main dish"
-            name="BÚN BÒ"
-            img="https://i.ibb.co/kxVPqYg/bunbo.png"
-            desc="là món ăn truyền thống Việt Nam, với nước dùng đậm đà, thịt bò mềm ngon, và hương vị cay nhẹ từ sa tế. Thích hợp cho bữa sáng hoặc trưa, đầy dinh dưỡng và hấp dẫn."
-            calo={300}
-            protein={10}
-            fat={10}
-            carb={10}
-            rating={4.5}
+            type={dishDetails?.type}
+            name={dishDetails?.name}
+            img={dishDetails?.linkImage}
+            desc={dishDetails?.description || "Chưa có"}
+            calo={dishDetails?.calories}
+            protein={dishDetails?.protein}
+            fat={dishDetails?.fat}
+            carb={dishDetails?.carb}
+            rating={dishDetails?.stars}
+            liked={dishDetails?.flagLiked}
+            foodId={foodId}
           />
 
           <NavigationDishDetail />
         </div>
 
         <BasicInfo
-          img="https://i.ibb.co/QkXghSy/basic-info.png"
-          method="hầm và luộc"
-          time="1h 43m"
-          type="main dish (món chính)"
-          level="trung bình"
-          diet="cơ bản"
-          favourites={300}
+          img={dishDetails?.listLinkImage?.[0]}
+          method={dishDetails?.method}
+          time={dishDetails?.time}
+          type={dishDetails?.type}
+          level={dishDetails?.level}
+          diet={dishDetails?.diet}
+          favourites={dishDetails?.numberOfLikes}
+          vote={dishDetails?.stars}
+          foodId={foodId}
         />
 
-        <NutritionDetails array={nutritionList} totalCalo={355} />
+        <NutritionDetails
+          img={dishDetails?.img1}
+          array={dishDetails?.listIngredient || ["Chưa có"]}
+          totalCalo={dishDetails?.calories}
+        />
 
         <CookingInstructions
-          first={first}
-          second={second}
-          third={third}
-          video="https://streamable.com/r9350c"
-          img1="https://i.ibb.co/QkXghSy/basic-info.png"
-          img2="https://i.ibb.co/QkXghSy/basic-info.png"
+          first={["Chưa có"]}
+          second={dishDetails.listStep || ["Chưa có"]}
+          video={dishDetails?.linkVideo || "Chưa có"}
+          img1={dishDetails?.img2}
         />
 
-        <RecommendDish dishes={recommendDishes} />
+        <RecommendDish type={dishDetails.realType} />
 
         <UserReviews reviews={reviews} />
 
-        <Footer></Footer>
+        <Footer />
       </div>
     </>
   );
