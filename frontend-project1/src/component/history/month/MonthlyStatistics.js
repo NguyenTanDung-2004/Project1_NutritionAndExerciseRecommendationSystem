@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import WorkoutStatistics from "./WorkoutStatistics";
 import CaloriesStatistics from "./CaloriesStatistics";
 import PCFStatistics from "./PCFStatistics";
@@ -12,7 +12,10 @@ const MonthlyStatistics = () => {
       "0"
     )}`;
   });
-
+  const [monthlyData, setMonthlyData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const apiUrl = process.env.REACT_APP_API_URL;
   const inputRef = useRef(null);
 
   const handleMonthChange = (event) => {
@@ -43,6 +46,48 @@ const MonthlyStatistics = () => {
     setIsPCFVisible((prev) => !prev);
   };
 
+  useEffect(() => {
+    const fetchMonthlyData = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const [year, month] = selectedMonth.split("-");
+        const url = `${apiUrl}/userHistory/getDataForMonthReport?month=${month}&year=${year}`;
+        const response = await fetch(url, {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+          },
+          credentials: "include", // Add this line to include cookies
+        });
+        if (!response.ok) {
+          const text = await response.text();
+          console.log(text);
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          throw new Error("Response is not in JSON format!");
+        }
+        const data = await response.json();
+        setMonthlyData(data);
+      } catch (err) {
+        setError(err.message || "Failed to fetch data");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchMonthlyData();
+  }, [selectedMonth, apiUrl]);
+
+  if (loading) {
+    return <div className="text-center">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center text-red-500">Error: {error}</div>;
+  }
+
   return (
     <div className="w-full flex flex-col justify-center gap-8">
       <div
@@ -69,13 +114,18 @@ const MonthlyStatistics = () => {
       >
         <span>LỊCH SỬ VÀ THỐNG KÊ BÀI TẬP</span>
         <i
-          class={`fa-solid ${
+          className={`fa-solid ${
             !isWorkoutVisible ? "fa-chevron-up" : "fa-chevron-down"
           } `}
         ></i>
       </div>
-
-      {isWorkoutVisible && <WorkoutStatistics month={selectedMonth} />}
+      {isWorkoutVisible && monthlyData && (
+        <WorkoutStatistics
+          month={selectedMonth}
+          exerciseChart={monthlyData.exerciseChart}
+          listExercises={monthlyData.listExercises}
+        />
+      )}
 
       <div
         onClick={toggleCaloriesVisibility}
@@ -83,13 +133,18 @@ const MonthlyStatistics = () => {
       >
         <span>LỊCH SỬ VÀ THỐNG KÊ CALORIES</span>
         <i
-          class={`fa-solid ${
+          className={`fa-solid ${
             !isCaloriesVisible ? "fa-chevron-up" : "fa-chevron-down"
           } `}
         ></i>
       </div>
-
-      {isCaloriesVisible && <CaloriesStatistics month={selectedMonth} />}
+      {isCaloriesVisible && monthlyData && (
+        <CaloriesStatistics
+          month={selectedMonth}
+          caloriesChart={monthlyData.caloriesChart}
+          listSavedFoodsCalories={monthlyData.listSavedFoodsCalories}
+        />
+      )}
 
       <div
         onClick={togglePCFVisibility}
@@ -97,13 +152,20 @@ const MonthlyStatistics = () => {
       >
         <span>LỊCH SỬ VÀ THỐNG KÊ PROTEIN - CARB - FAT</span>
         <i
-          class={`fa-solid ${
+          className={`fa-solid ${
             !isPCFVisible ? "fa-chevron-up" : "fa-chevron-down"
           } `}
         ></i>
       </div>
-
-      {isPCFVisible && <PCFStatistics month={selectedMonth} />}
+      {isPCFVisible && monthlyData && (
+        <PCFStatistics
+          month={selectedMonth}
+          fatCarbProteinChart={monthlyData.fatCarbProteinChart}
+          listSavedFoodFat={monthlyData.listSavedFoodFat}
+          listSavedFoodCarb={monthlyData.listSavedFoodCarb}
+          listSavedFoodProtein={monthlyData.listSavedFoodProtein}
+        />
+      )}
     </div>
   );
 };
