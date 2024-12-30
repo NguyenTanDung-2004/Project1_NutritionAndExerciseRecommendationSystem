@@ -3,7 +3,7 @@ import "../../css/dish_details/NutritionDetails.css";
 import StarVoted from "../../img/nutritional_regimen/star-voted.png";
 import Star from "../../img/nutritional_regimen/star.png";
 
-const NutritionDetails = ({ array, totalCalo }) => {
+const NutritionDetails = ({ array, totalCalo, img }) => {
   const [rating, setRating] = useState(0);
 
   const renderRating = () => {
@@ -32,9 +32,7 @@ const NutritionDetails = ({ array, totalCalo }) => {
   return (
     <>
       <div id="section-3" className="nutrition-details">
-        <span className="nutrition-details__title">
-          Nutritional Ingredients
-        </span>
+        <span className="nutrition-details__title">THÀNH PHẦN DINH DƯỠNG</span>
         <span className="nutrition-details__note">
           (Tùy vào khẩu phần và cách chế biến, lượng calo có thể thay đổi chút
           ít.)
@@ -42,10 +40,10 @@ const NutritionDetails = ({ array, totalCalo }) => {
         <div className="nutrition-details__main">
           <div className="nutrition-details__left">
             <div className="img-container">
-              <img src="https://i.ibb.co/kxVPqYg/bunbo.png" alt="" />
+              <img src={img} alt="" />
             </div>
 
-            <div className="nutrition-details__rating">{renderRating()}</div>
+            {/* <div className="nutrition-details__rating">{renderRating()}</div> */}
           </div>
 
           <div className="nutrition-details__right">

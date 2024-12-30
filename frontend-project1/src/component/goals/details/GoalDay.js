@@ -1,7 +1,7 @@
 import React from "react";
 import GoalChart from "../../chart/GoalChart";
 
-const GoalDay = ({ date }) => {
+const GoalDay = ({ key, date, data1 }) => {
   const data = {
     requiredProtein: 100,
     requiredFat: 50,

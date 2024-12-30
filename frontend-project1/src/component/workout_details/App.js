@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import "../../css/workout_details/App.css";
 import Header from "../header/Header";
 import NavigationBar from "../navigationBar/NavigationBar";
@@ -10,68 +10,70 @@ import Right from "./Right";
 const App = () => {
   const { pathname, state } = useLocation();
   const challengeData = state?.challengeData;
+  const [exerciseDetails, setExerciseDetails] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const exerciseId = pathname.split("/").pop();
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname]);
 
-  const images = [
-    "https://i.ibb.co/FHk62vT/1.png",
-    "https://i.ibb.co/FHk62vT/1.png",
-    "https://i.ibb.co/FHk62vT/1.png",
-    "https://i.ibb.co/FHk62vT/1.png",
-  ];
+  useEffect(() => {
+    const fetchExerciseDetails = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const url = `http://localhost:8080/exercise/getExerciseDetails?exerciseId=${exerciseId}`;
+        const response = await fetch(url, {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+          },
+          credentials: "include",
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          await response.text().then((text) => {
+            throw new Error("Response is not in JSON format!");
+          });
+        }
+        const data = await response.json();
+        setExerciseDetails(data);
+      } catch (err) {
+        setError(err);
+        console.error("Error fetching exercise details:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchExerciseDetails();
+  }, [pathname]);
 
-  const recommend = [
-    {
-      id: "2",
-      name: "Bài tập khởi động 2",
-      image: "https://i.ibb.co/x1K7stB/workout-1.png",
-      time: 15,
-      calo: 12,
-      rating: 4,
-    },
-    {
-      id: "3",
-      name: "Bài tập khởi động 3",
-      image: "https://i.ibb.co/x1K7stB/workout-1.png",
-      time: 20,
-      calo: 8,
-      rating: 3,
-    },
-    {
-      id: "4",
-      name: "Bài tập khởi động 4",
-      image: "https://i.ibb.co/x1K7stB/workout-1.png",
-      time: 25,
-      calo: 9,
-      rating: 2,
-    },
-    {
-      id: "5",
-      name: "Bài tập khởi động 5",
-      image: "https://i.ibb.co/x1K7stB/workout-1.png",
-      time: 45,
-      calo: 14,
-      rating: 1,
-    },
-    {
-      id: "6",
-      name: "Bài tập khởi động 6",
-      image: "https://i.ibb.co/x1K7stB/workout-1.png",
-      time: 50,
-      calo: 7,
-      rating: 5,
-    },
-    {
-      id: "7",
-      name: "Bài tập khởi động 7",
-      image: "https://i.ibb.co/x1K7stB/workout-1.png",
-      time: 40,
-      calo: 11,
-      rating: 4,
-    },
-  ];
+  if (loading) return <p>Loading workout details...</p>;
+  if (error) return <p>Error: {error.message}</p>;
+  if (!exerciseDetails) return null;
+
+  const transformRelatedExercises = (listRelatedExercises) => {
+    if (Array.isArray(listRelatedExercises)) {
+      return listRelatedExercises.map((item) => ({
+        id: item.exerciseId,
+        name: item.name,
+        image: item.linkImage,
+        time: item.time,
+        calo: item.calories,
+        rating: item.stars,
+      }));
+    } else {
+      console.log("Data is not an array:", listRelatedExercises);
+      return [];
+    }
+  };
+
   return (
     <>
       <div className="workout-details">
@@ -85,18 +87,26 @@ const App = () => {
       </div>
 
       <div className="workout-details__main">
-        <Left image="https://i.postimg.cc/NGnqyLgB/remove-workout.png" />
+        <Left
+          image={exerciseDetails?.linkImages?.[0]}
+          exerciseId={exerciseId}
+          vote={exerciseDetails?.stars}
+        />
         <Right
-          type="Khởi động"
-          name="Bài tập khởi động số 1"
-          rating={4}
-          images={images}
-          met={3}
-          time={5}
-          calo={5}
-          limitation="bệnh tim, bệnh tay, bệnh khớp, bệnh cột sống "
-          link="https://www.youtube.com/watch?v=cbKkB3POqaY"
-          recommend={recommend}
+          exerciseId={exerciseId}
+          type={exerciseDetails?.type}
+          name={exerciseDetails?.name}
+          rating={exerciseDetails?.stars}
+          liked={exerciseDetails?.flagLiked}
+          images={exerciseDetails?.linkImages}
+          met={exerciseDetails?.met}
+          time={exerciseDetails?.time}
+          calo={exerciseDetails?.calories}
+          limitation={exerciseDetails?.listHanChe || "Không có"}
+          link={exerciseDetails?.linkVideo}
+          recommend={transformRelatedExercises(
+            exerciseDetails?.listRelatedExercises
+          )}
           challengeData={challengeData}
         />
       </div>

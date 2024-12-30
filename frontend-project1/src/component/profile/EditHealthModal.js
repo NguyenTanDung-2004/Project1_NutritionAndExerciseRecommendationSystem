@@ -136,7 +136,7 @@ const EditHealthModal = ({ onClose }) => {
                 htmlFor="range"
                 className="text-sm font-medium text-gray-700"
               >
-                Khoảng
+                Ước lượng
               </label>
             </div>
           </div>

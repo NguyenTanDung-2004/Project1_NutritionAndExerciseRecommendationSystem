@@ -2,9 +2,77 @@ import React, { useState } from "react";
 import "../../css/dish_details/BasicInfo.css";
 import StarVoted from "../../img/nutritional_regimen/star-voted.png";
 import Star from "../../img/nutritional_regimen/star.png";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-const BasicInfo = ({ img, method, time, type, level, diet, favourites }) => {
-  const [rating, setRating] = useState(0);
+const BasicInfo = ({
+  img,
+  method,
+  time,
+  type,
+  level,
+  diet,
+  favourites,
+  vote,
+  foodId,
+}) => {
+  const [rating, setRating] = useState(vote);
+  let currentResponse = null;
+
+  const getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(";").shift();
+    return null;
+  };
+
+  const handleStarClick = async (index) => {
+    setRating(index);
+    const url = `http://localhost:8080/food/voteFood`;
+    const token = getCookie("jwtToken");
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify([{ id: foodId, stars: index }]),
+        credentials: "include",
+      });
+      if (!response.ok) {
+        const text = await response.text();
+        console.log(text);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      if (data.code === 1000) {
+        toast.success("Cảm ơn bạn đã vote cho bài tập này!", {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+      }
+    } catch (err) {
+      console.error("Error vote food:", err);
+      toast.error("Lỗi hệ thống", {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+    }
+  };
 
   const renderRating = () => {
     const stars = [];
@@ -21,18 +89,19 @@ const BasicInfo = ({ img, method, time, type, level, diet, favourites }) => {
     return stars;
   };
 
-  const handleStarClick = (index) => {
-    if (index === rating) {
-      setRating(0);
-    } else {
-      setRating(index);
+  const formatTime = (minutes) => {
+    if (minutes >= 60) {
+      const hours = Math.floor(minutes / 60);
+      const mins = minutes % 60;
+      return `${hours} giờ ${mins} phút`;
     }
+    return `${minutes} phút`;
   };
 
   return (
     <>
       <div id="section-2" className="basic-info">
-        <span className="basic-info__title">The basic characteristics </span>
+        <span className="basic-info__title">THÔNG TIN CƠ BẢN </span>
         <div className="basic-info__main">
           <div className="basic-info__left">
             <div className="img-container">
@@ -47,7 +116,7 @@ const BasicInfo = ({ img, method, time, type, level, diet, favourites }) => {
             </div>
 
             <div className="basic-info__item">
-              <span>Thời gian nấu: {time}</span>
+              <span>Thời gian nấu: {formatTime(time)}</span>
             </div>
 
             <div className="basic-info__item">
@@ -67,6 +136,7 @@ const BasicInfo = ({ img, method, time, type, level, diet, favourites }) => {
             </div>
           </div>
         </div>
+        <ToastContainer />
       </div>
     </>
   );

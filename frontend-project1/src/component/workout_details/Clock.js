@@ -1,31 +1,87 @@
 import React, { useState, useEffect } from "react";
 import "../../css/workout_details/Clock.css";
 import audioSrc from "../../img/workout_details/sound.mp3";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-const Clock = ({ time }) => {
+const Clock = ({ time, exerciseId }) => {
   const [timeLeft, setTimeLeft] = useState(time);
   const [isRunning, setIsRunning] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
   const audio = new Audio(audioSrc);
+  let currentResponse = null;
+
+  const getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(";").shift();
+    return null;
+  };
+
+  const recordExercise = async () => {
+    const url = `http://localhost:8080/userHistory/recordExercise?exerciseId=${exerciseId}`;
+    console.log("Record exercise URL:", url);
+    const token = getCookie("jwtToken");
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        credentials: "include",
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (data.code === 1000) {
+          toast.success("Chúc mừng bạn đã tập được 1 lần!", {
+            position: "top-right",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+          });
+        }
+        console.log("Record Exercise Success!", data);
+      } else {
+        const text = await response.text();
+        console.log(text);
+        toast.error("Lỗi hệ thống", {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+    } catch (err) {
+      console.error("Error record workout data:", err);
+    }
+  };
 
   useEffect(() => {
     let timer;
-
     if (isRunning && timeLeft > 0) {
       timer = setInterval(() => {
         setTimeLeft((prev) => prev - 1);
       }, 1000);
-    } else if (timeLeft === 0) {
+    } else if (timeLeft === 0 && !isFinished) {
       handleFinish();
     }
 
     return () => clearInterval(timer);
-  }, [isRunning, timeLeft]);
+  }, [isRunning, timeLeft, exerciseId, isFinished]);
 
   const handleStartStop = () => {
     if (isRunning) {
       setIsRunning(false);
-      resetClock();
     } else {
       setIsRunning(true);
       setIsFinished(false);
@@ -36,6 +92,7 @@ const Clock = ({ time }) => {
     setIsFinished(true);
     setIsRunning(false);
 
+    recordExercise();
     // Phát âm thanh khi kết thúc
     audio.play().catch((error) => {
       console.error("Error playing sound:", error);
@@ -52,6 +109,7 @@ const Clock = ({ time }) => {
 
       if (count === 6) {
         clearInterval(shakeInterval);
+        clockContainer.style.transform = "translateX(0)";
         clockContainer.style.transform = "translateX(0)";
         resetClock();
       }
@@ -88,6 +146,8 @@ const Clock = ({ time }) => {
           {isRunning ? "Kết thúc" : "Bắt đầu"}
         </button>
       </div>
+      {/* Toast container  */}
+      <ToastContainer />
     </>
   );
 };

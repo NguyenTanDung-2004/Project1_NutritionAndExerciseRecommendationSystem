@@ -1,49 +1,100 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Header from "../../header/Header";
 import NavigationBar from "../../navigationBar/NavigationBar";
 import Footer from "../../footer/Footer";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import GoalDay from "./GoalDay";
 import GoalOverview from "./GoalOverview";
+import { format } from "date-fns";
 
 const App = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [dailyData, setDailyData] = useState({});
+
+  const goal = location.state?.goal;
 
   const handleBackClick = () => {
     navigate("/goals");
   };
 
-  // Dữ liệu của mục tiêu (ví dụ)
-  const goalData = {
-    startDate: "01/12/2024", // Ngày bắt đầu
-    endDate: "07/12/2024", // Ngày kết thúc
-  };
-
   // Hàm để chuyển đổi ngày từ "dd/MM/yyyy" sang đối tượng Date
   const convertToDate = (dateString) => {
     const [day, month, year] = dateString.split("/");
-    return new Date(year, month - 1, day); // tháng bắt đầu từ 0 trong JavaScript
+    return new Date(year, month - 1, day);
   };
 
   // Hàm để tạo danh sách các ngày từ endDate tới startDate
   const generateGoalDays = (startDate, endDate) => {
+    if (!startDate || !endDate) {
+      return [];
+    }
     const days = [];
     let currentDate = convertToDate(endDate);
     const stopDate = convertToDate(startDate);
 
     while (currentDate >= stopDate) {
-      const formattedDate = `Ngày ${currentDate.getDate()} - ${currentDate.getDate()}/${
-        currentDate.getMonth() + 1
-      }/${currentDate.getFullYear()}`;
-      days.push(formattedDate);
-      currentDate.setDate(currentDate.getDate() - 1); // Giảm ngày xuống 1
+      const formattedDate = `Ngày ${currentDate.getDate()} - ${format(
+        currentDate,
+        "dd/MM/yyyy"
+      )}`;
+      days.push({ date: formattedDate, dateObj: new Date(currentDate) });
+      currentDate.setDate(currentDate.getDate() - 1);
     }
 
     return days;
   };
 
   // Lấy danh sách các ngày
-  const goalDays = generateGoalDays(goalData.startDate, goalData.endDate);
+  const goalDays = generateGoalDays(goal?.startDate, goal?.endDate);
+
+  useEffect(() => {
+    const fetchDailyData = async () => {
+      if (goalDays.length === 0) {
+        return;
+      }
+      try {
+        const newDailyData = {};
+        for (const day of goalDays) {
+          const dateObj = day.dateObj;
+          const formattedDate = day.date;
+          const response = await fetch(
+            `http://localhost:8080/userHistory/getDataForDateReport?day=${dateObj.getDate()}&month=${
+              dateObj.getMonth() + 1
+            }&year=${dateObj.getFullYear()}`,
+            {
+              method: "GET",
+              headers: {
+                Accept: "application/json",
+              },
+              credentials: "include",
+            }
+          );
+          if (!response.ok) {
+            const text = await response.text();
+            console.log(text);
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const data = await response.json();
+          newDailyData[formattedDate] = {
+            requiredProtein: 100,
+            requiredFat: 50,
+            requiredCarb: 200,
+            consumedProtein: data.protein,
+            consumedFat: data.fat,
+            consumedCarb: data.carb,
+            burned: data.currentBurned,
+            totalCalories: data.totalCalories,
+          };
+        }
+        setDailyData(newDailyData);
+      } catch (err) {
+        console.error("Error fetching list user target:", err);
+      }
+    };
+
+    fetchDailyData();
+  }, [goalDays]);
 
   return (
     <div className="bg-[#F3F2F7]">
@@ -64,7 +115,7 @@ const App = () => {
                 Mục tiêu cá nhân:
               </div>
               <div className="text-2xl text-black font-medium">
-                Giảm 2 kg để đi chơi
+                {goal?.name}
               </div>
             </div>
             <div className="text-base text-[#787878] font-semibold">
@@ -79,12 +130,10 @@ const App = () => {
             <i className="fa-solid fa-arrow-left-long text-xl"></i>
           </button>
         </div>
-
-        <GoalOverview />
-
+        {goal && <GoalOverview goal={goal} />}
         {/* Hiển thị từng ngày mục tiêu */}
-        {goalDays.map((date, index) => (
-          <GoalDay key={index} date={date} />
+        {goalDays.map((day, index) => (
+          <GoalDay key={index} date={day.date} data1={dailyData[day.date]} />
         ))}
       </div>
       <Footer />

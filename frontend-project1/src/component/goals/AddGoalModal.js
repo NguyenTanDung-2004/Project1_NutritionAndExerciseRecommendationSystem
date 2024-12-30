@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const AddGoalModal = ({ onClose }) => {
   const today = new Date().toISOString().split("T")[0];
@@ -10,21 +12,85 @@ const AddGoalModal = ({ onClose }) => {
   const [systemName, setSystemName] = useState("");
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
+  const toastConfig = {
+    position: "top-right",
+    autoClose: 3000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "light",
+  };
   const handleSave = () => {
-    // Kiểm tra thông tin hợp lệ
-    if (name && weightChange > 0) {
-      setIsConfirmModalOpen(true); // Hiện modal nhập tên hệ thống
+    if (!name) {
+      toast.error("Vui lòng nhập tên mục tiêu", toastConfig);
+      return;
     }
+    if (weightChange <= 0) {
+      toast.error("Vui lòng nhập cân nặng", toastConfig);
+      return;
+    }
+    setIsConfirmModalOpen(true);
   };
 
-  const handleFinalSave = () => {
+  const getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(";").shift();
+    return null;
+  };
+
+  const handleFinalSave = async () => {
     if (
-      systemName === "Hệ thống chăm sóc sức khỏe và đề xuất thức ăn và bài tập"
+      systemName !== "Hệ thống chăm sóc sức khỏe và đề xuất thức ăn và bài tập"
     ) {
-      alert("Lưu thành công!");
-      onClose();
-    } else {
-      alert("Tên hệ thống không đúng, vui lòng thử lại.");
+      toast.error("Tên hệ thống không đúng, vui lòng thử lại.", toastConfig);
+      return;
+    }
+    const end = new Date(
+      new Date(startDate).getTime() + duration * 24 * 60 * 60 * 1000
+    );
+    const body = {
+      end: end.toISOString().split("T")[0],
+      flagIncrease: goalType === "Tăng cân" ? 1 : 2,
+      weight: weightChange,
+      name: name,
+    };
+    console.log("Body request:", JSON.stringify(body));
+    try {
+      const url = `http://localhost:8080/userTarget/createUserTarget`;
+      const token = getCookie("jwtToken");
+      if (!token) {
+        toast.error("Không tìm thấy token", toastConfig);
+        return;
+      }
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(body),
+        credentials: "include",
+      });
+      if (!response.ok) {
+        const text = await response.text();
+        console.log(text);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      if (data.code === 1000) {
+        window.location.reload(true); // Force refresh trang nếu thành công
+      } else {
+        toast.error(data.message, toastConfig);
+        onClose(); // Đóng modal khi có lỗi
+      }
+    } catch (err) {
+      console.error("Error create user target:", err);
+      toast.error(`Lỗi hệ thống: ${err.message}`, toastConfig);
+      onClose(); // Đóng modal khi có lỗi
     }
   };
 
@@ -132,14 +198,14 @@ const AddGoalModal = ({ onClose }) => {
                   value={weightChange}
                   onChange={(e) => {
                     const value = Number(e.target.value);
-                    const maxWeightChange = duration / 7; // Số cân tối đa dựa trên duration
+                    const maxWeightChange = duration / 7;
                     setWeightChange(
                       value > maxWeightChange ? maxWeightChange : value
                     );
                   }}
                   step="0.1"
                   min="0.1"
-                  max={duration / 7} // Tối đa là duration / 7
+                  max={duration / 7}
                   className="flex-1 border border-gray-300 rounded-md px-3 py-2"
                 />
                 <span className="ml-2 text-sm text-gray-500">kg</span>
@@ -158,11 +224,10 @@ const AddGoalModal = ({ onClose }) => {
               onClick={onClose}
               className="bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold py-2 px-4 rounded"
             >
-              Hủy
+              Hủy bỏ
             </button>
             <button
               onClick={handleSave}
-              disabled={!name || weightChange <= 0}
               className={`py-2 px-4 rounded font-semibold text-white ${
                 name && weightChange > 0
                   ? "bg-[#1445FE] hover:bg-opacity-80"
@@ -206,6 +271,7 @@ const AddGoalModal = ({ onClose }) => {
           </div>
         </div>
       )}
+      <ToastContainer />
     </>
   );
 };

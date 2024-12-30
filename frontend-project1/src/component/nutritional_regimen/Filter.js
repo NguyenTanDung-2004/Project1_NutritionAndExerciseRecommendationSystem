@@ -1,90 +1,88 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../../css/nutritional_regimen/Filter.css";
 
-const cookingMethods = [
-  "fry",
-  "stir-fry",
-  "steam",
-  "deep",
-  "simmer",
-  "braise",
-  "grill/roast",
-  "boil",
-];
-const diets = [
-  "low-carb",
-  "low-fat",
-  "high-protein",
-  "vegetarian",
-  "healthy",
-  "basic",
-  "vegan",
-];
-const cookingTimes = ["< 30 minutes", "< 1 hours", "< 2 hours"];
-const levels = ["Easy", "Medium", "Hard"];
-
-const Filter = () => {
-  const [selectedCookingMethods, setSelectedCookingMethods] = useState([]);
+const Filter = ({ onFilterChange }) => {
   const [selectedDiets, setSelectedDiets] = useState([]);
   const [selectedCookingTime, setSelectedCookingTime] = useState(null);
   const [selectedLevel, setSelectedLevel] = useState(null);
 
+  const diets = [
+    { value: 1, label: "Ít tinh bột" },
+    { value: 2, label: "Ít chất béo" },
+    { value: 3, label: "Nhiều đạm" },
+    { value: 4, label: "Thuần chay" },
+    { value: 5, label: "Ăn chay (trứng, sữa)" },
+    { value: 6, label: "Healthy" },
+    { value: 7, label: "Bình thường" },
+  ];
+  const levels = [
+    { value: 1, label: "Dễ" },
+    { value: 2, label: "Trung bình" },
+    { value: 3, label: "Khó" },
+  ];
+  const cookingTimes = ["< 30 phút", "< 1 giờ", "< 2 giờ", "Tất cả"];
+
   const handleMultiSelect = (item, selected, setSelected) => {
-    return selected.includes(item)
-      ? setSelected(selected.filter((i) => i !== item))
-      : setSelected([...selected, item]);
+    const updatedSelected = selected.includes(item.value)
+      ? selected.filter((i) => i !== item.value)
+      : [...selected, item.value];
+    setSelected(updatedSelected);
+    onFilterChange({
+      selectedDiets: updatedSelected,
+      selectedCookingTime,
+      selectedLevel,
+    });
   };
 
   const handleSingleSelect = (item, setSelected) => {
-    return setSelected(item);
+    const newValue = selectedCookingTime === item.value ? null : item.value;
+    setSelected(newValue);
+    onFilterChange({
+      selectedDiets,
+      selectedCookingTime: newValue,
+      selectedLevel,
+    });
   };
+
+  const handleLevelSelect = (item, setSelected) => {
+    const newValue = selectedLevel === item.value ? null : item.value;
+    setSelected(newValue);
+    onFilterChange({
+      selectedDiets,
+      selectedCookingTime,
+      selectedLevel: newValue,
+    });
+  };
+
+  useEffect(() => {
+    onFilterChange({
+      selectedDiets,
+      selectedCookingTime,
+      selectedLevel,
+    });
+  }, []);
 
   return (
     <>
       <div className="dishes-filter">
-        <span className="title">Filter</span>
-
-        {/* cooking methods */}
-        <div className="filter-item">
-          <div className="filter-label">Cooking methods:</div>
-
-          <div className="filter-options">
-            {cookingMethods.map((method) => (
-              <span
-                key={method}
-                className={`filter-option ${
-                  selectedCookingMethods.includes(method) ? "selected" : ""
-                }`}
-                onClick={() =>
-                  handleMultiSelect(
-                    method,
-                    selectedCookingMethods,
-                    setSelectedCookingMethods
-                  )
-                }
-              >
-                {method}
-              </span>
-            ))}
-          </div>
-        </div>
+        <span className="title">Lọc</span>
 
         {/* diets */}
         <div className="filter-item">
-          <div className="filter-label">Diet:</div>
+          <div className="filter-label">Chế độ ăn:</div>
 
           <div className="filter-options">
             {diets.map((dietOption) => (
               <span
-                key={dietOption}
+                key={dietOption.value}
                 className={`filter-option ${
-                  selectedDiets.includes(dietOption) ? "selected" : ""
+                  selectedDiets.includes(dietOption.value) ? "selected" : ""
                 }`}
                 onClick={() =>
                   handleMultiSelect(dietOption, selectedDiets, setSelectedDiets)
                 }
               >
-                {dietOption}
+                {dietOption.label}
               </span>
             ))}
           </div>
@@ -92,7 +90,7 @@ const Filter = () => {
 
         {/* cooking time */}
         <div className="filter-item">
-          <div className="filter-label">Cooking time:</div>
+          <div className="filter-label">Thời gian nấu:</div>
 
           <div className="filter-options cooking-time">
             {cookingTimes.map((time, index) => (
@@ -104,7 +102,10 @@ const Filter = () => {
                     value={time}
                     checked={selectedCookingTime === time}
                     onChange={() => {
-                      handleSingleSelect(time, setSelectedCookingTime);
+                      handleSingleSelect(
+                        { value: time },
+                        setSelectedCookingTime
+                      );
                     }}
                   />
                   {time}
@@ -121,15 +122,15 @@ const Filter = () => {
           <div className="filter-options">
             {levels.map((level) => (
               <button
-                key={level}
+                key={level.value}
                 className={`filter-button ${
-                  selectedLevel === level ? "selected" : ""
+                  selectedLevel === level.value ? "selected" : ""
                 }`}
                 onClick={() => {
-                  handleSingleSelect(level, setSelectedLevel);
+                  handleLevelSelect(level, setSelectedLevel);
                 }}
               >
-                {level}
+                {level.label}
               </button>
             ))}
           </div>

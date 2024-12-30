@@ -1,38 +1,26 @@
 import React, { useState } from "react";
 import "../../css/nutritional_regimen/CategoryList.css";
 
-const categories = [
-  { label: "All" },
-  { label: "Main dish" },
-  { label: "Breakfast" },
-  { label: "Lunch" },
-  { label: "Dinner" },
-  { label: "Side dish" },
-  { label: "Snack" },
-  { label: "Drink" },
-];
+const CategoryList = ({ onCategoryChange, types }) => {
+  const [selectedCategory, setSelectedCategory] = useState("Tất cả");
 
-const CategoryList = () => {
-  const [selectedCategory, setSelectedCategory] = useState("All");
-
-  // Hàm xử lý khi chọn category
   const handleCategoryClick = (category) => {
     setSelectedCategory(category);
-    // filter
-    console.log(category);
+    onCategoryChange(category);
   };
+
   return (
     <>
       <div className="category-list">
-        {categories.map((category, index) => (
+        {types.map((category, index) => (
           <div
             key={index}
             className={`category-item ${
-              selectedCategory === category.label ? "active" : ""
+              selectedCategory === category ? "active" : ""
             }`}
-            onClick={() => handleCategoryClick(category.label)}
+            onClick={() => handleCategoryClick(category)}
           >
-            {category.label}
+            {category}
           </div>
         ))}
       </div>

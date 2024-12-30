@@ -1,48 +1,46 @@
-import React, { useState } from "react";
+import React from "react";
 import "../../css/dish_details/CookingInstructions.css";
-import Video from "../../img/dish_details/video.mp4";
+import Video from "../../img/dish_details/video.mp4"; // Đường dẫn đến video mặc định
 
-const CookingInstructions = ({ first, second, third, video, img1, img2 }) => {
-  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+const CookingInstructions = ({ first, second, video, img1, img2 }) => {
+  const defaultVideo = Video;
 
   const handleVideoClick = () => {
-    setIsVideoPlaying(true); // Chuyển sang true khi video phát
-  };
-
-  const closeVideo = () => {
-    setIsVideoPlaying(false); // Trở về false khi đóng video
+    if (video) {
+      window.open(video, "_blank");
+    } else {
+      window.open(defaultVideo, "_blank");
+    }
   };
 
   return (
     <>
-      <div
-        id="section-4"
-        className={`cooking-instructions ${isVideoPlaying ? "blur-bg" : ""}`}
-      >
-        <span className="cooking-instructions__title">
-          Nutritional Ingredients
-        </span>
+      <div id="section-4" className="cooking-instructions">
+        <span className="cooking-instructions__title">HƯỚNG DẪN CHẾ BIẾN</span>
 
         <div className="cooking-instructions__main">
           <div className="cooking-instructions__item">
             <div className="video-container" onClick={handleVideoClick}>
               <video
                 className="instruction-video"
-                src={video}
-                muted={!isVideoPlaying}
-                autoPlay={isVideoPlaying}
+                src={video || defaultVideo}
+                muted
                 loop
               ></video>
-              {!isVideoPlaying && <div className="video-overlay">▶</div>}
+              <div className="video-overlay">▶</div>
             </div>
 
             <div className="cooking-instructions__text">
               <span>Sơ chế nguyên liệu</span>
 
               <ul>
-                {first.map((ingredient, index) => (
-                  <li key={index}>{ingredient}</li>
-                ))}
+                {first?.length > 0 ? (
+                  first.map((ingredient, index) => (
+                    <li key={index}>{ingredient}</li>
+                  ))
+                ) : (
+                  <li>Chưa có</li>
+                )}
               </ul>
             </div>
           </div>
@@ -56,9 +54,13 @@ const CookingInstructions = ({ first, second, third, video, img1, img2 }) => {
               <span>Cách làm</span>
 
               <ul>
-                {second.map((ingredient, index) => (
-                  <li key={index}>{ingredient}</li>
-                ))}
+                {second?.length > 0 ? (
+                  second.map((ingredient, index) => (
+                    <li key={index}>{ingredient}</li>
+                  ))
+                ) : (
+                  <li>Chưa có</li>
+                )}
               </ul>
             </div>
           </div>
@@ -70,21 +72,6 @@ const CookingInstructions = ({ first, second, third, video, img1, img2 }) => {
           vui vẻ và đáng nhớ.
         </span>
       </div>
-
-      {isVideoPlaying && (
-        <div className="fullscreen-video-overlay">
-          <video
-            className="fullscreen-video"
-            src={Video}
-            autoPlay
-            loop
-            controls
-          ></video>
-          <button className="close-btn" onClick={closeVideo}>
-            ✖
-          </button>
-        </div>
-      )}
     </>
   );
 };

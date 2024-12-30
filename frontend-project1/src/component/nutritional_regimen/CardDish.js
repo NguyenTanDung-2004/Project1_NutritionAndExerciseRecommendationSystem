@@ -16,6 +16,15 @@ const CardDish = ({ type, name, img, time, calo, likes, rating, onClick }) => {
     }
     return stars;
   };
+  const formatTime = (minutes) => {
+    if (minutes >= 60) {
+      const hours = Math.floor(minutes / 60);
+      const mins = minutes % 60;
+      return `${hours} giờ ${mins} phút`;
+    }
+    return `${minutes} phút`;
+  };
+
   return (
     <>
       <div
@@ -25,31 +34,46 @@ const CardDish = ({ type, name, img, time, calo, likes, rating, onClick }) => {
       >
         <span className="type">{type}</span>
         <div className="dish-body">
-          <div className="dish-left">
-            <span className="name">{name}</span>
+          <div
+            className="dish-left"
+            style={{ display: "flex", flexDirection: "column" }}
+          >
+            <span
+              className="name text-ellipsis overflow-hidden whitespace-nowrap"
+              style={{ display: "block", flex: 1 }}
+            >
+              {name}
+            </span>
             <img src={img} alt="" />
           </div>
-          <div className="dish-right">
-            <div className="dish-info">
-              <span>
-                <img src={IconTime} alt="" />
-                {time}
-              </span>
-              <span>
-                <img src={IconCalo} alt="" />
-                {`${calo} calos`}
-              </span>
-              <span>
-                <img src={IconHeart} alt="" />
-                {likes}
-              </span>
+          {time !== undefined || calo !== undefined || likes !== undefined ? (
+            <div className="dish-right">
+              <div className="dish-info">
+                {time !== undefined && (
+                  <span>
+                    <img src={IconTime} alt="" />
+                    {formatTime(time)}
+                  </span>
+                )}
+                {calo !== undefined && (
+                  <span>
+                    <img src={IconCalo} alt="" />
+                    {`${calo} calos`}
+                  </span>
+                )}
+                {likes !== undefined && (
+                  <span>
+                    <img src={IconHeart} alt="" />
+                    {likes}
+                  </span>
+                )}
+              </div>
+              <div className="dish-rating">
+                {renderRating(rating)}
+                <span>{rating}</span>
+              </div>
             </div>
-            <div className="dish-rating">
-              {renderRating(rating)}
-
-              <span>{rating}</span>
-            </div>
-          </div>
+          ) : null}
         </div>
       </div>
     </>

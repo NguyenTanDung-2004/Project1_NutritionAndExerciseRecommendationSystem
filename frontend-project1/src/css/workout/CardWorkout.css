@@ -21,6 +21,7 @@
   border-radius: 50px;
   display: flex;
   cursor: pointer;
+  background: rgb(202, 202, 204);
 }
 .card-workout:hover .card-workout__container {
   box-shadow: 2px 7px 10px rgba(20, 69, 254, 0.5);

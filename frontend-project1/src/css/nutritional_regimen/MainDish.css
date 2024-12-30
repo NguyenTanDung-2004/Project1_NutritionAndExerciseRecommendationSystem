@@ -8,7 +8,7 @@
 }
 .main-dish {
   background-color: white;
-  padding: 100px 150px 100px 250px;
+  padding: 100px 250px 100px 250px;
 
   width: 100vw;
 }
@@ -57,4 +57,5 @@
 .main-dish .main {
   display: flex;
   margin-top: 50px;
+  justify-content: space-between;
 }
