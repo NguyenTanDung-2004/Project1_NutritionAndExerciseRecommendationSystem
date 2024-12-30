@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import "../../css/workout/Main.css";
 import Header from "../header/Header";
 import NavigationBar from "../navigationBar/NavigationBar";
 import Footer from "../footer/Footer";
@@ -10,6 +11,69 @@ const App = () => {
   const navigate = useNavigate();
   const [isAddActive, setIsAddActive] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [goals, setGoals] = useState([]);
+
+  // Hàm tính số ngày giữa 2 ngày
+  const dateDiffInDays = (date1, date2) => {
+    const _MS_PER_DAY = 1000 * 60 * 60 * 24;
+    const utc1 = Date.UTC(
+      date1.getFullYear(),
+      date1.getMonth(),
+      date1.getDate()
+    );
+    const utc2 = Date.UTC(
+      date2.getFullYear(),
+      date2.getMonth(),
+      date2.getDate()
+    );
+
+    return Math.floor((utc2 - utc1) / _MS_PER_DAY);
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
+  const transformData = (data) => {
+    if (data && data.listUserTarget) {
+      return data.listUserTarget.map((item) => {
+        const startDate = new Date(item.userTargetId.start);
+        const endDate = new Date(item.end);
+        const today = new Date();
+
+        const isEnded = endDate < today;
+        const totalDays = dateDiffInDays(startDate, endDate) + 1;
+        const daysCompleted = isEnded
+          ? totalDays
+          : Math.max(
+              0,
+              Math.min(totalDays, dateDiffInDays(startDate, today) + 1)
+            );
+        const percentage =
+          totalDays > 0 ? Math.round((daysCompleted / totalDays) * 100) : 0;
+
+        return {
+          id: `${item.userTargetId.userId}-${
+            startDate.toISOString().split("T")[0]
+          }`,
+          target: `${item.flagIncrease === 1 ? "+" : "-"}${item.weight}`,
+          name: item.name,
+          percentage: percentage,
+          daysCompleted: daysCompleted,
+          totalDays: totalDays,
+          startDate: formatDate(startDate),
+          endDate: formatDate(endDate),
+          type: item.flagIncrease === 1 ? "Tăng cân" : "Giảm cân",
+          status: isEnded ? "Đã kết thúc" : "Đang thực hiện",
+        };
+      });
+    }
+    return [];
+  };
 
   const handleOpenModal = () => {
     setIsAddModalOpen(true);
@@ -19,48 +83,47 @@ const App = () => {
     setIsAddModalOpen(false);
   };
 
-  const handleCardClick = (id) => {
-    navigate(`/goals/${id}`);
+  const handleCardClick = (goal) => {
+    navigate(`/goals/${goal.id}`, { state: { goal } });
   };
 
-  const goals = [
-    {
-      id: "1",
-      target: "+2",
-      name: "Giảm cân mục tiêu",
-      percentage: 100,
-      daysCompleted: 7,
-      totalDays: 7,
-      startDate: "01/12/2024",
-      endDate: "07/12/2024",
-      type: "Giảm cân",
-      status: "Đã kết thúc",
-    },
-    {
-      id: "2",
-      target: "+5",
-      name: "Tăng cơ bắp",
-      percentage: 50,
-      daysCompleted: 3,
-      totalDays: 6,
-      startDate: "01/12/2024",
-      endDate: "06/12/2024",
-      type: "Tăng cân",
-      status: "Đã kết thúc",
-    },
-    {
-      id: "3",
-      target: "+3",
-      name: "Giảm mỡ bụng",
-      percentage: 60,
-      daysCompleted: 4,
-      totalDays: 7,
-      startDate: "01/12/2024",
-      endDate: "07/12/2024",
-      type: "Giảm cân",
-      status: "Đã kết thúc",
-    },
-  ];
+  useEffect(() => {
+    const fetchGoals = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:8080/userTarget/getListUserTarget`,
+          {
+            method: "GET",
+            headers: {
+              Accept: "application/json",
+            },
+            credentials: "include",
+          }
+        );
+        if (!response.ok) {
+          const text = await response.text();
+          console.log(text);
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          throw new Error("Response is not in JSON format!");
+        }
+        const data = await response.json();
+        const transformedGoals = transformData(data);
+        setGoals(transformedGoals);
+        // Check if all goals are completed
+        const allGoalsCompleted = transformedGoals.every(
+          (goal) => goal.status === "Đã kết thúc"
+        );
+        setIsAddActive(allGoalsCompleted);
+      } catch (err) {
+        console.error("Error fetching list user target:", err);
+      }
+    };
+
+    fetchGoals();
+  }, []);
 
   const sortedGoals = [...goals].sort((a, b) => {
     if (a.status === "Đang thực hiện" && b.status !== "Đang thực hiện") {
@@ -71,11 +134,6 @@ const App = () => {
     }
     return 0;
   });
-
-  useEffect(() => {
-    const allFinished = goals.every((goal) => goal.status === "Đã kết thúc");
-    setIsAddActive(allFinished);
-  }, [goals]);
 
   return (
     <div className="bg-[#F3F2F7]">
@@ -125,7 +183,7 @@ const App = () => {
               endDate={goal.endDate}
               type={goal.type}
               status={goal.status}
-              onClick={() => handleCardClick(goal.id)}
+              onClick={() => handleCardClick(goal)} // Truyền goal vào
             />
           ))}
         </div>
