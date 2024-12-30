@@ -11,7 +11,7 @@ import {
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
-const HorizontalBarChart = ({ data, labels }) => {
+const HorizontalBarChart = ({ data, labels, unit }) => {
   const chartData = {
     labels: labels, // Nhận labels từ prop
     datasets: [
@@ -63,9 +63,9 @@ const HorizontalBarChart = ({ data, labels }) => {
             if (
               context.dataset.label === "Độ chênh lệch (cần nạp - thực sự nạp)"
             ) {
-              return `${context.dataset.label}: ${data.difference}`;
+              return `${context.dataset.label}: ${data.difference} ${unit}`;
             }
-            return `${context.dataset.label}: ${context.raw}`;
+            return `${context.dataset.label}: ${context.raw} ${unit}`;
           },
         },
       },

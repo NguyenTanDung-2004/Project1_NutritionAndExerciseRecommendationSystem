@@ -1,7 +1,7 @@
 import React from "react";
 import HorizontalBarChart from "../../chart/HorizontalBarChart";
 
-const ChartList = () => {
+const ChartList = ({ reportData }) => {
   const caloLabels = [
     "Calories cần nạp",
     "Calories thực sự nạp",
@@ -16,28 +16,30 @@ const ChartList = () => {
   const fatLabels = ["Fat cần nạp", "Fat thực sự nạp", "Độ chênh lệch"];
 
   const caloData = {
-    required: 350,
-    consumed: 250,
-    burned: 30,
-    difference: 130,
+    required: reportData?.totalCalories || 0,
+    consumed: reportData?.currentCalories || 0,
+    burned: reportData?.currentBurned || 0,
+    difference:
+      (reportData?.totalCalories || 0) - (reportData?.currentCalories || 0),
   };
   const proteinData = {
-    required: 250,
-    consumed: 100,
+    required: reportData?.totalProtein || 0,
+    consumed: reportData?.currentProtein || 0,
     burned: 0,
-    difference: 150,
+    difference:
+      (reportData?.totalProtein || 0) - (reportData?.currentProtein || 0),
   };
   const carbData = {
-    required: 220,
-    consumed: 220,
-    burned: 50,
-    difference: 50,
+    required: reportData?.totalCarb || 0,
+    consumed: reportData?.currentCarb || 0,
+    burned: 0,
+    difference: (reportData?.totalCarb || 0) - (reportData?.currentCarb || 0),
   };
   const fatData = {
-    required: 150,
-    consumed: 170,
-    burned: 10,
-    difference: -20,
+    required: reportData?.totalFat || 0,
+    consumed: reportData?.currentFat || 0,
+    burned: 0,
+    difference: (reportData?.totalFat || 0) - (reportData?.currentFat || 0),
   };
 
   return (
@@ -47,10 +49,14 @@ const ChartList = () => {
       </h1>
 
       <div className="w-full flex flex-wrap gap-10 justify-between items-center sm:px-4 md:px-8 lg:px-10">
-        <HorizontalBarChart data={caloData} labels={caloLabels} />
-        <HorizontalBarChart data={proteinData} labels={proteinLabels} />
-        <HorizontalBarChart data={carbData} labels={carbLabels} />
-        <HorizontalBarChart data={fatData} labels={fatLabels} />
+        <HorizontalBarChart data={caloData} labels={caloLabels} unit={"calo"} />
+        <HorizontalBarChart
+          data={proteinData}
+          labels={proteinLabels}
+          unit={"kg"}
+        />
+        <HorizontalBarChart data={carbData} labels={carbLabels} unit={"kg"} />
+        <HorizontalBarChart data={fatData} labels={fatLabels} unit={"kg"} />
       </div>
     </div>
   );
