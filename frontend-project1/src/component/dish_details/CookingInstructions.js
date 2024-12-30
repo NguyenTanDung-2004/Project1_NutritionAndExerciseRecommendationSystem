@@ -56,7 +56,9 @@ const CookingInstructions = ({ first, second, video, img1, img2 }) => {
               <ul>
                 {second?.length > 0 ? (
                   second.map((ingredient, index) => (
-                    <li key={index}>{ingredient}</li>
+                    <li key={index}>
+                      &#x2022; Bước {index + 1}: {ingredient}
+                    </li>
                   ))
                 ) : (
                   <li>Chưa có</li>

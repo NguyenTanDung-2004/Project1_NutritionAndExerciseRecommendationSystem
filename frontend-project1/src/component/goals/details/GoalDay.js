@@ -1,31 +1,70 @@
 import React from "react";
 import GoalChart from "../../chart/GoalChart";
 
-const GoalDay = ({ key, date, data1 }) => {
-  const data = {
-    requiredProtein: 100,
-    requiredFat: 50,
-    requiredCarb: 200,
-    consumedProtein: 90,
-    consumedFat: 45,
-    consumedCarb: 180,
-    burned: 500,
+const GoalDay = ({ date, index, dailyData }) => {
+  let comment = {
+    calo: 0,
+    kg: "0",
   };
 
-  const comment = {
-    calo: 50,
-    kg: "+0.5",
-  };
+  if (dailyData) {
+    const caloChange =
+      dailyData.totalCalories - (dailyData.currentCalories || 0);
+    const kgChange = caloChange / 7700;
+    comment = {
+      calo: parseFloat(caloChange.toFixed(2)),
+      kg: `${kgChange > 0 ? "+" : ""}${parseFloat(kgChange.toFixed(2))}`,
+    };
+  }
 
-  // Kiểm tra nếu comment có dữ liệu hay không
   const hasComment = comment && (comment.calo || comment.kg);
+
+  const chartData = dailyData
+    ? {
+        requiredProtein: dailyData.totalProtein
+          ? parseFloat(dailyData.totalProtein.toFixed(2))
+          : 0,
+        requiredFat: dailyData.totalFat
+          ? parseFloat(dailyData.totalFat.toFixed(2))
+          : 0,
+        requiredCarb: dailyData.totalCarb
+          ? parseFloat(dailyData.totalCarb.toFixed(2))
+          : 0,
+        consumedProtein: dailyData.currentProtein
+          ? parseFloat(dailyData.currentProtein.toFixed(2))
+          : 0,
+        consumedFat: dailyData.currentFat
+          ? parseFloat(dailyData.currentFat.toFixed(2))
+          : 0,
+        consumedCarb: dailyData.currentCarb
+          ? parseFloat(dailyData.currentCarb.toFixed(2))
+          : 0,
+        burned: dailyData.currentBurned
+          ? parseFloat(dailyData.currentBurned.toFixed(2))
+          : 0,
+        totalCalories: dailyData.totalCalories
+          ? parseFloat(dailyData.totalCalories.toFixed(2))
+          : 0,
+      }
+    : {
+        requiredProtein: 0,
+        requiredFat: 0,
+        requiredCarb: 0,
+        consumedProtein: 0,
+        consumedFat: 0,
+        consumedCarb: 0,
+        burned: 0,
+        totalCalories: 0,
+      };
 
   return (
     <div className="mt-10 w-full bg-white p-6 rounded-2xl shadow-md mb-10">
-      <h1 className="text-base font-bold mb-4 text-[#202224]">{date}</h1>
+      <h1 className="text-base font-bold mb-4 text-[#202224]">
+        Ngày {index} - {date}
+      </h1>
 
       <div className="w-full flex flex-wrap gap-10 justify-between items-center sm:px-4 md:px-8 lg:px-10">
-        <GoalChart data={data} />
+        <GoalChart data={chartData} />
         <div className="flex flex-1 flex-col gap-4 sm:mb-0 md:mb-0 lg:mb-10">
           <div className="text-[#202224] font-bold">• Nhận xét</div>
 

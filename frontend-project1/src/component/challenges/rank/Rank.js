@@ -1,35 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import VerticalBarChart from "../../chart/VerticalBarChart";
 import Table from "./Table";
 
-const Rank = () => {
-  const [rankData, setRankData] = useState(null);
-  const apiUrl = process.env.REACT_APP_API_URL;
-
-  useEffect(() => {
-    const fetchRankData = async () => {
-      try {
-        const response = await fetch(`${apiUrl}/challenge/getDataInRankTab`, {
-          method: "GET",
-          headers: {
-            Accept: "application/json",
-          },
-          credentials: "include",
-        });
-        if (!response.ok) {
-          const text = await response.text();
-          console.log(text);
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        setRankData(data);
-      } catch (err) {
-        console.error("Error fetching rank data:", err);
-      }
-    };
-    fetchRankData();
-  }, [apiUrl]);
-
+const Rank = ({ rankData }) => {
   if (!rankData) {
     return <div className="text-center">Loading ...</div>;
   }
