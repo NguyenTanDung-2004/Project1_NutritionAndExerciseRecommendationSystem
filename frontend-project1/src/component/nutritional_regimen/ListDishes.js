@@ -1,22 +1,22 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import "../../css/nutritional_regimen/ListDishes.css";
 import CardDish from "./CardDish";
-import DishesData from "./ListDishesData";
+import { useNavigate } from "react-router-dom";
 
-const ListDishes = () => {
+const ListDishes = ({ data }) => {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [sortOption, setSortOption] = useState("All");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const itemsPerPage = 10;
+  console.log("Data in ListDishes:", data);
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = DishesData.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = data?.slice(indexOfFirstItem, indexOfLastItem) || [];
 
-  const totalPages = Math.ceil(DishesData.length / itemsPerPage);
+  const totalPages = Math.ceil((data?.length || 0) / itemsPerPage);
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
   const goToPrevPage = () => {
@@ -62,7 +62,7 @@ const ListDishes = () => {
   return (
     <div className="list-dishes">
       <div className="list-info">
-        <span className="count-dish">{DishesData.length} dishes</span>
+        <span className="count-dish">{data?.length || 0} dishes</span>
         <div className="dropdown">
           <button
             className="dropdown-btn"

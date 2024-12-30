@@ -12,15 +12,10 @@ const GeneralInfo = () => {
   };
 
   const healthStatus = {
-    title: "Tình trạng sức khỏe tổng quát",
-    riskMessage:
-      "Nguy cơ tăng cao các bệnh mãn tính: Thừa cân và huyết áp cao là những yếu tố nguy cơ cho nhiều bệnh mãn tính, đặc biệt là bệnh tim mạch.",
-    interventionMessage: "Cần có biện pháp can thiệp sớm:",
-    interventionList: [
-      "Giảm cân: Thực hiện chế độ ăn uống lành mạnh và tăng cường hoạt động thể lực.",
-      "Kiểm soát huyết áp: Theo dõi huyết áp thường xuyên, có thể cần sử dụng thuốc điều trị.",
-      "Sàng lọc các yếu tố nguy cơ khác: Kiểm tra cholesterol, đường huyết định kỳ để phát hiện sớm các vấn đề tiềm ẩn.",
-    ],
+    statusBMI: "Bình thường",
+    statusGluco: "Đường trong máu bình thường.",
+    statusPressure: "Huyết áp cao cấp 3!",
+    statusHeartBeat: "Tim mạch rất tốt!",
   };
 
   return (
@@ -106,17 +101,18 @@ const GeneralInfo = () => {
 
       <div className="bg-white rounded-lg p-4">
         <div className="text-base font-semibold text-black">
-          {healthStatus.title}
+          Tình trạng sức khỏe tổng quát
         </div>
         <div className="px-10 lg:px-8 md:px-6 sm:px-4 text-sm">
-          <p className="text-red-500 mt-2 ">{healthStatus.riskMessage}</p>
+          <p className="mt-2"> &#x2022; Chỉ số BMI: {healthStatus.statusBMI}</p>
           <p className="mt-2">
-            {healthStatus.interventionMessage}
-            <ul className="list-disc pl-6 mt-1">
-              {healthStatus.interventionList.map((item, index) => (
-                <li key={index}>{item}</li>
-              ))}
-            </ul>
+            &#x2022; Chỉ số đường huyết: {healthStatus.statusGluco}
+          </p>
+          <p className="mt-2">
+            &#x2022; Chỉ số huyết áp: {healthStatus.statusPressure}
+          </p>
+          <p className="mt-2">
+            &#x2022; Chỉ số tim mạch: {healthStatus.statusHeartBeat}
           </p>
         </div>
       </div>

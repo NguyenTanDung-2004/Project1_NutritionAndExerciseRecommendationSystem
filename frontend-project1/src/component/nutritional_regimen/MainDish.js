@@ -4,7 +4,7 @@ import CategoryList from "./CategoryList";
 import ListDishes from "./ListDishes";
 import Filter from "./Filter";
 
-const MainDish = () => {
+const MainDish = ({ dishesData }) => {
   const [searchClicked, setSearchClicked] = useState(false);
   const [searchValue, setSearchValue] = useState("");
 
@@ -23,13 +23,14 @@ const MainDish = () => {
   const fetchSearchResults = (query) => {
     // xu ly event search
   };
+  console.log("Dishes data in MainDish:", dishesData);
 
   return (
     <>
       <div className="main-dish">
         <span className="title">DISCOVER</span>
         <div className="header-list">
-          <CategoryList></CategoryList>
+          <CategoryList />
           <div className="search-wrapper">
             <input
               type="text"
@@ -44,7 +45,7 @@ const MainDish = () => {
           </div>
         </div>
         <div className="main">
-          <ListDishes></ListDishes>
+          <ListDishes data={dishesData} />
           <Filter></Filter>
         </div>
       </div>

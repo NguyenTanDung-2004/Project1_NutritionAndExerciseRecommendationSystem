@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import "../../css/workout/ListWorkout.css";
-import data from "./ListWorkoutData";
 import CardWorkout from "./CardWorkout";
 import { useNavigate } from "react-router-dom";
 
@@ -12,9 +11,9 @@ const ListWorkout = ({ data }) => {
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = data?.slice(indexOfFirstItem, indexOfLastItem) || [];
 
-  const totalPages = Math.ceil(data.length / itemsPerPage);
+  const totalPages = Math.ceil((data?.length || 0) / itemsPerPage);
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
   const goToPrevPage = () => {
@@ -42,7 +41,7 @@ const ListWorkout = ({ data }) => {
   return (
     <div className="list-workout">
       <div className="list-workout__info">
-        <span>{data.length} bài tập</span>
+        <span>{data?.length || 0} bài tập</span>
       </div>
 
       <div className="list-workout__main">

@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../../css/workout_details/Right.css";
-import FullHeart from "../../img/dish_details/icon-no-heart.png";
-import NoHeart from "../../img/nutritional_regimen/icon-heart.png";
+import NoHeart from "../../img/dish_details/icon-no-heart.png";
+import FullHeart from "../../img/nutritional_regimen/icon-heart.png";
 import StarVoted from "../../img/nutritional_regimen/star-voted.png";
 import Star from "../../img/nutritional_regimen/star.png";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -11,8 +11,11 @@ import "swiper/css/pagination";
 import Clock from "./Clock";
 import { useNavigate } from "react-router-dom";
 import CardRecommend from "./CardRecommend";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Right = ({
+  exerciseId,
   type,
   name,
   rating,
@@ -24,12 +27,68 @@ const Right = ({
   link,
   recommend,
   challengeData,
+  liked,
 }) => {
-  const [heart, setHeart] = useState(FullHeart);
+  console.log(liked);
+  const [heart, setHeart] = useState(liked === 1 ? FullHeart : NoHeart);
   const navigate = useNavigate();
+  let currentResponse = null;
 
-  const handleClickHeart = () => {
-    heart === FullHeart ? setHeart(NoHeart) : setHeart(FullHeart);
+  const getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(";").shift();
+    return null;
+  };
+
+  const handleClickHeart = async () => {
+    if (liked === 0 && heart === NoHeart) {
+      const url = `http://localhost:8080/exercise/likeExcercise`;
+      const token = getCookie("jwtToken");
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify([exerciseId]),
+          credentials: "include",
+        });
+        if (!response.ok) {
+          const text = await response.text();
+          console.log(text);
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        if (data.code === 1000) {
+          toast.success(data.message, {
+            position: "top-right",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+          });
+        }
+        setHeart(FullHeart);
+      } catch (err) {
+        console.error("Error like exercise:", err);
+        toast.error("Lỗi hệ thống", {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+      }
+    }
   };
 
   const renderRating = (rating) => {
@@ -42,7 +101,7 @@ const Right = ({
     return stars;
   };
   const handleClick = (id) => {
-    navigate(`/workout/${id}`, { state: { challengeData: null } }); // Pass null to clear state
+    navigate(`/workout/${id}`, { state: { challengeData: null } });
   };
   return (
     <>
@@ -68,7 +127,8 @@ const Right = ({
               <img
                 src={heart}
                 alt="Heart Icon"
-                onClick={() => handleClickHeart()}
+                onClick={liked === 0 ? handleClickHeart : null}
+                style={{ cursor: liked === 0 ? "pointer" : "default" }}
               />
             </div>
           </>
@@ -136,7 +196,7 @@ const Right = ({
           </div>
 
           <div className="workout-details__right-clock">
-            <Clock time={time} />
+            <Clock time={time} exerciseId={exerciseId} />
           </div>
 
           <div className="workout-details__right-recommend">
@@ -168,6 +228,7 @@ const Right = ({
           </div>
         </div>
       </div>
+      <ToastContainer />
     </>
   );
 };
