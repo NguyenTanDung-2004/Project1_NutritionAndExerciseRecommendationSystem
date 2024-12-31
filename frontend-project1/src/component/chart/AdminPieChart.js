@@ -17,8 +17,8 @@ const AdminPieChart = ({ bad, normal, satisfied, labels }) => {
     datasets: [
       {
         data: [bad, normal, satisfied],
-        backgroundColor: ["#FF8E8B", "#36C5E2", "#9188FC"],
-        borderColor: ["#FF8E8B", "#36C5E2", "#9188FC"],
+        backgroundColor: ["#baaead", "#36C5E2", "#9188FC"],
+        borderColor: ["#baaead", "#36C5E2", "#9188FC"],
         borderWidth: 1,
       },
     ],
