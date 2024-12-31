@@ -30,7 +30,7 @@ const Profile = () => {
         <NavigationBar itemClicked="Profile" />
       </div>
 
-      <div className="mx-6 md:mx-[200px] mt-20 flex flex-col lg:flex-row  gap-12 ">
+      <div className="mx-6 md:mx-[200px] mt-12 flex flex-col lg:flex-row  gap-12 ">
         <div className="flex-1 basis-full lg:basis-1/3">
           <AccountInfo />
         </div>

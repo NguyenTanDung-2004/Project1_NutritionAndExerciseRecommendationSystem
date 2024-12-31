@@ -1,51 +1,134 @@
 import React, { useState } from "react";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Card = ({
   id,
+  exerciseId,
   image,
   nameChallenges,
   nameWorkout,
-  type,
-  level,
   soLanTap,
   soNguoiTap,
   point,
   time,
   calories,
+  onCardUpdate, // Add onCardUpdate callback
 }) => {
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
   const [isEditModalOpen, setEditModalOpen] = useState(false);
   const [newPoint, setNewPoint] = useState(point);
+  const apiUrl = process.env.REACT_APP_API_URL;
 
-  const handleDelete = () => {
-    alert(`Xóa thử thách có id: ${id}`);
-    setDeleteModalOpen(false);
+  const handleDelete = async () => {
+    try {
+      const response = await fetch(
+        `${apiUrl}/challenge/deleteChallenge?exerciseId=${exerciseId}`,
+        {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+          },
+          credentials: "include",
+        }
+      );
+      if (!response.ok) {
+        const text = await response.text();
+        console.log(text);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const responseData = await response.json();
+
+      if (responseData.code === 1000) {
+        toast.success("Xóa thử thách thành công!", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+        setDeleteModalOpen(false);
+        onCardUpdate();
+      } else {
+        toast.error(`Xóa thử thách thất bại! ${responseData.message}`, {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+      }
+    } catch (err) {
+      toast.error("Xóa thử thách thất bại!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      console.error("Error deleting challenge:", err);
+    }
   };
 
-  const handleSave = () => {
-    alert(`Lưu điểm mới của thử thách id = ${id} là ${newPoint}`);
-    setEditModalOpen(false);
+  const handleSave = async () => {
+    try {
+      const response = await fetch(`${apiUrl}/challenge/editChallenge`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          exerciseId: exerciseId,
+          point: newPoint,
+        }),
+      });
+      if (!response.ok) {
+        const text = await response.text();
+        console.log(text);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const responseData = await response.json();
+
+      if (responseData.code === 1000) {
+        toast.success("Lưu điểm thành công!", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+        setEditModalOpen(false);
+        onCardUpdate();
+      } else {
+        toast.error(`Lưu điểm thất bại! ${responseData.message}`, {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+      }
+    } catch (error) {
+      toast.error("Lưu điểm thất bại!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      console.error("Error editing challenge:", error);
+    }
   };
-
-  const typeColor =
-    type === "Khởi động"
-      ? "bg-[#1A78F2] text-[#1A78F2]"
-      : type === "Chân"
-      ? "bg-[#02bdd6] text-[#02bdd6]"
-      : type === "Tay"
-      ? "bg-[#5afc44] text-[#5afc44]"
-      : type === "Mông"
-      ? "bg-[#9002d6] text-[#9002d6]"
-      : "bg-[#b4afba] text-[#b4afba]";
-
-  const levelColor =
-    level === "Dễ"
-      ? "bg-[#00B69B] text-[#00B69B]"
-      : level === "Trung bình"
-      ? "bg-[#fc7244] text-[#fc7244]"
-      : level === "Khó"
-      ? "bg-[#cf1732] text-[#cf1732]"
-      : "bg-[#b4afba] text-[#b4afba]";
 
   const pointOptions = Array.from({ length: 10 }, (_, i) => (i + 1) * 10);
   return (
@@ -78,23 +161,6 @@ const Card = ({
       </div>
 
       <div className=" flex flex-col gap-4 sm:gap-10 w-full sm:w-auto items-end">
-        <div className="flex flex-wrap gap-2">
-          <div
-            className={`min-w-[95px] text-center flex relative gap-4 justify-between items-start px-4 py-1.5 min-h-[27px] ${typeColor} bg-opacity-20 rounded-md`}
-          >
-            <div className="z-0 flex-1 shrink my-auto basis-0 font-semibold text-[13px]">
-              {type}
-            </div>
-          </div>
-          <div
-            className={`min-w-[95px] text-center flex relative gap-4 justify-between items-start px-4 py-1.5 min-h-[27px] ${levelColor} bg-opacity-20 rounded-md`}
-          >
-            <div className="z-0 flex-1 shrink my-auto basis-0 font-semibold text-[13px]">
-              {level}
-            </div>
-          </div>
-        </div>
-
         <div className="flex gap-3">
           <i
             className="fa-solid fa-trash text-red-500 cursor-pointer"

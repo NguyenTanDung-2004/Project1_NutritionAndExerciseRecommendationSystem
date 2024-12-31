@@ -145,7 +145,7 @@ const App = () => {
           {activeView === "list" && (
             <div className="flex items-center gap-4">
               <SortList onSortChange={handleSortChange} />
-              <FilterList onFilterChange={handleFilterChange} />
+              {/* <FilterList onFilterChange={handleFilterChange} /> */}
             </div>
           )}
         </div>
