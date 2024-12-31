@@ -71,7 +71,7 @@ const Table = () => {
   };
 
   const handleAddClick = () => {
-    navigate(`/dashboard/dish/add`);
+    navigate(`/dashboard/addFood`);
   };
 
   const handleSearch = (term) => {

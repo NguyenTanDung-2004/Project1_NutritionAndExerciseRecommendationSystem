@@ -1,21 +1,39 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import DefaultAvatar from "../../img/profile/default-avatar.png";
 import ChangePasswordModal from "./ChangePasswordModal";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-const AccountInfo = () => {
+const AccountInfo = ({ userData }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [formAccount, setFormAccount] = useState({
-    lastName: "Phan",
-    firstName: "Nguyễn Trà Giang",
-    email: "abc@gmail.com",
-    gender: "Nữ",
-    dob: "2004-03-29",
+    lastName: "",
+    firstName: "",
+    email: "",
+    gender: "",
+    dob: "",
     avatar: "",
   });
+  const apiUrl = process.env.REACT_APP_API_URL;
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const avatarInputRef = useRef(null); // Tạo ref cho input file
+
+  useEffect(() => {
+    if (userData) {
+      setFormAccount({
+        lastName: userData.lastName || "",
+        firstName: userData.firstName || "",
+        email: userData.email || "",
+        gender: userData.gender || "",
+        dob: userData.dob ? userData.dob.split("T")[0] : "",
+        avatar: `${apiUrl}/UserImages/${userData.id}.png` || "",
+      });
+    }
+  }, [userData, apiUrl]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -26,20 +44,129 @@ const AccountInfo = () => {
     setIsEditing(!isEditing);
   };
 
-  const handleSaveChange = () => {
-    console.log("Data account: ", formAccount);
-    setIsEditing(false);
+  const handleSaveChange = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`${apiUrl}/user/updateUserInfo`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          firstName: formAccount.firstName,
+          lastName: formAccount.lastName,
+          gender: formAccount.gender,
+          dob: formAccount.dob,
+          height: userData.height,
+          weight: userData.weight,
+          flagBloodPressure: userData.flagBloodPressure,
+          flagHeartBeat: userData.flagHeartBeat,
+          flagGluco: userData.flagGluco,
+          heSoHoatDong: userData.heSoHoatDong,
+        }),
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        console.log(text);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const responseData = await response.json();
+      if (responseData.code === 1000) {
+        toast.success("Cập nhật thông tin thành công!", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+      } else {
+        toast.error(`Cập nhật thông tin thất bại! ${responseData.message}`, {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+      }
+      setIsEditing(false);
+    } catch (error) {
+      toast.error("Cập nhật thông tin thất bại!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      console.error("Error updating user info:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleAvatarChange = (e) => {
+  const handleAvatarClick = () => {
+    if (isEditing) {
+      avatarInputRef.current.click();
+    }
+  };
+
+  const handleAvatarChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setFormAccount({ ...formAccount, avatar: reader.result });
-      };
-
-      reader.readAsDataURL(file);
+      setLoading(true);
+      setFormAccount({ ...formAccount, avatar: URL.createObjectURL(file) });
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+        const response = await fetch(`${apiUrl}/user/uploadUserImage`, {
+          method: "POST",
+          body: formData,
+          credentials: "include",
+        });
+        if (!response.ok) {
+          const text = await response.text();
+          console.log(text);
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const responseData = await response.json();
+        if (responseData.code === 1000) {
+          toast.success("Cập nhật avatar thành công!", {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          });
+        } else {
+          toast.error(`Cập nhật avatar thất bại! ${responseData.message}`, {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          });
+        }
+      } catch (error) {
+        console.error("Error uploading avatar:", error);
+        toast.error("Cập nhật avatar thất bại!", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -73,20 +200,19 @@ const AccountInfo = () => {
       }}
     >
       <div className="flex flex-col items-center">
-        <label className="cursor-pointer">
+        <label className="cursor-pointer" onClick={handleAvatarClick}>
           <img
             src={formAccount.avatar || DefaultAvatar}
             alt="Avatar"
             className="w-[200px] h-[200px] rounded-full object-cover mb-4"
           />
-          {isEditing && (
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleAvatarChange}
-              className="hidden"
-            />
-          )}
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleAvatarChange}
+            className="hidden"
+            ref={avatarInputRef} // Gán ref vào input
+          />
         </label>
         <h2 className="text-lg font-semibold">
           {formAccount.lastName + " " + formAccount.firstName}
@@ -95,9 +221,10 @@ const AccountInfo = () => {
         {isEditing ? (
           <button
             onClick={handleSaveChange}
+            disabled={loading}
             className="mt-2 w-full py-2 bg-[#1445FE] hover:bg-opacity-80 text-white rounded-lg flex items-center gap-2 text-sm justify-center"
           >
-            <span>Lưu</span>
+            {loading ? "Đang lưu..." : "Lưu"}
           </button>
         ) : (
           <button
@@ -226,7 +353,9 @@ const AccountInfo = () => {
         onCurrentPasswordChange={handleCurrentPasswordChange}
         onNewPasswordChange={handleNewPasswordChange}
         onConfirmPasswordChange={handleConfirmPasswordChange}
+        email={userData.email}
       />
+      <ToastContainer />
     </div>
   );
 };

@@ -35,8 +35,14 @@ const Sidebar = ({ className }) => {
       iconClass: "fa-solid fa-person-running",
       label: "Bài tập",
       href: "/dashboard/workout",
+      activePaths: ["/dashboard/workout", "/dashboard/addWorkout"],
     },
-    { iconClass: "fa fa-utensils", label: "Món ăn", href: "/dashboard/dish" },
+    {
+      iconClass: "fa fa-utensils",
+      label: "Món ăn",
+      href: "/dashboard/dish",
+      activePaths: ["/dashboard/dish", "/dashboard/addFood"],
+    },
     {
       iconClass: "fa-solid fa-list",
       label: "Thử thách",
@@ -65,7 +71,13 @@ const Sidebar = ({ className }) => {
             iconClass={item.iconClass}
             label={item.label}
             href={item.href}
-            isActive={location.pathname.startsWith(item.href)}
+            isActive={
+              item.activePaths
+                ? item.activePaths.some((path) =>
+                    location.pathname.startsWith(path)
+                  )
+                : location.pathname.startsWith(item.href)
+            }
             onClick={() => handleNavigation(item.href)}
           />
         ))}

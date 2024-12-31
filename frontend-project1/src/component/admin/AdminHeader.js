@@ -1,11 +1,41 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import LogoImg from "../../img/home_out/logo.png";
 import AvatarDefault from "../../img/profile/default-avatar.png";
 
 const Header = ({ className }) => {
   const navigate = useNavigate();
+  const [avatar, setAvatar] = useState(AvatarDefault);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const apiUrl = process.env.REACT_APP_API_URL;
 
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await fetch(`${apiUrl}/user/userInfo`, {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+          },
+          credentials: "include",
+        });
+        if (!response.ok) {
+          const text = await response.text();
+          console.log(text);
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log("API User Info response:", data);
+        setFirstName(data.firstName || "");
+        setLastName(data.lastName || "");
+        setAvatar(`${apiUrl}/UserImages/${data.id}.png`);
+      } catch (err) {
+        console.error("Error fetching user info:", err);
+      }
+    };
+    fetchUserData();
+  }, [apiUrl]);
   const handleAvatarClick = () => {
     navigate("/dashboard/profile");
   };
@@ -30,13 +60,13 @@ const Header = ({ className }) => {
         >
           {/* Placeholder cho avatar */}
           <img
-            src={AvatarDefault}
+            src={avatar}
             alt="Admin Avatar"
-            className="w-10 h-10 rounded-full "
+            className="w-10 h-10 rounded-full object-cover "
           />
           <div className="flex flex-col">
             <span className="text-[#404040] text-sm font-semibold">
-              Phan Giang
+              {`${lastName} ${firstName}`}
             </span>
             <span className="text-[#565656] text-xs font-medium">Admin</span>
           </div>

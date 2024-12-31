@@ -1,4 +1,3 @@
-// src/components/modals/AddIngredientModal.js
 import React from "react";
 
 const AddIngredientModal = ({

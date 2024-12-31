@@ -3,16 +3,13 @@ import Layout from "../Layout";
 import Table from "../../table/Table";
 import AddIngredientModal from "./AddIngredientModal";
 import AddImageModal from "./AddImageModal";
-import DeleteConfirmationModal from "./DeleteConfirmationModal";
-import DeleteFoodConfirmationModal from "./DeleteFoodConfirmationModal";
 import EditIngredientModal from "./EditIngredientModal";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const App = () => {
+const AppFood = () => {
   const navigate = useNavigate();
-  const { id } = useParams();
 
   const handleClickBack = () => {
     navigate(-1);
@@ -37,8 +34,6 @@ const App = () => {
   });
 
   const [ingredients, setIngredients] = useState([]);
-  const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [ingredientToDelete, setIngredientToDelete] = useState(null);
   const [isAddIngredientModalOpen, setAddIngredientModalOpen] = useState(false);
   const [newIngredient, setNewIngredient] = useState({
     name: "",
@@ -53,8 +48,11 @@ const App = () => {
   const [newDishImages, setNewDishImages] = useState([]);
   const [steps, setSteps] = useState([]);
   const [isStepsEditable, setIsStepsEditable] = useState(false);
-  const [isDeleteFoodModalOpen, setDeleteFoodModalOpen] = useState(false);
-
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState(null);
+  const [newFoodId, setNewFoodId] = useState(null);
+  const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState(true);
+  const [loading, setLoading] = useState(false);
   // Các mảng options
   const types = [
     "Món chính",
@@ -90,66 +88,6 @@ const App = () => {
   const booleanOptions = ["Không", "Có"];
   const apiUrl = process.env.REACT_APP_API_URL;
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch(
-          `${apiUrl}/food/getFoodDetail?foodId=${id}`,
-          {
-            method: "GET",
-            headers: {
-              Accept: "application/json",
-            },
-            credentials: "include",
-          }
-        );
-        const data = await response.json();
-        console.log("API Response:", data);
-
-        setFormData({
-          name: data.name || "",
-          level: data.level ? levels[data.level - 1] : "Trung bình",
-          method: data.method ? methods[data.method - 1] : "Nước uống",
-          diet: data.diet ? diets[data.diet - 1] : "Ăn chay (trứng, sữa)",
-          time: String(data.time || "0"),
-          carb: String(data.carb || "0"),
-          protein: String(data.protein || "0"),
-          fat: String(data.fat || "0"),
-          flagBloodPressure: data.flagBloodPressure === 1 ? "Có" : "Không",
-          flagBloodGlucose: data.flagBloodGlucose === 1 ? "Có" : "Không",
-          flagHeart: data.flagHeart === 1 ? "Có" : "Không",
-          linkVideo: data.linkVideo || "",
-          description: data.description || "",
-          hinhAnh: data.listLinkImage
-            ? data.listLinkImage[data.listLinkImage.length - 1]
-            : null,
-          type: data.type || 5,
-        });
-
-        const mappedIngredients = (data.listIngredient || []).map(
-          (name, index) => ({
-            id: index + 1,
-            name: name,
-            weight: (data.listWeightIngredient || [])[index] || 0,
-            energy: (data.listCaloriesIngredient || [])[index] || 0,
-          })
-        );
-        setIngredients(mappedIngredients);
-        setSteps(data.listStep || []);
-
-        setDishImages(
-          data.listLinkImage
-            ? data.listLinkImage.slice(0, data.listLinkImage.length - 1)
-            : []
-        );
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-
-    fetchData();
-  }, [id]);
-
   const handleAddIngredient = () => {
     setIngredients([
       ...ingredients,
@@ -164,8 +102,9 @@ const App = () => {
   };
 
   const handleDeleteConfirmation = (ingredientId) => {
-    setIngredientToDelete(ingredientId);
-    setDeleteModalOpen(true);
+    setIngredients(
+      ingredients.filter((ingredient) => ingredient.id !== ingredientId)
+    );
   };
 
   const handleEditIngredient = (ingredient) => {
@@ -178,13 +117,6 @@ const App = () => {
     setEditModalOpen(true);
   };
 
-  const handleDelete = () => {
-    setIngredients(
-      ingredients.filter((ingredient) => ingredient.id !== ingredientToDelete)
-    );
-    setDeleteModalOpen(false);
-    setIngredientToDelete(null);
-  };
   const handleSaveEditIngredient = () => {
     setIngredients(
       ingredients.map((ingredient) =>
@@ -226,13 +158,22 @@ const App = () => {
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setFormData({ ...formData, hinhAnh: URL.createObjectURL(file) });
+      setAvatarFile(file);
+      setAvatarPreview(URL.createObjectURL(file));
     }
+  };
+  const handleClearWorkoutImages = () => {
+    setNewDishImages([]);
   };
 
   const handleSubmit = async () => {
+    if (isSaveButtonDisabled) {
+      return;
+    }
+    setLoading(true);
     try {
-      const url = `${apiUrl}/food/updateFood?foodId=${id}`;
+      // 1. Call createFood API
+      const url = `${apiUrl}/food/createFood`;
       // Calculate total calories
       const totalCalories = ingredients.reduce(
         (sum, item) => sum + Number(item.energy),
@@ -262,7 +203,7 @@ const App = () => {
       });
 
       console.log("API URL:", url);
-      console.log("Request Body update info text:", requestBody);
+      console.log("Request Body create info text:", requestBody);
 
       const response = await fetch(url, {
         method: "POST",
@@ -279,28 +220,101 @@ const App = () => {
         console.log(text);
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      const responseData = await response.json();
-      if (responseData.code === 1000) {
-        toast.success("Cập nhật thông tin thành công!", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
-      } else {
-        toast.error(`Cập nhật thông tin thất bại! ${responseData.message}`, {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
+      const responseData = await response.text();
+      setNewFoodId(responseData);
+      console.log("Create food API Response:", responseData);
+      toast.success("Tạo món ăn thành công!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      // 2. Call createImageForFood API
+      if (newDishImages.length > 0 || avatarFile) {
+        try {
+          const formDataImg = new FormData();
+          formDataImg.append("foodId", responseData);
+
+          if (avatarFile) {
+            formDataImg.append("removedImage", avatarFile);
+          }
+
+          if (newDishImages.length > 0) {
+            const filePromises = newDishImages.map(async (image) => {
+              const res = await fetch(image);
+              const blob = await res.blob();
+              const file = new File([blob], "image.png", {
+                type: "image/png",
+              });
+              return file;
+            });
+            const files = await Promise.all(filePromises);
+
+            files.forEach((file) => {
+              formDataImg.append("listNormalImages", file);
+            });
+          }
+
+          for (const pair of formDataImg.entries()) {
+            console.log(pair[0], pair[1]);
+          }
+          const responseImage = await fetch(
+            `${apiUrl}/food/createImageForFood`,
+            {
+              method: "POST",
+              credentials: "include",
+              body: formDataImg,
+            }
+          );
+          if (!responseImage.ok) {
+            const text = await responseImage.text();
+            console.log(text);
+            throw new Error(`HTTP error! status: ${responseImage.status}`);
+          }
+          const responseImageData = await responseImage.json();
+          if (responseImageData.code === 1000) {
+            toast.success("Tạo hình ảnh cho món ăn mới thành công!", {
+              position: "top-right",
+              autoClose: 3000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+            });
+          } else {
+            toast.error(
+              `Tạo hình ảnh cho món ăn mới thất bại! ${responseImageData.message}`,
+              {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+              }
+            );
+          }
+          setDishImages(newDishImages);
+          setNewDishImages([]);
+          setAvatarFile(null);
+          setAvatarPreview(null);
+        } catch (error) {
+          console.error("Error updating food images:", error);
+          toast.error("Có lỗi xảy ra khi tạo hình ảnh món ăn.", {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          });
+        }
       }
+      navigate(-1);
     } catch (error) {
-      toast.error("Cập nhật thông tin thất bại!", {
+      toast.error("Tạo món ăn thất bại!", {
         position: "top-right",
         autoClose: 3000,
         hideProgressBar: false,
@@ -309,17 +323,20 @@ const App = () => {
         draggable: true,
       });
       console.error("Error updating food info:", error);
+    } finally {
+      setLoading(false);
     }
   };
+  //   const handleSaveDishImages = () => {
+  //     setAddImageModalOpen(false);
+  //   };
 
   const handleDeleteImages = () => {
     setDishImages([]);
     setNewDishImages([]);
   };
-
   const handleAddDishImages = (e) => {
     const files = Array.from(e.target.files);
-
     if (files.length > 3) {
       toast.warn("Bạn chỉ có thể chọn tối đa 3 ảnh", {
         position: toast.POSITION.TOP_RIGHT,
@@ -329,94 +346,10 @@ const App = () => {
     const newImages = files.map((file) => URL.createObjectURL(file));
     setNewDishImages(newImages);
   };
-
-  const handleSaveDishImages = async () => {
-    setDishImages([...newDishImages]);
-    setAddImageModalOpen(false);
-    setNewDishImages([]);
-
-    try {
-      const formDataImg = new FormData();
-
-      if (formData.hinhAnh) {
-        if (typeof formData.hinhAnh === "string") {
-          const response = await fetch(formData.hinhAnh);
-          const blob = await response.blob();
-          const file = new File([blob], "image.jpg", { type: blob.type });
-          formDataImg.append("removedImage", file);
-        } else {
-          formDataImg.append(
-            "removedImage",
-            new File([formData.hinhAnh], "image.jpg")
-          );
-        }
-        formDataImg.append("flagRemove", "1");
-      } else {
-        formDataImg.append("flagRemove", "0");
-      }
-
-      if (newDishImages.length > 0) {
-        formDataImg.append("flagList", "1");
-        for (let i = 0; i < newDishImages.length; i++) {
-          const response = await fetch(newDishImages[i]);
-          const blob = await response.blob();
-          const file = new File([blob], `image${i}.jpg`, { type: blob.type });
-          formDataImg.append("listNormalImages", file);
-        }
-      } else {
-        formDataImg.append("flagList", "0");
-      }
-
-      const response = await fetch(
-        `${apiUrl}/food/updateFoodImage?foodId=${id}`,
-        {
-          method: "POST",
-          credentials: "include",
-          body: formDataImg,
-        }
-      );
-      if (!response.ok) {
-        const text = await response.text();
-        console.log(text);
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const responseData = await response.json();
-      if (responseData.code === 1000) {
-        setFormData({ ...formData, hinhAnh: newDishImages[0] });
-        toast.success("Cập nhật hình ảnh món ăn thành công!", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
-        window.location.reload();
-      } else {
-        toast.error(
-          `Cập nhật hình ảnh món ăn thất bại! ${responseData.message}`,
-          {
-            position: "top-right",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-          }
-        );
-      }
-    } catch (error) {
-      console.error("Error updating food images:", error);
-      toast.error("Có lỗi xảy ra khi cập nhật hình ảnh món ăn.", {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
-    }
+  const handleRemoveWorkoutImage = (image) => {
+    setNewDishImages((prevImages) => prevImages.filter((img) => img !== image));
   };
+
   const handleAddIngredientModal = () => {
     setAddIngredientModalOpen(true);
     setNewIngredient({
@@ -458,63 +391,6 @@ const App = () => {
     setIsStepsEditable(false);
   };
 
-  const handleDeleteFood = () => {
-    setDeleteFoodModalOpen(true);
-  };
-  const handleCancelDeleteFood = () => {
-    setDeleteFoodModalOpen(false);
-  };
-  const confirmDeleteFood = async () => {
-    setDeleteFoodModalOpen(false);
-    try {
-      // setLoading(true); // If you have a loading state, set it here
-      const response = await fetch(`${apiUrl}/food/deleteFood?foodId=${id}`, {
-        method: "POST",
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        const text = await response.text();
-        console.log(text);
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const responseData = await response.json();
-      if (responseData.code === 1000) {
-        toast.success("Xóa món ăn thành công!", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
-        navigate(-1);
-      } else {
-        toast.error(`Xóa món ăn thất bại! ${responseData.message}`, {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
-      }
-    } catch (error) {
-      console.error("Error deleting food:", error);
-      toast.error("Xóa món ăn thất bại!", {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
-    } finally {
-      // setLoading(false);
-    }
-  };
-
   const columns = [
     {
       header: "Tên nguyên liệu",
@@ -554,6 +430,12 @@ const App = () => {
       </td>
     </tr>
   );
+  useEffect(() => {
+    const isFormValid =
+      formData.name && formData.description && formData.linkVideo;
+
+    setIsSaveButtonDisabled(!isFormValid);
+  }, [formData]);
 
   return (
     <Layout>
@@ -802,19 +684,21 @@ const App = () => {
             <h3 className="text-lg font-semibold text-gray-800 mb-2">
               DANH SÁCH HÌNH ẢNH CỦA MÓN ĂN
             </h3>
-            <div className=" flex flex-wrap gap-4 p-4 bg-[#F4F7F9] rounded-lg ">
-              {dishImages.map((image, index) => (
+            <div className=" flex flex-wrap gap-4 p-4 bg-[#F4F7F9] rounded-lg  justify-between">
+              {newDishImages.map((image, index) => (
                 <div className="w-[200px]" key={index}>
                   <img
                     src={image}
-                    alt={`Dish ${index + 1}`}
+                    alt={`exercise ${index + 1}`}
                     className="rounded-lg object-cover w-full h-[150px]"
+                    onClick={() => handleRemoveWorkoutImage(image)}
+                    style={{ cursor: "pointer" }}
                   />
                 </div>
               ))}
             </div>
             <div className="text-center mt-4">
-              {dishImages.length === 0 ? (
+              {newDishImages.length === 0 ? (
                 <button
                   onClick={handleAddImageModal}
                   className="text-blue-500 hover:text-blue-700 font-semibold"
@@ -824,11 +708,11 @@ const App = () => {
                 </button>
               ) : (
                 <button
-                  onClick={handleDeleteImages}
+                  onClick={handleClearWorkoutImages}
                   className="text-red-500 hover:text-red-700 font-semibold"
                 >
                   <i className="fa-solid fa-trash mr-1"></i>
-                  Xóa ảnh
+                  Xóa tất cả ảnh
                 </button>
               )}
             </div>
@@ -892,14 +776,6 @@ const App = () => {
               )}
             </div>
           </div>
-          <div className="flex justify-center">
-            <button
-              onClick={handleSubmit}
-              className="bg-[#1445FE] hover:bg-opacity-80 text-white rounded-md px-6 py-2"
-            >
-              LƯU
-            </button>
-          </div>
         </div>
 
         {/* Right Side - Image & Description */}
@@ -909,9 +785,9 @@ const App = () => {
               Hình ảnh được xóa nền
             </h3>
             <div className="w-32 h-32 rounded-full bg-gray-200 mx-auto mb-2 flex items-center justify-center">
-              {formData.hinhAnh ? (
+              {avatarPreview ? (
                 <img
-                  src={formData.hinhAnh}
+                  src={avatarPreview}
                   alt="Uploaded"
                   className="w-full h-full rounded-full object-cover"
                 />
@@ -919,7 +795,6 @@ const App = () => {
                 <i className="fa-solid fa-bowl-food text-4xl text-gray-500"></i>
               )}
             </div>
-
             <label
               htmlFor="imageUpload"
               className="block text-center text-blue-500 cursor-pointer"
@@ -959,23 +834,24 @@ const App = () => {
                 {formData.description}
               </div>
             )}
-          </div>
-          <div className="flex justify-center">
-            <button
-              onClick={handleSaveDishImages}
-              className="bg-[#1445FE] hover:bg-opacity-60  text-white rounded-md px-4 py-2 min-w-[150px]"
-            >
-              LƯU ẢNH
-            </button>
-          </div>
 
-          <div className="flex justify-center mt-4">
-            <button
-              onClick={handleDeleteFood}
-              className="bg-red-500 hover:bg-red-700 text-white rounded-md px-4 py-2 min-w-[150px]"
-            >
-              XÓA MÓN ĂN
-            </button>
+            <div className="flex justify-center mt-10">
+              <button
+                onClick={handleSubmit}
+                disabled={isSaveButtonDisabled || loading}
+                className={`bg-[#1445FE] hover:bg-opacity-80 text-white rounded-md px-6 py-2 ${
+                  isSaveButtonDisabled || loading
+                    ? "opacity-50 cursor-not-allowed"
+                    : ""
+                }`}
+              >
+                {loading ? (
+                  <i className="fas fa-spinner animate-spin"></i>
+                ) : (
+                  "TẠO MÓN ĂN"
+                )}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -996,12 +872,7 @@ const App = () => {
         onClose={() => setAddImageModalOpen(false)}
         newDishImages={newDishImages}
         handleAddDishImages={handleAddDishImages}
-        handleSaveDishImages={handleSaveDishImages}
-      />
-      <DeleteConfirmationModal
-        isOpen={isDeleteModalOpen}
-        onClose={() => setDeleteModalOpen(false)}
-        onDelete={handleDelete}
+        handleSaveDishImages={() => setAddImageModalOpen(false)}
       />
       <EditIngredientModal
         isOpen={isEditModalOpen}
@@ -1010,14 +881,8 @@ const App = () => {
         setNewIngredient={setNewIngredient}
         onSaveEditIngredient={handleSaveEditIngredient}
       />
-
-      <DeleteFoodConfirmationModal
-        isOpen={isDeleteFoodModalOpen}
-        onClose={handleCancelDeleteFood}
-        onDelete={confirmDeleteFood}
-      />
     </Layout>
   );
 };
 
-export default App;
+export default AppFood;

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../css/home_in/Header.css";
 import LogoImg from "../../img/home_out/logo.png";
@@ -6,6 +6,35 @@ import AvatarDefault from "../../img/profile/default-avatar.png";
 
 const Header = (props) => {
   const navigate = useNavigate();
+  const [userName, setUserName] = useState("");
+  const [avatar, setAvatar] = useState(AvatarDefault);
+  const apiUrl = process.env.REACT_APP_API_URL;
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await fetch(`${apiUrl}/user/userInfo`, {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+          },
+          credentials: "include",
+        });
+        if (!response.ok) {
+          const text = await response.text();
+          console.log(text);
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log("API User Info response:", data);
+        setUserName(data.firstName || "");
+        setAvatar(`${apiUrl}/UserImages/${data.id}.png`);
+      } catch (err) {
+        console.error("Error fetching user info:", err);
+      }
+    };
+    fetchUserData();
+  }, [apiUrl]);
 
   const handleAvatarClick = () => {
     navigate("/profile");
@@ -18,7 +47,7 @@ const Header = (props) => {
       </div>
       <div className="sliding-text-container">
         <div className="sliding-text">
-          Welcome, {props.username}. {props.text}
+          Welcome, {userName}. {props.text}
         </div>
       </div>
       <div className="header-in-right">
@@ -32,11 +61,7 @@ const Header = (props) => {
           className="circle-container avatar cursor-pointer"
           onClick={handleAvatarClick}
         >
-          <img
-            className="avatar"
-            src={props.avatar || AvatarDefault}
-            alt="Avatar"
-          />
+          <img className="avatar" src={avatar || AvatarDefault} alt="Avatar" />
         </div>
       </div>
     </div>

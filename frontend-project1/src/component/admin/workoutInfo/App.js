@@ -4,6 +4,7 @@ import AddImageModal from "./AddImageModal";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import DeleteConfirmationModal from "./DeleteConfirmationModal"; // Import the modal component
 
 const App = () => {
   const navigate = useNavigate();
@@ -37,6 +38,7 @@ const App = () => {
   const apiUrl = process.env.REACT_APP_API_URL;
   const [avatarFile, setAvatarFile] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
 
   useEffect(() => {
     if (id === "add") {
@@ -348,52 +350,32 @@ const App = () => {
     }
   };
 
-  const handleDeleteExercise = async () => {
-    const confirmDelete = window.confirm(
-      "Bạn có chắc chắn muốn xóa bài tập này không?"
-    );
-    if (confirmDelete) {
-      try {
-        setLoading(true);
-        const response = await fetch(
-          `${apiUrl}/exercise/deleteExercise?exerciseId=${id}`,
-          {
-            method: "POST",
-            credentials: "include",
-          }
-        );
+  const handleDeleteExercise = () => {
+    setDeleteModalOpen(true);
+  };
 
-        if (!response.ok) {
-          const text = await response.text();
-          console.log(text);
-          throw new Error(`HTTP error! status: ${response.status}`);
+  const confirmDeleteExercise = async () => {
+    setDeleteModalOpen(false);
+    try {
+      setLoading(true);
+      const response = await fetch(
+        `${apiUrl}/exercise/deleteExercise?exerciseId=${id}`,
+        {
+          method: "POST",
+          credentials: "include",
         }
+      );
 
-        const responseData = await response.json();
+      if (!response.ok) {
+        const text = await response.text();
+        console.log(text);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-        if (responseData.code === 1000) {
-          toast.success("Xóa bài tập thành công!", {
-            position: "top-right",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-          });
-          navigate(-1); // Go back after successful delete
-        } else {
-          toast.error(`Xóa bài tập thất bại! ${responseData.message}`, {
-            position: "top-right",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-          });
-        }
-      } catch (error) {
-        console.error("Error deleting exercise:", error);
-        toast.error("Xóa bài tập thất bại!", {
+      const responseData = await response.json();
+
+      if (responseData.code === 1000) {
+        toast.success("Xóa bài tập thành công!", {
           position: "top-right",
           autoClose: 3000,
           hideProgressBar: false,
@@ -401,12 +383,34 @@ const App = () => {
           pauseOnHover: true,
           draggable: true,
         });
-      } finally {
-        setLoading(false);
+        navigate(-1); // Go back after successful delete
+      } else {
+        toast.error(`Xóa bài tập thất bại! ${responseData.message}`, {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
       }
+    } catch (error) {
+      console.error("Error deleting exercise:", error);
+      toast.error("Xóa bài tập thất bại!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+    } finally {
+      setLoading(false);
     }
   };
-
+  const handleCancelDeleteExercise = () => {
+    setDeleteModalOpen(false);
+  };
   const handleDeleteImages = () => {
     setFormData({ ...formData, hinhAnh: null });
     setAvatarFile(null);
@@ -672,6 +676,11 @@ const App = () => {
         newDishImages={newWorkoutImages}
         handleAddDishImages={handleAddDishImages}
         handleSaveDishImages={handleSaveWorkoutImages}
+      />
+      <DeleteConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={handleCancelDeleteExercise}
+        onDelete={confirmDeleteExercise}
       />
       <ToastContainer />
     </Layout>
