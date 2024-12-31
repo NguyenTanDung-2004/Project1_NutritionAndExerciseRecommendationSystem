@@ -129,7 +129,6 @@ const App = () => {
   };
   return (
     <Layout>
-      <ToastContainer />
       <div className="flex flex-col bg-white px-4 pt-4 min-h-screen">
         <div className="items-center mb-4 flex ">
           <button
@@ -184,6 +183,7 @@ const App = () => {
             </button>
           )}
         </div>
+        <ToastContainer />
       </div>
     </Layout>
   );
