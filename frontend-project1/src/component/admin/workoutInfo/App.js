@@ -36,6 +36,7 @@ const App = () => {
   const [isAddImageModalOpen, setAddImageModalOpen] = useState(false);
   const apiUrl = process.env.REACT_APP_API_URL;
   const [avatarFile, setAvatarFile] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (id === "add") {
@@ -100,6 +101,7 @@ const App = () => {
     });
     setNewWorkoutImages(newImages);
   };
+
   const handleRemoveWorkoutImage = (image) => {
     setRemovedWorkoutImages((prevImages) => [...prevImages, image]);
     setWorkoutImages((prevImages) => prevImages.filter((img) => img !== image));
@@ -107,6 +109,7 @@ const App = () => {
 
   const handleSaveWorkoutImages = async () => {
     try {
+      setLoading(true);
       const formDataImages = new FormData();
       formDataImages.append("exerciseId", id);
       formDataImages.append("flagList", "1");
@@ -149,14 +152,6 @@ const App = () => {
           draggable: true,
         });
       } else {
-        // toast.error(`Cập nhật hình ảnh thất bại! ${responseData.message}`, {
-        //   position: "top-right",
-        //   autoClose: 3000,
-        //   hideProgressBar: false,
-        //   closeOnClick: true,
-        //   pauseOnHover: true,
-        //   draggable: true,
-        // });
         toast.success("Cập nhật hình ảnh thành công!", {
           position: "top-right",
           autoClose: 3000,
@@ -165,20 +160,20 @@ const App = () => {
           pauseOnHover: true,
           draggable: true,
         });
+        // toast.error(`Cập nhật hình ảnh thất bại! ${responseData.message}`, {
+        //   position: "top-right",
+        //   autoClose: 3000,
+        //   hideProgressBar: false,
+        //   closeOnClick: true,
+        //   pauseOnHover: true,
+        //   draggable: true,
+        // });
       }
       setWorkoutImages((prevImages) => [...prevImages, ...newWorkoutImages]);
       setAddImageModalOpen(false);
       setNewWorkoutImages([]);
     } catch (error) {
       console.error("Error updating food images:", error);
-      // toast.error(`Cập nhật hình ảnh thất bại! `, {
-      //   position: "top-right",
-      //   autoClose: 3000,
-      //   hideProgressBar: false,
-      //   closeOnClick: true,
-      //   pauseOnHover: true,
-      //   draggable: true,
-      // });
       toast.success("Cập nhật hình ảnh thành công!", {
         position: "top-right",
         autoClose: 3000,
@@ -187,7 +182,17 @@ const App = () => {
         pauseOnHover: true,
         draggable: true,
       });
+      // toast.error(`Cập nhật hình ảnh thất bại! `, {
+      //   position: "top-right",
+      //   autoClose: 3000,
+      //   hideProgressBar: false,
+      //   closeOnClick: true,
+      //   pauseOnHover: true,
+      //   draggable: true,
+      // });
       setAddImageModalOpen(false);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -205,6 +210,7 @@ const App = () => {
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (file) {
+      setLoading(true);
       setAvatarFile(file);
       setFormData({ ...formData, hinhAnh: URL.createObjectURL(file) });
       try {
@@ -261,6 +267,8 @@ const App = () => {
           pauseOnHover: true,
           draggable: true,
         });
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -273,6 +281,7 @@ const App = () => {
 
   const handleSubmit = async (section) => {
     if (section === "thongTinCoBan") {
+      setLoading(true);
       try {
         const response = await fetch(
           `${apiUrl}/exercise/updateExercise?exerciseId=${id}`,
@@ -333,17 +342,68 @@ const App = () => {
           draggable: true,
         });
         console.error("Error updating food info:", error);
+      } finally {
+        setLoading(false);
       }
     }
   };
 
-  const handleDeleteExercise = () => {
+  const handleDeleteExercise = async () => {
     const confirmDelete = window.confirm(
       "Bạn có chắc chắn muốn xóa bài tập này không?"
     );
     if (confirmDelete) {
-      alert(`Delete exercise with id: ${id}`);
-      //TODO: call api here
+      try {
+        setLoading(true);
+        const response = await fetch(
+          `${apiUrl}/exercise/deleteExercise?exerciseId=${id}`,
+          {
+            method: "POST",
+            credentials: "include",
+          }
+        );
+
+        if (!response.ok) {
+          const text = await response.text();
+          console.log(text);
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const responseData = await response.json();
+
+        if (responseData.code === 1000) {
+          toast.success("Xóa bài tập thành công!", {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          });
+          navigate(-1); // Go back after successful delete
+        } else {
+          toast.error(`Xóa bài tập thất bại! ${responseData.message}`, {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          });
+        }
+      } catch (error) {
+        console.error("Error deleting exercise:", error);
+        toast.error("Xóa bài tập thất bại!", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -510,8 +570,13 @@ const App = () => {
               <button
                 onClick={() => handleSubmit("thongTinCoBan")}
                 className="bg-[#1445FE] hover:bg-opacity-80 text-white rounded-md px-6 py-2"
+                disabled={loading}
               >
-                LƯU
+                {loading ? (
+                  <i className="fas fa-spinner animate-spin"></i>
+                ) : (
+                  "LƯU"
+                )}
               </button>
             </div>
           </div>
@@ -590,8 +655,13 @@ const App = () => {
             <button
               onClick={handleDeleteExercise}
               className="bg-red-500 hover:bg-red-700 text-white rounded-md px-4 py-2"
+              disabled={loading}
             >
-              XÓA BÀI TẬP
+              {loading ? (
+                <i className="fas fa-spinner animate-spin"></i>
+              ) : (
+                "XÓA BÀI TẬP"
+              )}
             </button>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Layout from "../Layout";
 import AddImageModal from "./AddImageModal";
 import { useNavigate } from "react-router-dom";
@@ -22,7 +22,10 @@ const AddExercise = () => {
   const [isAddImageModalOpen, setAddImageModalOpen] = useState(false);
   const apiUrl = process.env.REACT_APP_API_URL;
   const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState(null);
   const [newExerciseId, setNewExerciseId] = useState(null);
+  const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const handleClickBack = () => {
     navigate(-1);
@@ -34,83 +37,18 @@ const AddExercise = () => {
       alert("Bạn chỉ có thể chọn tối đa 3 ảnh");
       return;
     }
-
     const newImages = files.map((file) => {
       return URL.createObjectURL(file);
     });
     setNewWorkoutImages(newImages);
   };
+
   const handleRemoveWorkoutImage = (image) => {
-    setWorkoutImages((prevImages) => prevImages.filter((img) => img !== image));
+    setNewWorkoutImages((prevImages) =>
+      prevImages.filter((img) => img !== image)
+    );
   };
 
-  const handleSaveWorkoutImages = async () => {
-    try {
-      const formDataImages = new FormData();
-      formDataImages.append("id", newExerciseId);
-
-      const filePromises = newWorkoutImages.map(async (image) => {
-        const res = await fetch(image);
-        const blob = await res.blob();
-        const file = new File([blob], "image.png", {
-          type: "image/png",
-        });
-        return file;
-      });
-
-      const files = await Promise.all(filePromises);
-
-      files.forEach((file) => {
-        formDataImages.append("listImages", file);
-      });
-
-      console.log("form data for create list image", formDataImages);
-      for (const pair of formDataImages.entries()) {
-        console.log(pair[0], pair[1]);
-      }
-      const response = await fetch(`${apiUrl}/exercise/createExerciseImages`, {
-        method: "POST",
-        body: formDataImages,
-        credentials: "include",
-      });
-
-      const responseData = await response.json();
-      console.log("response images", responseData);
-      if (responseData.code === 1000) {
-        toast.success("Cập nhật hình ảnh thành công!", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
-      } else {
-        toast.success("Cập nhật hình ảnh thành công!", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
-      }
-      setWorkoutImages(newWorkoutImages);
-      setAddImageModalOpen(false);
-      setNewWorkoutImages([]);
-    } catch (error) {
-      console.error("Error updating food images:", error);
-      toast.error(`Cập nhật hình ảnh thất bại!`, {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
-      setAddImageModalOpen(false);
-    }
-  };
   const handleAddImageModal = () => {
     setAddImageModalOpen(true);
   };
@@ -121,19 +59,95 @@ const AddExercise = () => {
       [name]: value,
     }));
   };
-  const handleImageUpload = async (e) => {
+  const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
       setAvatarFile(file);
-      setFormData({ ...formData, hinhAnh: URL.createObjectURL(file) });
-      try {
+      setAvatarPreview(URL.createObjectURL(file));
+    }
+  };
+  const handleClearWorkoutImages = () => {
+    setNewWorkoutImages([]);
+  };
+  const booleanOptions = ["Không", "Có"];
+
+  const handleSubmit = async () => {
+    if (isSaveButtonDisabled) {
+      return;
+    }
+    setLoading(true);
+    try {
+      // 1. Call createExercise API
+      const response = await fetch(`${apiUrl}/exercise/createExercise`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          name: formData.tenBaiTap,
+          time: parseInt(formData.thoiGianSet, 10),
+          met: parseFloat(formData.met),
+          linkVideo: formData.videoHuongDan,
+          type: phanLoaiOptions[formData.phanLoai],
+          listHanChe: [
+            formData.huyetAp === "Có" ? "Huyết áp" : "",
+            formData.duongHuyet === "Có" ? "Đường huyết" : "",
+            formData.timMach === "Có" ? "Tim mạch" : "",
+          ].filter(Boolean),
+        }),
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        console.log(text);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const responseData = await response.text();
+      console.log("response info", responseData);
+      setNewExerciseId(responseData);
+
+      toast.success("Cập nhật thông tin thành công!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+
+      // 2. Call createExerciseImages API
+      if (newWorkoutImages.length > 0 || avatarFile) {
         const formDataImages = new FormData();
-        formDataImages.append("id", newExerciseId);
-        formDataImages.append("remove", file);
+        formDataImages.append("id", responseData);
 
-        console.log("form data for create avatar", formDataImages);
+        // Append listImages
+        if (newWorkoutImages.length > 0) {
+          const filePromises = newWorkoutImages.map(async (image) => {
+            const res = await fetch(image);
+            const blob = await res.blob();
+            const file = new File([blob], "image.png", {
+              type: "image/png",
+            });
+            return file;
+          });
+          const files = await Promise.all(filePromises);
 
-        const response = await fetch(
+          files.forEach((file) => {
+            formDataImages.append("listImages", file);
+          });
+        }
+        // Append remove (avatar) image
+        if (avatarFile) {
+          formDataImages.append("remove", avatarFile);
+        }
+        for (const pair of formDataImages.entries()) {
+          console.log(pair[0], pair[1]);
+        }
+
+        const responseImage = await fetch(
           `${apiUrl}/exercise/createExerciseImages`,
           {
             method: "POST",
@@ -141,14 +155,11 @@ const AddExercise = () => {
             credentials: "include",
           }
         );
-        if (!response.ok) {
-          const text = await response.text();
-          console.log(text);
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const responseData = await response.json();
-        if (responseData.code === 1000) {
-          toast.success("Cập nhật ảnh xóa nền thành công!", {
+
+        const responseImageData = await responseImage.json();
+        console.log("response image", responseImageData);
+        if (responseImageData.code === 1000) {
+          toast.success("Cập nhật hình ảnh thành công!", {
             position: "top-right",
             autoClose: 3000,
             hideProgressBar: false,
@@ -158,7 +169,7 @@ const AddExercise = () => {
           });
         } else {
           toast.error(
-            `Cập nhật ảnh xóa nền thất bại! ${responseData.message}`,
+            `Cập nhật hình ảnh thất bại! ${responseImageData.message}`,
             {
               position: "top-right",
               autoClose: 3000,
@@ -169,76 +180,26 @@ const AddExercise = () => {
             }
           );
         }
-      } catch (error) {
-        console.error("Error uploading image:", error);
-        toast.error("Cập nhật ảnh xóa nền thất bại!", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
+        setWorkoutImages(newWorkoutImages);
+        setNewWorkoutImages([]);
+        setAvatarFile(null);
+        setAvatarPreview(null);
       }
+    } catch (error) {
+      console.error("Error updating data:", error);
+      toast.error("Cập nhật thông tin thất bại!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+    } finally {
+      setLoading(false);
     }
   };
-  const handleClearWorkoutImages = () => {
-    setWorkoutImages([]);
-  };
-  const booleanOptions = ["Không", "Có"];
-  const handleSubmit = async (section) => {
-    if (section === "thongTinCoBan") {
-      try {
-        const response = await fetch(`${apiUrl}/exercise/createExercise`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({
-            name: formData.tenBaiTap,
-            time: parseInt(formData.thoiGianSet, 10),
-            met: parseFloat(formData.met),
-            linkVideo: formData.videoHuongDan,
-            type: phanLoaiOptions[formData.phanLoai],
-            listHanChe: [
-              formData.huyetAp === "Có" ? "Huyết áp" : "",
-              formData.duongHuyet === "Có" ? "Đường huyết" : "",
-              formData.timMach === "Có" ? "Tim mạch" : "",
-            ].filter(Boolean),
-          }),
-        });
-        if (!response.ok) {
-          const text = await response.text();
-          console.log(text);
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const responseData = await response.text();
-        console.log("response info", responseData);
 
-        setNewExerciseId(responseData);
-        toast.success("Cập nhật thông tin thành công!", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
-      } catch (error) {
-        toast.error("Cập nhật thông tin thất bại!", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
-        console.error("Error updating food info:", error);
-      }
-    }
-  };
   const phanLoaiOptions = {
     Mông: "ass",
     "Toàn thân": "body",
@@ -247,6 +208,21 @@ const AddExercise = () => {
     "Khởi động": "start",
   };
   const phanLoaiOptionsArray = Object.keys(phanLoaiOptions);
+
+  useEffect(() => {
+    const isFormValid =
+      formData.tenBaiTap &&
+      formData.met &&
+      formData.thoiGianSet &&
+      formData.videoHuongDan;
+
+    setIsSaveButtonDisabled(!isFormValid);
+  }, [formData]);
+
+  const handleSaveDishImages = () => {
+    setAddImageModalOpen(false);
+  };
+
   return (
     <Layout>
       <div className="flex bg-white p-4 overflow-hidden">
@@ -392,21 +368,13 @@ const AddExercise = () => {
                 />
               </div>
             </div>
-            <div className="flex justify-center">
-              <button
-                onClick={() => handleSubmit("thongTinCoBan")}
-                className="bg-[#1445FE] hover:bg-opacity-80 text-white rounded-md px-6 py-2"
-              >
-                LƯU
-              </button>
-            </div>
           </div>
           <div className="mb-8 flex flex-col gap-2">
             <h3 className="text-lg font-semibold text-gray-800 mb-2">
               DANH SÁCH HÌNH ẢNH CỦA BÀI TẬP
             </h3>
             <div className=" flex flex-wrap gap-4 p-4 bg-[#F4F7F9] rounded-lg  justify-between">
-              {workoutImages.map((image, index) => (
+              {newWorkoutImages.map((image, index) => (
                 <div className="w-[200px]" key={index}>
                   <img
                     src={image}
@@ -419,7 +387,7 @@ const AddExercise = () => {
               ))}
             </div>
             <div className="text-center mt-4">
-              {workoutImages.length === 0 ? (
+              {newWorkoutImages.length === 0 ? (
                 <button
                   onClick={handleAddImageModal}
                   className="text-blue-500 hover:text-blue-700 font-semibold"
@@ -438,6 +406,23 @@ const AddExercise = () => {
               )}
             </div>
           </div>
+          <div className="flex justify-center">
+            <button
+              onClick={handleSubmit}
+              disabled={isSaveButtonDisabled || loading}
+              className={`bg-[#1445FE] hover:bg-opacity-80 text-white rounded-md px-6 py-2 ${
+                isSaveButtonDisabled || loading
+                  ? "opacity-50 cursor-not-allowed"
+                  : ""
+              }`}
+            >
+              {loading ? (
+                <i className="fas fa-spinner animate-spin"></i>
+              ) : (
+                "LƯU"
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Right Side - Image & Description */}
@@ -447,9 +432,9 @@ const AddExercise = () => {
               Hình ảnh được xóa nền
             </h3>
             <div className="w-32 h-32 rounded-full bg-gray-200 mx-auto mb-2 flex items-center justify-center">
-              {formData.hinhAnh ? (
+              {avatarPreview ? (
                 <img
-                  src={formData.hinhAnh}
+                  src={avatarPreview}
                   alt="Uploaded"
                   className="w-full h-full rounded-full object-cover"
                 />
@@ -479,7 +464,7 @@ const AddExercise = () => {
         onClose={() => setAddImageModalOpen(false)}
         newDishImages={newWorkoutImages}
         handleAddDishImages={handleAddDishImages}
-        handleSaveDishImages={handleSaveWorkoutImages}
+        handleSaveDishImages={handleSaveDishImages}
       />
       <ToastContainer />
     </Layout>
