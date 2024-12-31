@@ -196,7 +196,11 @@ const Right = ({
           </div>
 
           <div className="workout-details__right-clock">
-            <Clock time={time} exerciseId={exerciseId} />
+            <Clock
+              time={time}
+              exerciseId={exerciseId}
+              challengeData={challengeData}
+            />
           </div>
 
           <div className="workout-details__right-recommend">

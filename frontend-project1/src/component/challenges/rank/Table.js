@@ -10,7 +10,7 @@ const columns = [
   { header: "TỔNG ĐIỂM", className: "flex-1 hidden md:table-cell " },
 ];
 
-const Table = ({ listUserInRanks, currentPoint, currentRank }) => {
+const Table = ({ listUserInRanks }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortType, setSortType] = useState("Cao xuống thấp");

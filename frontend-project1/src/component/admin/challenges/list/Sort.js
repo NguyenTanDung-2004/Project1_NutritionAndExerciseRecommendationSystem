@@ -29,7 +29,7 @@ const SortDropdown = ({ onSortChange }) => {
   };
 
   return (
-    <div className="relative w-[160px]" onMouseLeave={closeDropdown}>
+    <div className="relative w-[200px]" onMouseLeave={closeDropdown}>
       <div
         className="text-xs text-[#2b3034e6] font-semibold gap-4 flex items-center justify-between border border-solid border-[#d5d5d5] bg-[#fcfdfd] rounded-lg h-[38px] px-4 cursor-pointer w-full"
         onClick={openDropdown}

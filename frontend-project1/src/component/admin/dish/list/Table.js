@@ -5,24 +5,27 @@ import SearchBar from "./SearchBar";
 import { useNavigate } from "react-router-dom";
 
 const columns = [
-  { header: "ID", className: "w-[150px]  hidden md:table-cell" },
-  { header: "TÊN", className: "w-[300px] hidden md:table-cell " },
+  { header: "ID", className: "w-[150px] flex-[3] hidden md:table-cell" },
+  { header: "TÊN", className: "w-[300px] flex-[5] hidden md:table-cell " },
   {
     header: "TRỌNG LƯỢNG",
-    className: "w-[150px] text-center  hidden md:table-cell",
+    className: "w-[150px] flex-[3] text-center  hidden md:table-cell",
   },
   {
     header: "NĂNG LƯỢNG",
-    className: "w-[150px] text-center  hidden md:table-cell",
+    className: "w-[150px] flex-[3]  text-center  hidden md:table-cell",
   },
-  { header: "CARB", className: "w-[140px] text-center hidden md:table-cell" },
+  {
+    header: "CARB",
+    className: "w-[140px] flex-[3] text-center hidden md:table-cell",
+  },
   {
     header: "PROTEIN",
-    className: "w-[140px] text-center hidden md:table-cell",
+    className: "w-[140px] flex-[3] text-center hidden md:table-cell",
   },
   {
     header: "FAT",
-    className: "flex-1 text-center hidden md:table-cell",
+    className: "w-[140px] flex-[3] text-center hidden md:table-cell",
   },
 ];
 

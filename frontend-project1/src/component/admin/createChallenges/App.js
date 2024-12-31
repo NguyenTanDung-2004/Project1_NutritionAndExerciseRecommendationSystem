@@ -1,33 +1,51 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Layout from "../Layout";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import WorkoutSelection from "./WorkoutSelection";
 import WorkoutConfirmation from "./WorkoutConfirmation";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const App = () => {
   const navigate = useNavigate();
-  const { id } = useParams();
+  const [workouts, setWorkouts] = useState([]);
+  const [selectedWorkouts, setSelectedWorkouts] = useState([]);
+  const [isConfirmScreen, setIsConfirmScreen] = useState(false);
+  const [workoutScores, setWorkoutScores] = useState({});
+  const apiUrl = process.env.REACT_APP_API_URL;
+
+  useEffect(() => {
+    const fetchWorkouts = async () => {
+      try {
+        const response = await fetch(`${apiUrl}/exercise/getAllExercises`, {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+          },
+          credentials: "include",
+        });
+        if (!response.ok) {
+          const text = await response.text();
+          console.log(text);
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        const transformedData = data.map((item, index) => ({
+          id: String(index + 1).padStart(5, "0"), // display as STT
+          exerciseId: item.exerciseId, // keep the exerciseId
+          name: item.name,
+        }));
+        setWorkouts(transformedData);
+      } catch (err) {
+        console.error("Error fetching workouts:", err);
+      }
+    };
+    fetchWorkouts();
+  }, [apiUrl]);
 
   const handleClickBack = () => {
     navigate(-1);
   };
-
-  const [selectedWorkouts, setSelectedWorkouts] = useState([]);
-  const [isConfirmScreen, setIsConfirmScreen] = useState(false);
-  const [workoutScores, setWorkoutScores] = useState({});
-
-  const workouts = [
-    { id: "00001", name: "BÀI TẬP KHỞI ĐỘNG TAY CHÂN BỤNG" },
-    { id: "00002", name: "BÀI TẬP KHỞI ĐỘNG TAY CHÂN BỤNG" },
-    { id: "00003", name: "BÀI TẬP KHỞI ĐỘNG TAY CHÂN BỤNG" },
-    { id: "00004", name: "BÀI TẬP KHỞI ĐỘNG TAY CHÂN BỤNG" },
-    { id: "00005", name: "BÀI TẬP KHỞI ĐỘNG TAY CHÂN BỤNG" },
-    { id: "00006", name: "BÀI TẬP KHỞI ĐỘNG TAY CHÂN BỤNG" },
-    { id: "00007", name: "BÀI TẬP KHỞI ĐỘNG TAY CHÂN BỤNG" },
-    { id: "00008", name: "BÀI TẬP KHỞI ĐỘNG TAY CHÂN BỤNG" },
-    { id: "00009", name: "BÀI TẬP KHỞI ĐỘNG TAY CHÂN BỤNG" },
-    { id: "00010", name: "BÀI TẬP KHỞI ĐỘNG TAY CHÂN BỤNG" },
-  ];
 
   const handleToggleWorkout = (workoutId) => {
     if (selectedWorkouts.includes(workoutId)) {
@@ -40,21 +58,67 @@ const App = () => {
   const handleNext = () => {
     setIsConfirmScreen(true);
   };
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     const selectedWithScore = selectedWorkouts.map((workoutId) => {
+      const workout = workouts.find((item) => item.id === workoutId);
       return {
-        id: workoutId,
-        score: workoutScores[workoutId] || "10", // use 10 as default
+        exerciseId: workout.exerciseId,
+        point: parseInt(workoutScores[workoutId] || "10", 10), // use 10 as default
       };
     });
-    alert(`
-           Danh sách các bài tập đã được chọn:
-           ${selectedWithScore
-             .map((item) => `${item.id} - ${item.score}`)
-             .join(",\n")}
-           `);
 
-    navigate("/dashboard/challenges");
+    try {
+      const response = await fetch(`${apiUrl}/challenge/createChallenges`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(selectedWithScore),
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        console.log(text);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const responseData = await response.json();
+      if (responseData.code === 1000) {
+        toast.success("Thêm thử thách thành công!", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+
+        setTimeout(() => {
+          navigate("/dashboard/challenges");
+        }, 1500);
+      } else {
+        toast.error(`Thêm thử thách thất bại! ${responseData.message}`, {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+      }
+    } catch (error) {
+      toast.error("Thêm thử thách thất bại!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      console.error("Error create challenge:", error);
+    }
   };
 
   const handleScoreChange = (workoutId, score) => {
@@ -65,6 +129,7 @@ const App = () => {
   };
   return (
     <Layout>
+      <ToastContainer />
       <div className="flex flex-col bg-white px-4 pt-4 min-h-screen">
         <div className="items-center mb-4 flex ">
           <button

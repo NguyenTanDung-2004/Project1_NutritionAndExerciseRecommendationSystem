@@ -65,11 +65,7 @@ const Rank = ({ rankData }) => {
       </div>
 
       <div className="w-full">
-        <Table
-          listUserInRanks={rankData?.listUserInRanks || []}
-          currentPoint={rankData?.currentPoint || 0}
-          currentRank={rankData?.currentRank || 0}
-        />
+        <Table listUserInRanks={rankData?.listUserInRanks || []} />
       </div>
     </div>
   );

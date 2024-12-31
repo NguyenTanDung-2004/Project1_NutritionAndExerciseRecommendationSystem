@@ -42,7 +42,6 @@ const ListChallenges = ({ searchTerm, filterType, sortType }) => {
   const transformedChallenges = challenges.map((item) => ({
     id: item.exerciseId,
     image: item.linkImage,
-    nameChallenges: item.name,
     nameWorkout: item.name,
     type: "khac",
     level: "Dễ",

@@ -4,11 +4,12 @@ import audioSrc from "../../img/workout_details/sound.mp3";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const Clock = ({ time, exerciseId }) => {
+const Clock = ({ time, exerciseId, challengeData }) => {
   const [timeLeft, setTimeLeft] = useState(time);
   const [isRunning, setIsRunning] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
   const audio = new Audio(audioSrc);
+  const apiUrl = process.env.REACT_APP_API_URL;
   let currentResponse = null;
 
   const getCookie = (name) => {
@@ -19,8 +20,10 @@ const Clock = ({ time, exerciseId }) => {
   };
 
   const recordExercise = async () => {
-    const url = `http://localhost:8080/userHistory/recordExercise?exerciseId=${exerciseId}`;
-    console.log("Record exercise URL:", url);
+    const url = challengeData
+      ? `${apiUrl}/challenge/doExerciseChallenge?exerciseId=${exerciseId}`
+      : `${apiUrl}/userHistory/recordExercise?exerciseId=${exerciseId}`;
+
     const token = getCookie("jwtToken");
     try {
       const response = await fetch(url, {
@@ -34,16 +37,21 @@ const Clock = ({ time, exerciseId }) => {
       if (response.ok) {
         const data = await response.json();
         if (data.code === 1000) {
-          toast.success("Chúc mừng bạn đã tập được 1 lần!", {
-            position: "top-right",
-            autoClose: 2000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-          });
+          toast.success(
+            challengeData
+              ? "Chúc mừng bạn đã thực hiện thử thách 1 lần!"
+              : "Chúc mừng bạn đã tập được 1 lần!",
+            {
+              position: "top-right",
+              autoClose: 2000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "light",
+            }
+          );
         }
         console.log("Record Exercise Success!", data);
       } else {
@@ -63,6 +71,16 @@ const Clock = ({ time, exerciseId }) => {
       }
     } catch (err) {
       console.error("Error record workout data:", err);
+      toast.error("Lỗi hệ thống", {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
     }
   };
 
@@ -77,7 +95,7 @@ const Clock = ({ time, exerciseId }) => {
     }
 
     return () => clearInterval(timer);
-  }, [isRunning, timeLeft, exerciseId, isFinished]);
+  }, [isRunning, timeLeft, exerciseId, isFinished, challengeData]);
 
   const handleStartStop = () => {
     if (isRunning) {
