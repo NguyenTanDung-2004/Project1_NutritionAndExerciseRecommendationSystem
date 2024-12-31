@@ -109,7 +109,7 @@ const AddExercise = () => {
       console.log("response info", responseData);
       setNewExerciseId(responseData);
 
-      toast.success("Cập nhật thông tin thành công!", {
+      toast.success("Tạo bài tập với thông tin cơ bản thành công!", {
         position: "top-right",
         autoClose: 3000,
         hideProgressBar: false,
@@ -159,7 +159,7 @@ const AddExercise = () => {
         const responseImageData = await responseImage.json();
         console.log("response image", responseImageData);
         if (responseImageData.code === 1000) {
-          toast.success("Cập nhật hình ảnh thành công!", {
+          toast.success("Tạo hình ảnh thành công cho bài tập!", {
             position: "top-right",
             autoClose: 3000,
             hideProgressBar: false,
@@ -168,17 +168,14 @@ const AddExercise = () => {
             draggable: true,
           });
         } else {
-          toast.error(
-            `Cập nhật hình ảnh thất bại! ${responseImageData.message}`,
-            {
-              position: "top-right",
-              autoClose: 3000,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-            }
-          );
+          toast.error(`Tạo hình ảnh thành công! ${responseImageData.message}`, {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          });
         }
         setWorkoutImages(newWorkoutImages);
         setNewWorkoutImages([]);

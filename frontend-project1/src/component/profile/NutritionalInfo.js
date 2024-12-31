@@ -2,10 +2,21 @@ import React, { useState, useEffect } from "react";
 import HeartProgress from "./HeartProgress";
 import LineProgress from "./LineProgress";
 import EditNutritionModal from "./EditNutritionModal";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const NutritionalInfo = ({ userData }) => {
   const today = new Date().toISOString().split("T")[0];
   const [selectedDate, setSelectedDate] = useState(today);
+  const diets = [
+    "Ít tinh bột",
+    "Ít chất béo",
+    "Nhiều đạm",
+    "Thuần chay",
+    "Ăn chay (trứng, sữa)",
+    "Healthy",
+    "Bình thường",
+  ];
   const [nutritionData, setNutritionData] = useState({
     dailyCalories: 0,
     remainingCalories: 0,
@@ -34,58 +45,94 @@ const NutritionalInfo = ({ userData }) => {
       total: 0,
     },
   });
+  const apiUrl = process.env.REACT_APP_API_URL;
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (userData) {
-      setNutritionData({
-        dailyCalories: userData.totalCalories || 0,
-        remainingCalories:
-          userData.totalCalories - userData.currentCalories || 0,
-        burnedCalories: userData.currentBurned || 0,
-        intakePercentage:
-          userData.totalCalories > 0
-            ? (
-                (userData.currentCalories / userData.totalCalories) *
-                100
-              ).toFixed(0)
-            : 0,
-        diet: "Ít tinh bột",
-        meals: [
-          { label: "Bữa sáng", calories: 0 },
-          { label: "Bữa trưa", calories: 0 },
-          { label: "Bữa tối", calories: 0 },
-          { label: "Bữa phụ", calories: 0 },
-        ],
-        protein: {
-          percentage:
-            userData.totalProtein > 0
-              ? (
-                  (userData.currentProtein / userData.totalProtein) *
-                  100
-                ).toFixed(0)
+    const fetchNutritionData = async () => {
+      setLoading(true);
+      try {
+        const [year, month, day] = selectedDate.split("-");
+
+        const response = await fetch(
+          `${apiUrl}/userHistory/getDataForDateReport?day=${day}&month=${month}&year=${year}`,
+          {
+            method: "GET",
+            headers: {
+              Accept: "application/json",
+            },
+            credentials: "include",
+          }
+        );
+
+        if (!response.ok) {
+          const text = await response.text();
+          console.log(text);
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("API Data Report:", data);
+
+        setNutritionData({
+          dailyCalories: parseFloat((data.totalCalories || 0).toFixed(2)),
+          remainingCalories: parseFloat(
+            (data.totalCalories - data.currentCalories || 0).toFixed(2)
+          ),
+          burnedCalories: parseFloat((data.currentBurned || 0).toFixed(2)),
+          intakePercentage:
+            data.totalCalories > 0
+              ? parseFloat(
+                  ((data.currentCalories / data.totalCalories) * 100).toFixed(2)
+                )
               : 0,
-          intake: userData.currentProtein || 0,
-          total: userData.totalProtein || 0,
-        },
-        carb: {
-          percentage:
-            userData.totalCarb > 0
-              ? ((userData.currentCarb / userData.totalCarb) * 100).toFixed(0)
-              : 0,
-          intake: userData.currentCarb || 0,
-          total: userData.totalCarb || 0,
-        },
-        fat: {
-          percentage:
-            userData.totalFat > 0
-              ? ((userData.currentFat / userData.totalFat) * 100).toFixed(0)
-              : 0,
-          intake: userData.currentFat || 0,
-          total: userData.totalFat || 0,
-        },
-      });
-    }
-  }, [userData]);
+          diet: "Ít tinh bột",
+          meals: [
+            { label: "Bữa sáng", calories: 0 },
+            { label: "Bữa trưa", calories: 0 },
+            { label: "Bữa tối", calories: 0 },
+            { label: "Bữa phụ", calories: 0 },
+          ],
+          protein: {
+            percentage:
+              data.totalProtein > 0
+                ? parseFloat(
+                    ((data.currentProtein / data.totalProtein) * 100).toFixed(2)
+                  )
+                : 0,
+            intake: parseFloat((data.currentProtein || 0).toFixed(2)),
+            total: parseFloat((data.totalProtein || 0).toFixed(2)),
+          },
+          carb: {
+            percentage:
+              data.totalCarb > 0
+                ? parseFloat(
+                    ((data.currentCarb / data.totalCarb) * 100).toFixed(2)
+                  )
+                : 0,
+            intake: parseFloat((data.currentCarb || 0).toFixed(2)),
+            total: parseFloat((data.totalCarb || 0).toFixed(2)),
+          },
+          fat: {
+            percentage:
+              data.totalFat > 0
+                ? parseFloat(
+                    ((data.currentFat / data.totalFat) * 100).toFixed(2)
+                  )
+                : 0,
+            intake: parseFloat((data.currentFat || 0).toFixed(2)),
+            total: parseFloat((data.totalFat || 0).toFixed(2)),
+          },
+        });
+      } catch (err) {
+        console.log(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNutritionData();
+  }, [selectedDate, apiUrl]);
 
   const dietOptions = [
     { label: "Ít tinh bột", bgColor: "[#A2F4F3]" },
@@ -102,9 +149,61 @@ const NutritionalInfo = ({ userData }) => {
     setIsEditModalOpen(true);
   };
 
-  const handleDietChange = (diet) => {
-    setNutritionData((prevData) => ({ ...prevData, diet }));
-    setIsDietDropdownOpen(false);
+  const handleDietChange = async (diet) => {
+    setLoading(true);
+    try {
+      const flagDiet = diets.indexOf(diet) + 1;
+
+      const response = await fetch(
+        `${apiUrl}/user/updateUserDiet?flagDiet=${flagDiet}`,
+        {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+          },
+          credentials: "include",
+        }
+      );
+      if (!response.ok) {
+        const text = await response.text();
+        console.log(text);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const responseData = await response.json();
+      if (responseData.code === 1000) {
+        toast.success("Cập nhật chế độ ăn thành công!", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+        setNutritionData((prevData) => ({ ...prevData, diet }));
+        setIsDietDropdownOpen(false);
+      } else {
+        toast.error(`Cập nhật chế độ ăn thất bại! ${responseData.message}`, {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+      }
+    } catch (err) {
+      toast.error("Cập nhật chế độ ăn thất bại!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      console.log(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDateChange = (event) => {
@@ -141,151 +240,157 @@ const NutritionalInfo = ({ userData }) => {
         </span>
       </div>
 
-      <div className="bg-white flex flex-col items-center justify-center gap-4 rounded-lg p-4">
-        <div className="flex flex-col items-center">
-          <div className="text-base font-semibold text-[#595858]">
-            Calories cần nạp
-          </div>
-          <div className="text-lg font-bold text-[#1445FE] self-center">
-            {nutritionData.dailyCalories}
-          </div>
-        </div>
-
-        <div className="w-full flex items-center justify-between lg:px-14 md:px-4 sm:px-0">
+      {loading ? (
+        <div>Loading...</div>
+      ) : (
+        <div className="bg-white flex flex-col items-center justify-center gap-4 rounded-lg p-4">
           <div className="flex flex-col items-center">
-            <div className="text-[#595858] text-base font-semibold">
-              Calories còn lại
+            <div className="text-base font-semibold text-[#595858]">
+              Calories cần nạp
             </div>
-            <div className="text-lg font-bold text-[#FF0000] self-center">
-              {nutritionData.remainingCalories}
-            </div>
-          </div>
-
-          <div className="flex flex-col items-center justify-center">
-            <HeartProgress percentage={nutritionData.intakePercentage} />
             <div className="text-lg font-bold text-[#1445FE] self-center">
-              {nutritionData.intakePercentage}%
-            </div>
-            <div className="text-[#595858] text-base font-semibold">Đã nạp</div>
-          </div>
-
-          <div className="flex flex-col items-center">
-            <div className="text-[#595858] text-base font-semibold">
-              Calories tiêu hao
-            </div>
-            <div className="text-lg font-bold text-[#CCCCCC] self-center">
-              {nutritionData.burnedCalories}
+              {nutritionData.dailyCalories}
             </div>
           </div>
-        </div>
 
-        <div className="mt-5 w-full flex flex-wrap items-center justify-between lg:px-16 md:px-4 sm:px-0">
-          {nutritionData.meals.map((meal, index) => (
-            <div
-              key={index}
-              className="flex flex-col items-center justify-center gap-2"
-            >
+          <div className="w-full flex items-center justify-between lg:px-14 md:px-4 sm:px-0">
+            <div className="flex flex-col items-center">
               <div className="text-[#595858] text-base font-semibold">
-                {meal.label}
+                Calories còn lại
               </div>
-              {meal.calories > 0 ? (
-                <div
-                  className="text-lg font-bold text-[#1445FE] cursor-pointer"
-                  onClick={() => handleAddMeal(meal)}
-                >
-                  {meal.calories}
+              <div className="text-lg font-bold text-[#FF0000] self-center">
+                {nutritionData.remainingCalories}
+              </div>
+            </div>
+
+            <div className="flex flex-col items-center justify-center">
+              <HeartProgress percentage={nutritionData.intakePercentage} />
+              <div className="text-lg font-bold text-[#1445FE] self-center">
+                {nutritionData.intakePercentage}%
+              </div>
+              <div className="text-[#595858] text-base font-semibold">
+                Đã nạp
+              </div>
+            </div>
+
+            <div className="flex flex-col items-center">
+              <div className="text-[#595858] text-base font-semibold">
+                Calories tiêu hao
+              </div>
+              <div className="text-lg font-bold text-[#CCCCCC] self-center">
+                {nutritionData.burnedCalories}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-5 w-full flex flex-wrap items-center justify-between lg:px-16 md:px-4 sm:px-0">
+            {nutritionData.meals.map((meal, index) => (
+              <div
+                key={index}
+                className="flex flex-col items-center justify-center gap-2"
+              >
+                <div className="text-[#595858] text-base font-semibold">
+                  {meal.label}
                 </div>
-              ) : (
-                <button
-                  onClick={() => handleAddMeal(meal)}
-                  className="w-5 h-5 rounded-full bg-[#1445FE] text-white flex items-center justify-center"
-                >
-                  <i className="fa-solid fa-plus text-xs"></i>
-                </button>
+                {meal.calories > 0 ? (
+                  <div
+                    className="text-lg font-bold text-[#1445FE] cursor-pointer"
+                    onClick={() => handleAddMeal(meal)}
+                  >
+                    {meal.calories}
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => handleAddMeal(meal)}
+                    className="w-5 h-5 rounded-full bg-[#1445FE] text-white flex items-center justify-center"
+                  >
+                    <i className="fa-solid fa-plus text-xs"></i>
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="mt-5  w-full flex flex-wrap items-center justify-between lg:px-16 md:px-4 sm:px-0">
+            <div className="w-[140px] flex flex-col gap-2">
+              <div className="flex justify-between">
+                <div className="text-[#595858] text-sm font-semibold">
+                  Protein
+                </div>
+                <div className="text-[#595858] text-sm font-medium">
+                  {nutritionData.protein.percentage}%
+                </div>
+              </div>
+
+              <LineProgress percentage={nutritionData.protein.percentage} />
+              <div className="text-[#595858] text-sm font-medium self-center">
+                {nutritionData.protein.intake}/{nutritionData.protein.total}g
+              </div>
+            </div>
+
+            <div className="w-[140px] flex flex-col gap-2">
+              <div className="flex justify-between">
+                <div className="text-[#595858] text-sm font-semibold">Carb</div>
+                <div className="text-[#595858] text-sm font-medium">
+                  {nutritionData.carb.percentage}%
+                </div>
+              </div>
+
+              <LineProgress percentage={nutritionData.carb.percentage} />
+              <div className="text-[#595858] text-sm font-medium self-center">
+                {nutritionData.carb.intake}/{nutritionData.carb.total}g
+              </div>
+            </div>
+
+            <div className="w-[140px] flex flex-col gap-2">
+              <div className="flex justify-between">
+                <div className="text-[#595858] text-sm font-semibold">Fat</div>
+                <div className="text-[#595858] text-sm font-medium">
+                  {nutritionData.fat.percentage}%
+                </div>
+              </div>
+
+              <LineProgress percentage={nutritionData.fat.percentage} />
+              <div className="text-[#595858] text-sm font-medium self-center">
+                {nutritionData.fat.intake}/{nutritionData.fat.total}g
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-5 w-full flex gap-4 items-center justify-start lg:px-16 md:px-4 sm:px-0">
+            <div className="text-black text-base font-semibold">
+              Bạn đang thực hiện chế độ ăn:
+            </div>
+
+            <div
+              className="relative w-[140px] cursor-pointer"
+              onClick={() => setIsDietDropdownOpen(!isDietDropdownOpen)}
+            >
+              <div
+                className={`bg-${
+                  dietOptions.find((diet) => diet.label === nutritionData.diet)
+                    ?.bgColor
+                } text-black text-center text-sm rounded-2xl font-semibold py-0.5`}
+              >
+                {nutritionData.diet}
+              </div>
+
+              {isDietDropdownOpen && (
+                <div className="absolute top-6 -left-1.5 flex flex-col bg-[#EAF0F0] p-2 gap-2 rounded-lg shadow-lg">
+                  {diets.map((diet, index) => (
+                    <div
+                      key={index}
+                      onClick={() => handleDietChange(diet)}
+                      className={`w-[140px] text-black text-center text-sm rounded-2xl font-semibold py-0.5 cursor-pointer bg-white hover:bg-gray-100`}
+                    >
+                      {diet}
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
-          ))}
-        </div>
-        <div className="mt-5  w-full flex flex-wrap items-center justify-between lg:px-16 md:px-4 sm:px-0">
-          <div className="w-[140px] flex flex-col gap-2">
-            <div className="flex justify-between">
-              <div className="text-[#595858] text-sm font-semibold">
-                Protein
-              </div>
-              <div className="text-[#595858] text-sm font-medium">
-                {nutritionData.protein.percentage}%
-              </div>
-            </div>
-
-            <LineProgress percentage={nutritionData.protein.percentage} />
-            <div className="text-[#595858] text-sm font-medium self-center">
-              {nutritionData.protein.intake}/{nutritionData.protein.total}g
-            </div>
-          </div>
-
-          <div className="w-[140px] flex flex-col gap-2">
-            <div className="flex justify-between">
-              <div className="text-[#595858] text-sm font-semibold">Carb</div>
-              <div className="text-[#595858] text-sm font-medium">
-                {nutritionData.carb.percentage}%
-              </div>
-            </div>
-
-            <LineProgress percentage={nutritionData.carb.percentage} />
-            <div className="text-[#595858] text-sm font-medium self-center">
-              {nutritionData.carb.intake}/{nutritionData.carb.total}g
-            </div>
-          </div>
-
-          <div className="w-[140px] flex flex-col gap-2">
-            <div className="flex justify-between">
-              <div className="text-[#595858] text-sm font-semibold">Fat</div>
-              <div className="text-[#595858] text-sm font-medium">
-                {nutritionData.fat.percentage}%
-              </div>
-            </div>
-
-            <LineProgress percentage={nutritionData.fat.percentage} />
-            <div className="text-[#595858] text-sm font-medium self-center">
-              {nutritionData.fat.intake}/{nutritionData.fat.total}g
-            </div>
           </div>
         </div>
-
-        <div className="mt-5 w-full flex gap-4 items-center justify-start lg:px-16 md:px-4 sm:px-0">
-          <div className="text-black text-base font-semibold">
-            Bạn đang thực hiện chế độ ăn:
-          </div>
-
-          <div
-            className="relative w-[140px] cursor-pointer"
-            onClick={() => setIsDietDropdownOpen(!isDietDropdownOpen)}
-          >
-            <div
-              className={`bg-${
-                dietOptions.find((diet) => diet.label === nutritionData.diet)
-                  ?.bgColor
-              } text-black text-center text-sm rounded-2xl font-semibold py-0.5`}
-            >
-              {nutritionData.diet}
-            </div>
-
-            {isDietDropdownOpen && (
-              <div className="absolute top-6 -left-1.5 flex flex-col bg-[#EAF0F0] p-2 gap-2 rounded-lg shadow-lg">
-                {dietOptions.map((diet, index) => (
-                  <div
-                    key={index}
-                    onClick={() => handleDietChange(diet.label)}
-                    className={`w-[140px] bg-${diet.bgColor} text-black text-center text-sm rounded-2xl font-semibold py-0.5 cursor-pointer`}
-                  >
-                    {diet.label}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+      )}
       {isEditModalOpen && (
         <EditNutritionModal
           onClose={handleCloseModal}

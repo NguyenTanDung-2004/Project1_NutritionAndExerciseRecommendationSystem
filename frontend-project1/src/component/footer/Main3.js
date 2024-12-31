@@ -4,7 +4,7 @@ const Main3 = () => {
   return (
     <div
       id="main3"
-      className="bg-[#1445fe] rounded-3xl h-[250px] shadow-lg px-[20px] sm:px-[50px] lg:px-[180px] flex flex-col lg:flex-row justify-between items-center mb-5 mt-[350px] gap-5"
+      className="bg-[#1445fe] rounded-3xl h-[250px] shadow-lg px-[20px] sm:px-[50px] lg:px-[180px] flex flex-col lg:flex-row justify-between items-center mb-5 mt-[420px] gap-5"
     >
       {/* Văn bản chỉ hiển thị trên màn hình lớn */}
       <span className="text-white text-xl font-sans text-center lg:text-left hidden sm:block">
