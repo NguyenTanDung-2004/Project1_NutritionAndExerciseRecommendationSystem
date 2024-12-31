@@ -1,92 +1,32 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Layout from "../Layout";
 import AddImageModal from "./AddImageModal";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const App = () => {
+const AddExercise = () => {
   const navigate = useNavigate();
-  const { id } = useParams();
-  const [isAdding, setIsAdding] = useState(false);
-
-  const handleClickBack = () => {
-    navigate(-1);
-  };
-
   const [formData, setFormData] = useState({
     tenBaiTap: "",
     phanLoai: "Khởi động",
     met: "",
     thoiGianSet: "",
-    caloSet: "",
-    thoiGian: "0",
-    carb: "0",
-    protein: "0",
-    fat: "0",
     videoHuongDan: "",
-    hinhAnh: null,
     huyetAp: "Không",
     duongHuyet: "Không",
     timMach: "Không",
   });
   const [workoutImages, setWorkoutImages] = useState([]);
   const [newWorkoutImages, setNewWorkoutImages] = useState([]);
-  const [removedWorkoutImages, setRemovedWorkoutImages] = useState([]);
   const [isAddImageModalOpen, setAddImageModalOpen] = useState(false);
   const apiUrl = process.env.REACT_APP_API_URL;
   const [avatarFile, setAvatarFile] = useState(null);
+  const [newExerciseId, setNewExerciseId] = useState(null);
 
-  useEffect(() => {
-    if (id === "add") {
-      setIsAdding(true);
-      return;
-    }
-
-    const fetchWorkoutDetail = async () => {
-      try {
-        const response = await fetch(
-          `${apiUrl}/exercise/getExerciseDetails?exerciseId=${id}`,
-          {
-            method: "GET",
-            headers: {
-              Accept: "application/json",
-            },
-            credentials: "include",
-          }
-        );
-        if (!response.ok) {
-          const text = await response.text();
-          console.log(text);
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        console.log("api get detail", data);
-        const images = data.linkImages || [];
-
-        setFormData({
-          tenBaiTap: data.name,
-          phanLoai:
-            Object.keys(phanLoaiOptions).find(
-              (key) => phanLoaiOptions[key] === data.type
-            ) || "Khởi động",
-          met: data.met,
-          thoiGianSet: data.time,
-          videoHuongDan: data.linkVideo,
-          huyetAp: data.listHanChe?.includes("Huyết áp") ? "Có" : "Không",
-          duongHuyet: data.listHanChe?.includes("Đường huyết") ? "Có" : "Không",
-          timMach: data.listHanChe?.includes("Tim mạch") ? "Có" : "Không",
-          hinhAnh: images.length > 0 ? images[images.length - 1] : null,
-        });
-        setWorkoutImages(
-          images.length > 0 ? images.slice(0, images.length - 1) : []
-        );
-      } catch (err) {
-        console.error("Error fetching workout details:", err);
-      }
-    };
-    fetchWorkoutDetail();
-  }, [id, apiUrl]);
+  const handleClickBack = () => {
+    navigate(-1);
+  };
 
   const handleAddDishImages = (e) => {
     const files = Array.from(e.target.files);
@@ -101,16 +41,13 @@ const App = () => {
     setNewWorkoutImages(newImages);
   };
   const handleRemoveWorkoutImage = (image) => {
-    setRemovedWorkoutImages((prevImages) => [...prevImages, image]);
     setWorkoutImages((prevImages) => prevImages.filter((img) => img !== image));
   };
 
   const handleSaveWorkoutImages = async () => {
     try {
       const formDataImages = new FormData();
-      formDataImages.append("exerciseId", id);
-      formDataImages.append("flagList", "1");
-      formDataImages.append("flagRemove", "0");
+      formDataImages.append("id", newExerciseId);
 
       const filePromises = newWorkoutImages.map(async (image) => {
         const res = await fetch(image);
@@ -124,21 +61,21 @@ const App = () => {
       const files = await Promise.all(filePromises);
 
       files.forEach((file) => {
-        formDataImages.append("listNormalImages", file);
+        formDataImages.append("listImages", file);
       });
 
-      console.log("form data for update list image", formDataImages);
+      console.log("form data for create list image", formDataImages);
       for (const pair of formDataImages.entries()) {
         console.log(pair[0], pair[1]);
       }
-      const response = await fetch(`${apiUrl}/exercise/updateExerciseImages`, {
+      const response = await fetch(`${apiUrl}/exercise/createExerciseImages`, {
         method: "POST",
         body: formDataImages,
         credentials: "include",
       });
 
       const responseData = await response.json();
-      console.log("response", responseData);
+      console.log("response images", responseData);
       if (responseData.code === 1000) {
         toast.success("Cập nhật hình ảnh thành công!", {
           position: "top-right",
@@ -149,14 +86,6 @@ const App = () => {
           draggable: true,
         });
       } else {
-        // toast.error(`Cập nhật hình ảnh thất bại! ${responseData.message}`, {
-        //   position: "top-right",
-        //   autoClose: 3000,
-        //   hideProgressBar: false,
-        //   closeOnClick: true,
-        //   pauseOnHover: true,
-        //   draggable: true,
-        // });
         toast.success("Cập nhật hình ảnh thành công!", {
           position: "top-right",
           autoClose: 3000,
@@ -166,20 +95,12 @@ const App = () => {
           draggable: true,
         });
       }
-      setWorkoutImages((prevImages) => [...prevImages, ...newWorkoutImages]);
+      setWorkoutImages(newWorkoutImages);
       setAddImageModalOpen(false);
       setNewWorkoutImages([]);
     } catch (error) {
       console.error("Error updating food images:", error);
-      // toast.error(`Cập nhật hình ảnh thất bại! `, {
-      //   position: "top-right",
-      //   autoClose: 3000,
-      //   hideProgressBar: false,
-      //   closeOnClick: true,
-      //   pauseOnHover: true,
-      //   draggable: true,
-      // });
-      toast.success("Cập nhật hình ảnh thành công!", {
+      toast.error(`Cập nhật hình ảnh thất bại!`, {
         position: "top-right",
         autoClose: 3000,
         hideProgressBar: false,
@@ -190,11 +111,9 @@ const App = () => {
       setAddImageModalOpen(false);
     }
   };
-
   const handleAddImageModal = () => {
     setAddImageModalOpen(true);
   };
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevFormData) => ({
@@ -209,14 +128,13 @@ const App = () => {
       setFormData({ ...formData, hinhAnh: URL.createObjectURL(file) });
       try {
         const formDataImages = new FormData();
-        formDataImages.append("exerciseId", id);
-        formDataImages.append("flagList", 0);
-        formDataImages.append("flagRemove", 1);
-        formDataImages.append("removedImage", file);
+        formDataImages.append("id", newExerciseId);
+        formDataImages.append("remove", file);
 
-        console.log("form data for update avatar", formDataImages);
+        console.log("form data for create avatar", formDataImages);
+
         const response = await fetch(
-          `${apiUrl}/exercise/updateExerciseImages`,
+          `${apiUrl}/exercise/createExerciseImages`,
           {
             method: "POST",
             body: formDataImages,
@@ -264,65 +182,50 @@ const App = () => {
       }
     }
   };
-
   const handleClearWorkoutImages = () => {
     setWorkoutImages([]);
-    setRemovedWorkoutImages([]);
   };
   const booleanOptions = ["Không", "Có"];
-
   const handleSubmit = async (section) => {
     if (section === "thongTinCoBan") {
       try {
-        const response = await fetch(
-          `${apiUrl}/exercise/updateExercise?exerciseId=${id}`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Accept: "application/json",
-            },
-            credentials: "include",
-            body: JSON.stringify({
-              name: formData.tenBaiTap,
-              time: parseInt(formData.thoiGianSet, 10),
-              met: parseFloat(formData.met),
-              linkVideo: formData.videoHuongDan,
-              type: phanLoaiOptions[formData.phanLoai],
-              listHanChe: [
-                formData.huyetAp === "Có" ? "Huyết áp" : "",
-                formData.duongHuyet === "Có" ? "Đường huyết" : "",
-                formData.timMach === "Có" ? "Tim mạch" : "",
-              ].filter(Boolean),
-            }),
-          }
-        );
+        const response = await fetch(`${apiUrl}/exercise/createExercise`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            name: formData.tenBaiTap,
+            time: parseInt(formData.thoiGianSet, 10),
+            met: parseFloat(formData.met),
+            linkVideo: formData.videoHuongDan,
+            type: phanLoaiOptions[formData.phanLoai],
+            listHanChe: [
+              formData.huyetAp === "Có" ? "Huyết áp" : "",
+              formData.duongHuyet === "Có" ? "Đường huyết" : "",
+              formData.timMach === "Có" ? "Tim mạch" : "",
+            ].filter(Boolean),
+          }),
+        });
         if (!response.ok) {
           const text = await response.text();
           console.log(text);
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const responseData = await response.json();
+        const responseData = await response.text();
+        console.log("response info", responseData);
 
-        if (responseData.code === 1000) {
-          toast.success("Cập nhật thông tin thành công!", {
-            position: "top-right",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-          });
-        } else {
-          toast.error(`Cập nhật thông tin thất bại! ${responseData.message}`, {
-            position: "top-right",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-          });
-        }
+        setNewExerciseId(responseData);
+        toast.success("Cập nhật thông tin thành công!", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
       } catch (error) {
         toast.error("Cập nhật thông tin thất bại!", {
           position: "top-right",
@@ -336,21 +239,6 @@ const App = () => {
       }
     }
   };
-
-  const handleDeleteExercise = () => {
-    const confirmDelete = window.confirm(
-      "Bạn có chắc chắn muốn xóa bài tập này không?"
-    );
-    if (confirmDelete) {
-      alert(`Delete exercise with id: ${id}`);
-      //TODO: call api here
-    }
-  };
-
-  const handleDeleteImages = () => {
-    setFormData({ ...formData, hinhAnh: null });
-    setAvatarFile(null);
-  };
   const phanLoaiOptions = {
     Mông: "ass",
     "Toàn thân": "body",
@@ -358,9 +246,7 @@ const App = () => {
     Vai: "shoulder",
     "Khởi động": "start",
   };
-
   const phanLoaiOptionsArray = Object.keys(phanLoaiOptions);
-
   return (
     <Layout>
       <div className="flex bg-white p-4 overflow-hidden">
@@ -374,7 +260,7 @@ const App = () => {
               <i className="fa-solid fa-arrow-left "></i>
             </button>
             <h2 className="text-2xl font-semibold text-gray-800">
-              Thông tin bài tập
+              Thêm bài tập
             </h2>
           </div>
           <div className="mt-3 mb-8 flex flex-col gap-2">
@@ -586,14 +472,6 @@ const App = () => {
               />
             </label>
           </div>
-          <div className="flex justify-center mt-auto">
-            <button
-              onClick={handleDeleteExercise}
-              className="bg-red-500 hover:bg-red-700 text-white rounded-md px-4 py-2"
-            >
-              XÓA BÀI TẬP
-            </button>
-          </div>
         </div>
       </div>
       <AddImageModal
@@ -608,4 +486,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default AddExercise;

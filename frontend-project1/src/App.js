@@ -19,6 +19,7 @@ import AdminWorkout from "./pages/AdminWorkout";
 import AdminDish from "./pages/AdminDish";
 import AdminProfile from "./pages/AdminProfile";
 import AdminAddChallenges from "./pages/AdminAddChallenges";
+import AdminAddWorkout from "./pages/AdminAddWorkout";
 import AdminInfoWorkout from "./pages/AdminInfoWorkout";
 import AdminInfoDish from "./pages/AdminInfoDish";
 
@@ -44,6 +45,7 @@ function App() {
         <Route path="/dashboard/challenges" element={<AdminChallenges />} />
         <Route path="/dashboard/profile" element={<AdminProfile />} />
         <Route path="/dashboard/workout/:id" element={<AdminInfoWorkout />} />
+        <Route path="/dashboard/addWorkout" element={<AdminAddWorkout />} />
         <Route path="/dashboard/dish/:id" element={<AdminInfoDish />} />
         <Route
           path="/dashboard/challenges/add"

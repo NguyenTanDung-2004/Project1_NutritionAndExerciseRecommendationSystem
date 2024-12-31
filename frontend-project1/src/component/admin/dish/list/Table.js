@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Row from "./Row";
 import Pagination from "./Pagination";
 import SearchBar from "./SearchBar";
@@ -7,10 +7,6 @@ import { useNavigate } from "react-router-dom";
 const columns = [
   { header: "ID", className: "w-[150px] flex-[3] hidden md:table-cell" },
   { header: "TÊN", className: "w-[300px] flex-[5] hidden md:table-cell " },
-  {
-    header: "TRỌNG LƯỢNG",
-    className: "w-[150px] flex-[3] text-center  hidden md:table-cell",
-  },
   {
     header: "NĂNG LƯỢNG",
     className: "w-[150px] flex-[3]  text-center  hidden md:table-cell",
@@ -29,155 +25,47 @@ const columns = [
   },
 ];
 
-const data = [
-  {
-    id: "00001",
-    name: "BÁNH CHUỐI NGÂM QUA ĐÊM",
-    weight: "100",
-    calories: "230",
-    carb: "23.4",
-    protein: "10",
-    fat: "10",
-  },
-  {
-    id: "00002",
-    name: "YẾN MẠCH CHUỐI HẠT CHIA",
-    weight: "120",
-    calories: "250",
-    carb: "30.5",
-    protein: "12",
-    fat: "8",
-  },
-  {
-    id: "00003",
-    name: "TRỨNG LUỘC",
-    weight: "60",
-    calories: "90",
-    carb: "1.1",
-    protein: "7",
-    fat: "6",
-  },
-  {
-    id: "00004",
-    name: "ỨC GÀ ÁP CHẢO",
-    weight: "150",
-    calories: "280",
-    carb: "0",
-    protein: "30",
-    fat: "10",
-  },
-  {
-    id: "00005",
-    name: "KHOAI LANG LUỘC",
-    weight: "150",
-    calories: "130",
-    carb: "30",
-    protein: "2",
-    fat: "0.2",
-  },
-  {
-    id: "00006",
-    name: "CƠM TRẮNG",
-    weight: "100",
-    calories: "130",
-    carb: "28",
-    protein: "2",
-    fat: "0.3",
-  },
-  {
-    id: "00007",
-    name: "NƯỚC ÉP CAM",
-    weight: "200",
-    calories: "90",
-    carb: "21",
-    protein: "1",
-    fat: "0.2",
-  },
-  {
-    id: "00008",
-    name: "SALAD RAU CỦ",
-    weight: "150",
-    calories: "70",
-    carb: "10",
-    protein: "2",
-    fat: "3",
-  },
-  {
-    id: "00009",
-    name: "BƠ NGHIỀN",
-    weight: "50",
-    calories: "80",
-    carb: "4",
-    protein: "1",
-    fat: "7",
-  },
-  {
-    id: "00010",
-    name: "HẠT ÓC CHÓ",
-    weight: "30",
-    calories: "200",
-    carb: "4",
-    protein: "5",
-    fat: "20",
-  },
-  {
-    id: "00011",
-    name: "SÚP LƠ LUỘC",
-    weight: "200",
-    calories: "55",
-    carb: "11",
-    protein: "4",
-    fat: "0.5",
-  },
-  {
-    id: "00012",
-    name: "CÁ HỒI NƯỚNG",
-    weight: "120",
-    calories: "280",
-    carb: "0",
-    protein: "25",
-    fat: "20",
-  },
-  {
-    id: "00013",
-    name: "ĐẬU HŨ CHIÊN",
-    weight: "100",
-    calories: "140",
-    carb: "5",
-    protein: "8",
-    fat: "10",
-  },
-  {
-    id: "00014",
-    name: "NƯỚC DỪA",
-    weight: "250",
-    calories: "60",
-    carb: "15",
-    protein: "1",
-    fat: "0",
-  },
-  {
-    id: "00015",
-    name: "CHUỐI CHÍN",
-    weight: "120",
-    calories: "105",
-    carb: "27",
-    protein: "1",
-    fat: "0.3",
-  },
-  {
-    id: "00016",
-    name: "SỮA CHUA HY LẠP",
-    weight: "100",
-    calories: "60",
-    carb: "4",
-    protein: "10",
-    fat: "0",
-  },
-];
-
 const Table = () => {
   const navigate = useNavigate();
+  const [foods, setFoods] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchBy, setSearchBy] = useState("Tên");
+  const apiUrl = process.env.REACT_APP_API_URL;
+
+  useEffect(() => {
+    const fetchFoods = async () => {
+      try {
+        const response = await fetch(`${apiUrl}/food/getAllFoods`, {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+          },
+          credentials: "include",
+        });
+        if (!response.ok) {
+          const text = await response.text();
+          console.log(text);
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        const transformedData = data.map((item, index) => ({
+          id: String(index + 1).padStart(5, "0"),
+          foodId: item.id,
+          name: item.name,
+          calories: parseFloat(item.calories).toFixed(1),
+          carb: parseFloat(item.carb).toFixed(1),
+          protein: parseFloat(item.protein).toFixed(1),
+          fat: parseFloat(item.fat).toFixed(1),
+        }));
+        setFoods(transformedData);
+      } catch (err) {
+        console.error("Error fetching list food:", err);
+      }
+    };
+    fetchFoods();
+  }, [apiUrl]);
+
   const handleRowClick = (id) => {
     navigate(`/dashboard/dish/${id}`);
   };
@@ -186,21 +74,16 @@ const Table = () => {
     navigate(`/dashboard/dish/add`);
   };
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [searchBy, setSearchBy] = useState("Tên");
-
   const handleSearch = (term) => {
     setSearchTerm(term);
     setCurrentPage(1);
   };
 
-  const filteredData = data.filter((workout) => {
+  const filteredData = foods.filter((food) => {
     const term = searchTerm.toLowerCase();
-    if (searchBy === "Id") return workout.id.toLowerCase().includes(term);
-    if (searchBy === "Tên") return workout.name.toLowerCase().includes(term);
-
-    if (searchBy === "Tên") return workout.name.toLowerCase().includes(term);
+    if (searchBy === "Id") return food.id.toLowerCase().includes(term);
+    if (searchBy === "Tên") return food.name.toLowerCase().includes(term);
+    return food.name.toLowerCase().includes(term);
   });
 
   // Pagination
@@ -237,11 +120,11 @@ const Table = () => {
 
       {/* table */}
       <div className="mt-4 flex overflow-hidden flex-col justify-center w-full max-md:max-w-full">
-        {currentData.map((user, index) => (
+        {currentData.map((food) => (
           <Row
-            key={user.id}
-            {...user}
-            onClick={() => handleRowClick(user.id)}
+            key={food.id}
+            {...food}
+            onClick={() => handleRowClick(food.foodId)}
           />
         ))}
       </div>

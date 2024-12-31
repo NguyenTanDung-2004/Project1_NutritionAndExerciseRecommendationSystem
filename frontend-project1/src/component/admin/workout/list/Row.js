@@ -40,20 +40,6 @@ const Row = ({ id, name, soLanTap, met, time, calo, totalCalo, onClick }) => {
           {time}s
         </div>
       </div>
-
-      <div className="lg:flex-[3] w-full lg:w-[140px]  flex items-center justify-center md:py-3 mb-2 md:mb-0">
-        <div className="text-sm text-[#202224cc] ">
-          <span className="md:hidden font-bold">CALO/SET: </span>
-          {calo} calo
-        </div>
-      </div>
-
-      <div className="lg:flex-[3] w-full lg:w-[140px]  flex items-center justify-center md:py-3 mb-2 md:mb-0">
-        <div className="text-sm text-[#202224cc] ">
-          <span className="md:hidden font-bold">TỔNG CALORIES: </span>
-          {totalCalo} calo
-        </div>
-      </div>
     </div>
   );
 };

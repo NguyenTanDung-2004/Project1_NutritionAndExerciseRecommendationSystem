@@ -22,13 +22,6 @@ const Row = ({ id, name, weight, calories, carb, protein, fat, onClick }) => {
 
       <div className="lg:flex-[3] w-full lg:w-[150px] flex items-center justify-center md:py-3 mb-2 md:mb-0">
         <div className="text-sm text-[#202224cc] ">
-          <span className="md:hidden font-bold">TRỌNG LƯỢNG: </span>
-          {weight}g
-        </div>
-      </div>
-
-      <div className="lg:flex-[3] w-full lg:w-[150px] flex items-center justify-center md:py-3 mb-2 md:mb-0">
-        <div className="text-sm text-[#202224cc] ">
           <span className="md:hidden font-bold">NĂNG LƯỢNG: </span>
           {calories} calo
         </div>
