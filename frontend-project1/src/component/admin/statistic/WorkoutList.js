@@ -1,7 +1,7 @@
 import React from "react";
 import Table from "../../table/Table";
 
-const WorkoutList = () => {
+const WorkoutList = ({ data }) => {
   const columns = [
     { header: "STT", accessor: "stt", className: "px-4 py-3 " },
     {
@@ -10,62 +10,24 @@ const WorkoutList = () => {
       className: "px-4 py-3",
     },
     {
-      header: "SỐ LẦN TẬP",
-      accessor: "numbers",
+      header: "THỜI GIAN / SET",
+      accessor: "time",
       className: "px-4 py-2 text-center",
     },
-  ];
-
-  const data = [
     {
-      stt: "01",
-      name: "Bài tập khởi động cơ mông 03",
-      numbers: "300",
+      header: "MET",
+      accessor: "met",
+      className: "px-4 py-2 text-center",
     },
     {
-      stt: "02",
-      name: "Bài tập plank cơ bản",
-      numbers: "280",
+      header: "TỔNG VOTE",
+      accessor: "vote",
+      className: "px-4 py-3 text-center",
     },
     {
-      stt: "03",
-      name: "Bài tập squat cơ bản",
-      numbers: "260",
-    },
-    {
-      stt: "04",
-      name: "Bài tập hít đất nâng cao",
-      numbers: "240",
-    },
-    {
-      stt: "05",
-      name: "Bài tập kéo dãn cơ tay",
-      numbers: "220",
-    },
-    {
-      stt: "06",
-      name: "Bài tập plank nghiêng",
-      numbers: "200",
-    },
-    {
-      stt: "07",
-      name: "Bài tập cardio tại chỗ",
-      numbers: "180",
-    },
-    {
-      stt: "08",
-      name: "Bài tập xoay eo cơ bản",
-      numbers: "160",
-    },
-    {
-      stt: "09",
-      name: "Bài tập kéo giãn cơ chân",
-      numbers: "140",
-    },
-    {
-      stt: "10",
-      name: "Bài tập leo núi tại chỗ",
-      numbers: "120",
+      header: "SỐ LƯỢT THÍCH",
+      accessor: "likes",
+      className: "px-4 py-2 text-center",
     },
   ];
 
@@ -73,14 +35,19 @@ const WorkoutList = () => {
     <tr key={index} className="text-[#202224] text-opacity-80 text-sm border-t">
       <td className="px-4 py-5">{item.stt}</td>
       <td className="px-4 py-5">{item.name}</td>
-      <td className="px-4 py-5 text-center">{item.numbers}</td>
+      <td className="px-4 py-5 text-center">{item.time}s</td>
+      <td className="px-4 py-5 text-center">{item.met}</td>
+      <td className="px-4 py-5 text-center">
+        {parseFloat(item.vote.toFixed(2))}/5
+      </td>
+      <td className="px-4 py-5 text-center">{item.likes}</td>
     </tr>
   );
 
   return (
     <div className="w-full">
       <h1 className="text-base font-bold mb-4 text-[#202224]">
-        TOP 10 BÀI TẬP ĐƯỢC TẬP NHIỀU
+        TOP 3 BÀI TẬP ĐƯỢC YÊU THÍCH
       </h1>
       <Table columns={columns} renderRow={renderRow} data={data} />
     </div>

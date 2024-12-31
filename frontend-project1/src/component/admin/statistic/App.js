@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Layout from "../Layout";
 import AdminVerticalBarChart from "../../chart/AdminVerticalBarChart";
 import DishList from "./DishList";
@@ -7,95 +7,196 @@ import InfoCard from "./InfoCard";
 import AdminPieChart from "../../chart/AdminPieChart";
 
 const App = () => {
-  const top3Point = [
-    {
-      name: "Bánh chuối",
-      avatar: "https://i.ibb.co/xY1yTJX/default-avatar.jpg",
-      score: 100,
-    },
-    {
-      name: "Cà phê sữa nóng",
-      avatar: "https://via.placeholder.com/42",
-      score: 80,
-    },
-    { name: "Bún bò huế", avatar: "https://via.placeholder.com/40", score: 60 },
-  ];
-  const top3LanTap = [
-    {
-      name: "Khởi động 1",
-      avatar: "https://i.ibb.co/xY1yTJX/default-avatar.jpg",
-      score: 25,
-    },
-    {
-      name: "Mông cơ bản",
-      avatar: "https://via.placeholder.com/42",
-      score: 18,
-    },
-    {
-      name: "Cơ bắp nâng cao",
-      avatar: "https://via.placeholder.com/40",
-      score: 15,
-    },
-  ];
+  const [top3Food, setTop3Food] = useState([]);
+  const [listFood, setListFood] = useState([]);
+  const [listExercise, setListExercise] = useState([]);
+  const [top3Exercise, setTop3Exercise] = useState([]);
+  const [userStats, setUserStats] = useState({});
+
+  useEffect(() => {
+    const fetchFoodStats = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:8080/food/getFoodStatistic",
+          {
+            method: "GET",
+            headers: {
+              Accept: "application/json",
+            },
+            credentials: "include",
+          }
+        );
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        const transformedData = data.map((item, index) => ({
+          name: item.name,
+          avatar: item.linkImage,
+          score: item.numberOfLikes,
+        }));
+        const transformedData1 = data.map((item, index) => ({
+          stt: String(index + 1).padStart(2, "0"),
+          name: item.name,
+          calories: item.calories,
+          vote: item.vote,
+          likes: item.numberOfLikes,
+        }));
+        setTop3Food(transformedData);
+        setListFood(transformedData1);
+      } catch (error) {
+        console.error("Error fetching top 3 food:", error);
+      }
+    };
+
+    const fetchExerciseStats = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:8080/exercise/getExerciseStatistic",
+          {
+            method: "GET",
+            headers: {
+              Accept: "application/json",
+            },
+            credentials: "include",
+          }
+        );
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        const transformedData = data.map((item, index) => ({
+          name: item.name,
+          avatar: item.linkImage,
+          score: item.numberOfLikes,
+        }));
+        const transformedData1 = data.map((item, index) => ({
+          stt: String(index + 1).padStart(2, "0"),
+          name: item.name,
+          time: item.time,
+          met: item.met,
+          vote: item.vote,
+          likes: item.numberOfLikes,
+        }));
+        setTop3Exercise(transformedData);
+        setListExercise(transformedData1);
+      } catch (error) {
+        console.error("Error fetching top 3 exercise:", error);
+      }
+    };
+
+    const fetchUserStats = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:8080/user/getUserStatistic",
+          {
+            method: "GET",
+            headers: {
+              Accept: "application/json",
+            },
+            credentials: "include",
+          }
+        );
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setUserStats(data);
+      } catch (error) {
+        console.error("Error fetching user statistics:", error);
+      }
+    };
+
+    fetchFoodStats();
+    fetchExerciseStats();
+    fetchUserStats();
+  }, []);
+
+  const calculatePercentage = (value, total) => {
+    if (total === 0) return 0;
+    return parseFloat(((value / total) * 100).toFixed(1));
+  };
 
   const infoData1 = [
     {
-      dataInfo: "95",
+      dataInfo: userStats.totalUsers || 0,
       urliconInfo: "/images/iconUsers.svg",
+      percentageChangeInfo: -1,
       titleInfo: "số người dùng hệ thống",
     },
     {
-      dataInfo: "60",
+      dataInfo: userStats.userUnder35 || 0,
       urliconInfo: "/images/youngUsers.svg",
-      percentageChangeInfo: "25%",
+      percentageChangeInfo: calculatePercentage(
+        userStats.userUnder35,
+        userStats.totalUsers
+      ),
       titleInfo: "Nhỏ hơn 35 tuổi",
     },
 
     {
-      dataInfo: "30",
+      dataInfo: userStats.userOver35 || 0,
       urliconInfo: "/images/middleUsers.svg",
-      percentageChangeInfo: "15%",
+      percentageChangeInfo: calculatePercentage(
+        userStats.userOver35,
+        userStats.totalUsers
+      ),
       titleInfo: "35 - 55 tuổi",
     },
     {
-      dataInfo: "15",
+      dataInfo: userStats.userOver55 || 0,
       urliconInfo: "/images/oldUsers.svg",
-      percentageChangeInfo: "10%",
+      percentageChangeInfo: calculatePercentage(
+        userStats.userOver55,
+        userStats.totalUsers
+      ),
       titleInfo: "Lớn hơn 55 tuổi",
     },
   ];
 
   const infoData2 = [
     {
-      dataInfo: "95",
+      dataInfo: userStats.userThieuCan || 0,
       urliconInfo: "/images/iconUsers.svg",
-      percentageChangeInfo: "22%",
+      percentageChangeInfo: calculatePercentage(
+        userStats.userThieuCan,
+        userStats.totalUsers
+      ),
       titleInfo: "Thiếu cân: BMI < 18.5",
     },
     {
-      dataInfo: "60",
+      dataInfo: userStats.userBinhThuong || 0,
       urliconInfo: "/images/youngUsers.svg",
-      percentageChangeInfo: "25%",
+      percentageChangeInfo: calculatePercentage(
+        userStats.userBinhThuong,
+        userStats.totalUsers
+      ),
       titleInfo: "Bình thường: BMI 18.5 - 24.9",
     },
 
     {
-      dataInfo: "30",
+      dataInfo: userStats.userThuaCan || 0,
       urliconInfo: "/images/middleUsers.svg",
-      percentageChangeInfo: "15%",
+      percentageChangeInfo: calculatePercentage(
+        userStats.userThuaCan,
+        userStats.totalUsers
+      ),
       titleInfo: "Thừa cân: BMI 25 - 29.9",
     },
     {
-      dataInfo: "15",
+      dataInfo: userStats.userBeoPhi || 0,
       urliconInfo: "/images/oldUsers.svg",
-      percentageChangeInfo: "10%",
+      percentageChangeInfo: calculatePercentage(
+        userStats.userBeoPhi,
+        userStats.totalUsers
+      ),
       titleInfo: "Béo phì: BMI >= 30",
     },
   ];
 
-  const bad = 65; // Giá trị cho "Tệ"
-  const normal = 26; // Giá trị cho "Bình thường"
-  const satisfied = 82; // Giá trị cho "Hài lòng"
+  const bad = userStats.bad || 0;
+  const normal = userStats.good || 0;
+  const satisfied = userStats.satisfied || 0;
 
   const pieLabels = ["Tệ", "Bình thường", "Hài lòng"];
 
@@ -105,11 +206,11 @@ const App = () => {
         <div className="flex flex-wrap justify-between gap-3">
           <div className="w-full sm:w-[580px] bg-white p-6 rounded-2xl shadow-md mb-10">
             <h1 className="text-base font-bold mb-4 text-[#202224]">
-              TOP 3 MÓN ĂN ĐƯỢC YÊU THÍCH
+              TOP3 MÓN ĂN ĐƯỢC YÊU THÍCH
             </h1>
 
             <div className="w-full flex flex-wrap gap-10 justify-between items-center sm:px-4 md:px-8 lg:px-10">
-              <AdminVerticalBarChart data={top3Point} unit="yêu thích" />
+              <AdminVerticalBarChart data={top3Food} unit="yêu thích" />
             </div>
 
             <div className="flex mt-4 justify-center items-center ">
@@ -122,25 +223,25 @@ const App = () => {
 
           <div className="w-full sm:w-[580px] bg-white p-6 rounded-2xl shadow-md mb-10">
             <h1 className="text-base font-bold mb-4 text-[#202224]">
-              TOP 3 BÀI TẬP ĐƯỢC TẬP NHIỀU NHẤT
+              TOP 3 BÀI TẬP ĐƯỢC YÊU THÍCH NHẤT
             </h1>
 
             <div className="w-full flex flex-wrap gap-10 justify-between items-center sm:px-4 md:px-8 lg:px-10">
-              <AdminVerticalBarChart data={top3LanTap} unit="lần" />
+              <AdminVerticalBarChart data={top3Exercise} unit="yêu thích" />
             </div>
 
             <div className="flex mt-4 justify-center items-center">
               <span className="block w-10 h-1 bg-[#1445FE] mr-2 rounded-sm"></span>
               <span className="text-xs font-medium text-[#202224] text-opacity-80">
-                Số lần tập
+                Số lượt thích
               </span>
             </div>
           </div>
         </div>
 
-        <div className="flex flex-wrap sm:flex-nowrap justify-between w-full bg-white p-6 rounded-2xl shadow-md mb-10 gap-16">
-          <DishList />
-          <WorkoutList />
+        <div className="flex flex-col sm:flex-row justify-between w-full bg-white p-6 rounded-2xl shadow-md mb-10 gap-16">
+          <DishList data={listFood} />
+          <WorkoutList data={listExercise} />
         </div>
 
         <div className="flex flex-col gap-3 h-full w-full">
@@ -179,7 +280,7 @@ const App = () => {
 
             <div className=" flex flex-col gap-3">
               <div className="flex items-center gap-2">
-                <div className="w-[20px] h-[20px] bg-[#FF8E8B] rounded-full"></div>
+                <div className="w-[20px] h-[20px] bg-[#baaead] rounded-full"></div>
                 <span>Tệ</span>
               </div>
               <div className="flex items-center gap-2">

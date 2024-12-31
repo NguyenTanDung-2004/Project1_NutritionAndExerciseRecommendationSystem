@@ -33,9 +33,9 @@ const InfoCard = ({
         <span className="text-black text-sm font-medium leading-normal">
           {titleInfo}
         </span>
-        {percentageChangeInfo && (
+        {percentageChangeInfo !== -1 && (
           <p className="text-[#7C8DB5] text-sm font-medium leading-normal">
-            <span>{percentageChangeInfo}</span> tổng người dùng
+            <span>{percentageChangeInfo}%</span> tổng người dùng
           </p>
         )}
       </div>
