@@ -1,40 +1,91 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import HeartProgress from "./HeartProgress";
 import LineProgress from "./LineProgress";
 import EditNutritionModal from "./EditNutritionModal";
 
-const NutritionalInfo = () => {
+const NutritionalInfo = ({ userData }) => {
   const today = new Date().toISOString().split("T")[0];
   const [selectedDate, setSelectedDate] = useState(today);
-
   const [nutritionData, setNutritionData] = useState({
-    dailyCalories: 2000,
-    remainingCalories: 950,
+    dailyCalories: 0,
+    remainingCalories: 0,
     burnedCalories: 0,
-    intakePercentage: 50,
+    intakePercentage: 0,
     diet: "Ít tinh bột",
     meals: [
-      { label: "Bữa sáng", calories: 550 },
-      { label: "Bữa trưa", calories: 250 },
+      { label: "Bữa sáng", calories: 0 },
+      { label: "Bữa trưa", calories: 0 },
       { label: "Bữa tối", calories: 0 },
       { label: "Bữa phụ", calories: 0 },
     ],
     protein: {
-      percentage: 27,
-      intake: 27,
-      total: 100,
+      percentage: 0,
+      intake: 0,
+      total: 0,
     },
     carb: {
-      percentage: 100,
-      intake: 100,
-      total: 100,
+      percentage: 0,
+      intake: 0,
+      total: 0,
     },
     fat: {
-      percentage: 40,
-      intake: 40,
-      total: 100,
+      percentage: 0,
+      intake: 0,
+      total: 0,
     },
   });
+
+  useEffect(() => {
+    if (userData) {
+      setNutritionData({
+        dailyCalories: userData.totalCalories || 0,
+        remainingCalories:
+          userData.totalCalories - userData.currentCalories || 0,
+        burnedCalories: userData.currentBurned || 0,
+        intakePercentage:
+          userData.totalCalories > 0
+            ? (
+                (userData.currentCalories / userData.totalCalories) *
+                100
+              ).toFixed(0)
+            : 0,
+        diet: "Ít tinh bột",
+        meals: [
+          { label: "Bữa sáng", calories: 0 },
+          { label: "Bữa trưa", calories: 0 },
+          { label: "Bữa tối", calories: 0 },
+          { label: "Bữa phụ", calories: 0 },
+        ],
+        protein: {
+          percentage:
+            userData.totalProtein > 0
+              ? (
+                  (userData.currentProtein / userData.totalProtein) *
+                  100
+                ).toFixed(0)
+              : 0,
+          intake: userData.currentProtein || 0,
+          total: userData.totalProtein || 0,
+        },
+        carb: {
+          percentage:
+            userData.totalCarb > 0
+              ? ((userData.currentCarb / userData.totalCarb) * 100).toFixed(0)
+              : 0,
+          intake: userData.currentCarb || 0,
+          total: userData.totalCarb || 0,
+        },
+        fat: {
+          percentage:
+            userData.totalFat > 0
+              ? ((userData.currentFat / userData.totalFat) * 100).toFixed(0)
+              : 0,
+          intake: userData.currentFat || 0,
+          total: userData.totalFat || 0,
+        },
+      });
+    }
+  }, [userData]);
 
   const dietOptions = [
     { label: "Ít tinh bột", bgColor: "[#A2F4F3]" },

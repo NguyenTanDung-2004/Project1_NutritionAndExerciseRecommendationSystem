@@ -1,22 +1,42 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
-const GeneralInfo = () => {
-  const healthData = {
-    bmi: 25,
-    height: 150,
-    weight: 40,
-    glucoseLevel: "< 90 / < 140",
-    bloodPressure: "< 99 / < 80",
-    heartRate: "60 - 100",
-    activityIndex: 1.375,
-  };
+const GeneralInfo = ({ userData }) => {
+  const [healthData, setHealthData] = useState({
+    bmi: 0,
+    height: 0,
+    weight: 0,
+    glucoseLevel: "0",
+    bloodPressure: "0",
+    heartRate: "0",
+    activityIndex: 0,
+  });
 
-  const healthStatus = {
-    statusBMI: "Bình thường",
-    statusGluco: "Đường trong máu bình thường.",
-    statusPressure: "Huyết áp cao cấp 3!",
-    statusHeartBeat: "Tim mạch rất tốt!",
-  };
+  const [healthStatus, setHealthStatus] = useState({
+    statusBMI: "",
+    statusGluco: "",
+    statusPressure: "",
+    statusHeartBeat: "",
+  });
+
+  useEffect(() => {
+    if (userData) {
+      setHealthData({
+        bmi: userData.bmi || 0,
+        height: userData.height || 0,
+        weight: userData.weight || 0,
+        glucoseLevel: userData.gluco || "0",
+        bloodPressure: userData.pressure || "0",
+        heartRate: userData.beat || "0",
+        activityIndex: userData.heSoHoatDong || 0,
+      });
+      setHealthStatus({
+        statusBMI: userData.statusBMI || "",
+        statusGluco: userData.statusGluco || "",
+        statusPressure: userData.statusPressure || "",
+        statusHeartBeat: userData.statusHeartBeat || "",
+      });
+    }
+  }, [userData]);
 
   return (
     <div className="w-full h-auto flex flex-col gap-5">
@@ -24,7 +44,7 @@ const GeneralInfo = () => {
         <div className="flex flex-col items-center">
           <div className="text-black font-semibold">BMI</div>
           <div className="text-4xl font-bold text-[#1445FE]">
-            {healthData.bmi}
+            {parseFloat(healthData.bmi.toFixed(2))}
           </div>
         </div>
 
@@ -104,15 +124,15 @@ const GeneralInfo = () => {
           Tình trạng sức khỏe tổng quát
         </div>
         <div className="px-10 lg:px-8 md:px-6 sm:px-4 text-sm">
-          <p className="mt-2"> &#x2022; Chỉ số BMI: {healthStatus.statusBMI}</p>
+          <p className="mt-2"> • Chỉ số BMI: {healthStatus.statusBMI}</p>
           <p className="mt-2">
-            &#x2022; Chỉ số đường huyết: {healthStatus.statusGluco}
+            • Chỉ số đường huyết: {healthStatus.statusGluco}
           </p>
           <p className="mt-2">
-            &#x2022; Chỉ số huyết áp: {healthStatus.statusPressure}
+            • Chỉ số huyết áp: {healthStatus.statusPressure}
           </p>
           <p className="mt-2">
-            &#x2022; Chỉ số tim mạch: {healthStatus.statusHeartBeat}
+            • Chỉ số tim mạch: {healthStatus.statusHeartBeat}
           </p>
         </div>
       </div>
