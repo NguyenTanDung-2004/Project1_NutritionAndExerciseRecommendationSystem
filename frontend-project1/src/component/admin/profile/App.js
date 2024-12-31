@@ -1,48 +1,193 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Layout from "../Layout";
 import AvatarDefault from "../../../img/profile/default-avatar.png";
 import ChangePasswordModal from "./ChangePasswordModal";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-const App = ({ avt }) => {
-  const [avatar, setAvatar] = useState(avt || AvatarDefault);
-  const [isNameEditable, setIsNameEditable] = useState(false);
-  const [name, setName] = useState("Phan Giang");
+const App = () => {
+  const [avatar, setAvatar] = useState(AvatarDefault);
+  const [isFirstNameEditable, setIsFirstNameEditable] = useState(false);
+  const [isLastNameEditable, setIsLastNameEditable] = useState(false);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [userId, setUserId] = useState(null);
+  const [userData, setUserData] = useState({});
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [nameChange, setNameChange] = useState(false);
   const [weightChange, setWeightChange] = useState(0);
+  const apiUrl = process.env.REACT_APP_API_URL;
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await fetch(`${apiUrl}/user/userInfo`, {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+          },
+          credentials: "include",
+        });
+        if (!response.ok) {
+          const text = await response.text();
+          console.log(text);
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log("API User Info response:", data);
+        setFirstName(data.firstName || "");
+        setLastName(data.lastName || "");
+        setUserId(data.id);
+        setUserData(data);
+        setAvatar(`${apiUrl}/UserImages/${data.id}.png`);
+      } catch (err) {
+        console.error("Error fetching user info:", err);
+      }
+    };
+    fetchUserData();
+  }, [apiUrl]);
 
-  const handleEditName = () => {
-    setIsNameEditable(true);
+  const handleEditFirstName = () => {
+    setIsFirstNameEditable(true);
   };
 
-  const handleNameBlur = () => {
+  const handleFirstNameBlur = () => {
     setNameChange(true);
-    setIsNameEditable(false);
+    setIsFirstNameEditable(false);
   };
 
-  const handleNameChange = (e) => {
-    setName(e.target.value);
+  const handleFirstNameChange = (e) => {
+    setFirstName(e.target.value);
   };
 
-  const handleAvatarUpload = (e) => {
+  const handleEditLastName = () => {
+    setIsLastNameEditable(true);
+  };
+
+  const handleLastNameBlur = () => {
+    setNameChange(true);
+    setIsLastNameEditable(false);
+  };
+
+  const handleLastNameChange = (e) => {
+    setLastName(e.target.value);
+  };
+
+  const handleAvatarUpload = async (e) => {
     const file = e.target.files[0];
     if (file) {
       setWeightChange(1);
       setAvatar(URL.createObjectURL(file));
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+        const response = await fetch(`${apiUrl}/user/uploadUserImage`, {
+          method: "POST",
+          body: formData,
+          credentials: "include",
+        });
+        if (!response.ok) {
+          const text = await response.text();
+          console.log(text);
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const responseData = await response.json();
+        if (responseData.code === 1000) {
+          toast.success("Cập nhật avatar thành công!", {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          });
+        } else {
+          toast.error(`Cập nhật avatar thất bại! ${responseData.message}`, {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          });
+        }
+      } catch (error) {
+        console.error("Error uploading avatar:", error);
+        toast.error("Cập nhật avatar thất bại!", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+      }
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setWeightChange(0);
     setNameChange(false);
-    alert(`
-    Thay đổi thông tin:
-        Tên: ${name}
-        Ảnh: ${avatar}
-     `);
+
+    try {
+      const response = await fetch(`${apiUrl}/user/updateUserInfo`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          firstName: firstName,
+          lastName: lastName,
+          gender: userData.gender,
+          dob: userData.dob,
+          height: userData.height,
+          weight: userData.weight,
+          flagBloodPressure: userData.flagBloodPressure,
+          flagHeartBeat: userData.flagHeartBeat,
+          flagGluco: userData.flagGluco,
+          heSoHoatDong: userData.heSoHoatDong,
+        }),
+      });
+      if (!response.ok) {
+        const text = await response.text();
+        console.log(text);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const responseData = await response.json();
+      if (responseData.code === 1000) {
+        toast.success("Cập nhật thông tin thành công!", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+      } else {
+        toast.error(`Cập nhật thông tin thất bại! ${responseData.message}`, {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+      }
+    } catch (error) {
+      toast.error("Cập nhật thông tin thất bại!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      console.error("Error updating user info:", error);
+    }
   };
 
   const handleShowPasswordModal = () => {
@@ -112,19 +257,46 @@ const App = ({ avt }) => {
                 <label className="text-gray-700 font-semibold text-base">
                   Tên:
                 </label>
-                {isNameEditable ? (
+                {isFirstNameEditable ? (
                   <input
                     type="text"
-                    value={name}
-                    onChange={handleNameChange}
-                    onBlur={handleNameBlur}
+                    value={firstName}
+                    onChange={handleFirstNameChange}
+                    onBlur={handleFirstNameBlur}
                     className=" border border-gray-300 rounded px-3 py-2 flex-1 focus:outline-none"
                   />
                 ) : (
                   <div className="flex items-center gap-2 flex-1">
-                    <span className=" text-gray-800  text-base">{name}</span>
+                    <span className=" text-gray-800  text-base">
+                      {firstName}
+                    </span>
                     <i
-                      onClick={handleEditName}
+                      onClick={handleEditFirstName}
+                      className="fa-solid fa-pen text-gray-700  cursor-pointer"
+                    ></i>
+                  </div>
+                )}
+              </div>
+
+              <div className="mb-4 flex items-center gap-2">
+                <label className="text-gray-700 font-semibold text-base">
+                  Họ:
+                </label>
+                {isLastNameEditable ? (
+                  <input
+                    type="text"
+                    value={lastName}
+                    onChange={handleLastNameChange}
+                    onBlur={handleLastNameBlur}
+                    className=" border border-gray-300 rounded px-3 py-2 flex-1 focus:outline-none"
+                  />
+                ) : (
+                  <div className="flex items-center gap-2 flex-1">
+                    <span className=" text-gray-800  text-base">
+                      {lastName}
+                    </span>
+                    <i
+                      onClick={handleEditLastName}
                       className="fa-solid fa-pen text-gray-700  cursor-pointer"
                     ></i>
                   </div>
@@ -144,9 +316,9 @@ const App = ({ avt }) => {
           <div className="flex justify-center mt-[30px]">
             <button
               onClick={handleSave}
-              disabled={!nameChange && weightChange <= 0}
+              disabled={!nameChange}
               className={`py-2 px-4 rounded font-semibold text-white ${
-                nameChange || weightChange > 0
+                nameChange
                   ? "bg-[#1445FE] hover:bg-opacity-80"
                   : "bg-gray-400 cursor-not-allowed"
               }`}
@@ -163,8 +335,11 @@ const App = ({ avt }) => {
             onCurrentPasswordChange={handleCurrentPasswordChange}
             onNewPasswordChange={handleNewPasswordChange}
             onConfirmPasswordChange={handleConfirmPasswordChange}
+            email={userData.email}
           />
         </div>
+
+        <ToastContainer />
       </div>
     </Layout>
   );
