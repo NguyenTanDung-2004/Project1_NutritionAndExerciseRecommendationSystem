@@ -14,27 +14,27 @@ const App = () => {
   const handleClickBack = () => {
     navigate(-1);
   };
+
   const [formData, setFormData] = useState({
-    tenMonAn: "",
+    name: "",
     level: "Trung bình",
-    phuongPhapNau: "Nước uống",
-    cheDoAn: "Ăn chay (trứng, sữa)",
-    thoiGian: "0",
+    method: "Nước uống",
+    diet: "Ăn chay (trứng, sữa)",
+    time: "0",
     carb: "0",
     protein: "0",
     fat: "0",
-    huyetAp: "Không",
-    duongHuyet: "Không",
-    timMach: "Không",
-    videoHuongDan: "https://www.youtube.com/watch?v=fG7dJ6A3l7w",
-    gioiThieuMonAn: "",
+    flagBloodPressure: "Không",
+    flagBloodGlucose: "Không",
+    flagHeart: "Không",
+    linkVideo: "https://www.youtube.com/watch?v=fG7dJ6A3l7w",
+    description: "",
     hinhAnh: null,
   });
-  const [ingredients, setIngredients] = useState([]);
 
+  const [ingredients, setIngredients] = useState([]);
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
   const [ingredientToDelete, setIngredientToDelete] = useState(null);
-
   const [isAddIngredientModalOpen, setAddIngredientModalOpen] = useState(false);
   const [newIngredient, setNewIngredient] = useState({
     name: "",
@@ -45,43 +45,102 @@ const App = () => {
   const [isEditModalOpen, setEditModalOpen] = useState(false);
   const [ingredientToEdit, setIngredientToEdit] = useState(null);
   const [isDescriptionEditable, setIsDescriptionEditable] = useState(false);
-
   const [dishImages, setDishImages] = useState([]);
   const [newDishImages, setNewDishImages] = useState([]);
+  const [steps, setSteps] = useState([]);
+
+  // Các mảng options
+  const types = [
+    "Món chính",
+    "Món phụ",
+    "Món ăn vặt",
+    "Món ăn sáng",
+    "Đồ uống",
+  ];
+  const methods = [
+    "Nước uống",
+    "Xào",
+    "Rang",
+    "Nướng",
+    "Canh",
+    "Kho",
+    "Hấp",
+    "Hầm",
+    "Chiên dầu",
+    "Chiên không dầu",
+    "Pha chế",
+    "Luộc",
+  ];
+  const diets = [
+    "Ít tinh bột",
+    "Ít chất béo",
+    "Nhiều đạm",
+    "Thuần chay",
+    "Ăn chay (trứng, sữa)",
+    "Healthy",
+    "Bình thường",
+  ];
+  const levels = ["Dễ", "Trung bình", "Khó"];
+  const booleanOptions = ["Không", "Có"];
+  const apiUrl = process.env.REACT_APP_API_URL;
 
   useEffect(() => {
-    if (id !== "add") {
-      //mock data
-      setFormData({
-        tenMonAn: "Bánh chuối yến mạch",
-        level: "Trung bình",
-        phuongPhapNau: "Nước uống",
-        cheDoAn: "Ăn chay (trứng, sữa)",
-        thoiGian: "20",
-        carb: "29.3",
-        protein: "10",
-        fat: "10",
-        huyetAp: "Không",
-        duongHuyet: "Có",
-        timMach: "Không",
-        videoHuongDan: "https://www.youtube.com/watch?v=fG7dJ6A3l7w",
-        gioiThieuMonAn:
-          "Bánh chuối yến mạch là món tráng miệng thơm ngon, kết hợp vị ngọt tự nhiên của chuối với độ giòn của yến mạch, giàu dinh dưỡng và thích hợp cho người ăn lành mạnh.",
-        hinhAnh:
-          "https://images.unsplash.com/photo-1599180678171-10f571a88081?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTh8fGJhbmFuYSUyMGJyZWFkfGVufDB8fDB8fHx8MA%3D%3D&auto=format&fit=crop&w=500&q=60",
-      });
-      setIngredients([
-        { id: 1, name: "ỚT XÀY", weight: 10, energy: 50 },
-        { id: 2, name: "TIÊU ĐEN", weight: 10, energy: 50 },
-        { id: 3, name: "CHUỐI", weight: 10, energy: 50 },
-        { id: 4, name: "HÀNH", weight: 10, energy: 50 },
-      ]);
-      setDishImages([
-        "https://images.unsplash.com/photo-1599180678171-10f571a88081?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTh8fGJhbmFuYSUyMGJyZWFkfGVufDB8fDB8fHx8MA%3D%3D&auto=format&fit=crop&w=500&q=60",
-        "https://images.unsplash.com/photo-1599180678171-10f571a88081?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTh8fGJhbmFuYSUyMGJyZWFkfGVufDB8fDB8fHx8MA%3D%3D&auto=format&fit=crop&w=500&q=60",
-        "https://images.unsplash.com/photo-1599180678171-10f571a88081?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTh8fGJhbmFuYSUyMGJyZWFkfGVufDB8fDB8fHx8MA%3D%3D&auto=format&fit=crop&w=500&q=60",
-      ]);
-    }
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          `${apiUrl}/food/getFoodDetail?foodId=${id}`,
+          {
+            method: "GET",
+            headers: {
+              Accept: "application/json",
+            },
+            credentials: "include",
+          }
+        );
+        const data = await response.json();
+        console.log("API Response:", data);
+
+        setFormData({
+          name: data.name || "",
+          level: data.level ? levels[data.level - 1] : "Trung bình",
+          method: data.method ? methods[data.method - 1] : "Nước uống",
+          diet: data.diet ? diets[data.diet - 1] : "Ăn chay (trứng, sữa)",
+          time: String(data.time || "0"),
+          carb: String(data.carb || "0"),
+          protein: String(data.protein || "0"),
+          fat: String(data.fat || "0"),
+          flagBloodPressure: data.flagBloodPressure === 1 ? "Có" : "Không",
+          flagBloodGlucose: data.flagBloodGlucose === 1 ? "Có" : "Không",
+          flagHeart: data.flagHeart === 1 ? "Có" : "Không",
+          linkVideo: data.linkVideo || "",
+          description: data.description || "",
+          hinhAnh: data.listLinkImage
+            ? data.listLinkImage[data.listLinkImage.length - 1]
+            : null,
+        });
+
+        const mappedIngredients = (data.listIngredient || []).map(
+          (name, index) => ({
+            id: index + 1,
+            name: name,
+            weight: (data.listWeightIngredient || [])[index] || 0,
+            energy: (data.listCaloriesIngredient || [])[index] || 0,
+          })
+        );
+        setIngredients(mappedIngredients);
+        setSteps(data.listStep || []);
+
+        setDishImages(
+          data.listLinkImage
+            ? data.listLinkImage.slice(0, data.listLinkImage.length - 1)
+            : []
+        );
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
   }, [id]);
 
   const handleAddIngredient = () => {
@@ -140,10 +199,9 @@ const App = () => {
     const { name, value } = e.target;
     setFormData((prevFormData) => ({
       ...prevFormData,
-      [name]: value.replace(/[^0-9.]/g, ""), // Keep only digits and dots
+      [name]: value.replace(/[^0-9.]/g, ""),
     }));
   };
-
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -151,41 +209,42 @@ const App = () => {
     }
   };
 
-  const handleSubmit = (section) => {
-    if (section === "thongTinCoBan") {
-      alert(
-        `
-            Tên món ăn: ${formData.tenMonAn}
-            Level: ${formData.level}
-            Phương pháp nấu: ${formData.phuongPhapNau}
-            Chế độ ăn: ${formData.cheDoAn}
-            Thời gian: ${formData.thoiGian} phút
-            Carb: ${formData.carb} g
-            Protein: ${formData.protein} g
-            Fat: ${formData.fat} g
-            Huyết áp: ${formData.huyetAp}
-            Đường huyết: ${formData.duongHuyet}
-            Tim mạch: ${formData.timMach}
-            Video hướng dẫn: ${formData.videoHuongDan}
-            Ảnh xóa nền: ${formData.hinhAnh}
-            Giới thiệu món ăn: ${formData.gioiThieuMonAn}
-          `
-      );
-    } else if (section === "danhSachThanhPhan") {
-      alert(`
-              Danh sách thành phần :
-             ${ingredients
-               .map(
-                 (item) =>
-                   `${item.name} - ${item.weight}g - ${item.energy} calo\n`
-               )
-               .join("")}
-             `);
-    } else if (section === "danhSachHinhAnh") {
-      alert(`
-            Danh sách hình ảnh:
-            ${dishImages.join(",\n")}
-          `);
+  const handleSubmit = async () => {
+    try {
+      const response = await fetch(`${apiUrl}/food/updateFood?foodId=${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          name: formData.name,
+          level: levels.indexOf(formData.level) + 1,
+          method: methods.indexOf(formData.method) + 1,
+          diet: diets.indexOf(formData.diet) + 1,
+          time: Number(formData.time),
+          carb: Number(formData.carb),
+          protein: Number(formData.protein),
+          fat: Number(formData.fat),
+          description: formData.description,
+          linkVideo: formData.linkVideo,
+          listIngredient: ingredients.map((item) => item.name),
+          listWeightIngredient: ingredients.map((item) => item.weight),
+          listCaloriesIngredient: ingredients.map((item) => item.energy),
+          listStep: steps,
+        }),
+      });
+      if (!response.ok) {
+        const text = await response.text();
+        console.log(text);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      alert("Cập nhật thông tin món ăn thành công!");
+    } catch (error) {
+      console.error("Error updating food:", error);
+      alert("Có lỗi xảy ra khi cập nhật thông tin món ăn.");
     }
   };
 
@@ -211,6 +270,7 @@ const App = () => {
     setNewDishImages([]);
     setFormData({ ...formData, hinhAnh: newDishImages[0] });
   };
+
   const handleAddIngredientModal = () => {
     setAddIngredientModalOpen(true);
     setNewIngredient({
@@ -229,32 +289,6 @@ const App = () => {
   const handleDescriptionBlur = () => {
     setIsDescriptionEditable(false);
   };
-
-  const levelOptions = ["Dễ", "Trung bình", "Khó"];
-  const phuongPhapNauOptions = [
-    "Nước uống",
-    "Xào",
-    "Rang",
-    "Nướng",
-    "Canh",
-    "Kho",
-    "Hấp",
-    "Hầm",
-    "Chiên dầu",
-    "Chiên không dầu",
-    "Pha chế",
-    "Luộc",
-  ];
-  const cheDoAnOptions = [
-    "ít tinh bột",
-    "ít chất béo",
-    "nhiều đạm",
-    "thuần chay",
-    "Ăn chay (trứng, sữa)",
-    "Healthy",
-    "bình thường",
-  ];
-  const booleanOptions = ["Không", "Có"];
 
   const columns = [
     {
@@ -324,8 +358,8 @@ const App = () => {
                 </label>
                 <input
                   type="text"
-                  name="tenMonAn"
-                  value={formData.tenMonAn}
+                  name="name"
+                  value={formData.name}
                   onChange={handleInputChange}
                   className="w-full border border-gray-300 rounded px-3 py-2"
                 />
@@ -342,7 +376,7 @@ const App = () => {
                     onChange={handleInputChange}
                     className="w-full border border-gray-300 rounded px-3 py-2"
                   >
-                    {levelOptions.map((option) => (
+                    {levels.map((option) => (
                       <option key={option} value={option}>
                         {option}
                       </option>
@@ -354,12 +388,12 @@ const App = () => {
                     PHƯƠNG PHÁP NẤU
                   </label>
                   <select
-                    name="phuongPhapNau"
-                    value={formData.phuongPhapNau}
+                    name="method"
+                    value={formData.method}
                     onChange={handleInputChange}
                     className="w-full border border-gray-300 rounded px-3 py-2"
                   >
-                    {phuongPhapNauOptions.map((option) => (
+                    {methods.map((option) => (
                       <option key={option} value={option}>
                         {option}
                       </option>
@@ -371,12 +405,12 @@ const App = () => {
                     CHẾ ĐỘ ĂN
                   </label>
                   <select
-                    name="cheDoAn"
-                    value={formData.cheDoAn}
+                    name="diet"
+                    value={formData.diet}
                     onChange={handleInputChange}
                     className="w-full border border-gray-300 rounded px-3 py-2"
                   >
-                    {cheDoAnOptions.map((option) => (
+                    {diets.map((option) => (
                       <option key={option} value={option}>
                         {option}
                       </option>
@@ -393,8 +427,8 @@ const App = () => {
                   <div className="flex items-center border border-gray-300 rounded px-3 py-2">
                     <input
                       type="text"
-                      name="thoiGian"
-                      value={formData.thoiGian}
+                      name="time"
+                      value={formData.time}
                       onChange={handleInputChange}
                       className="w-full  focus:outline-none bg-transparent"
                     />
@@ -453,8 +487,8 @@ const App = () => {
                   CÓ HẠN CHẾ CHO NGƯỜI BỊ CÁC BỆNH LÝ VỀ HUYẾT ÁP KHÔNG ?
                 </label>
                 <select
-                  name="huyetAp"
-                  value={formData.huyetAp}
+                  name="flagBloodPressure"
+                  value={formData.flagBloodPressure}
                   onChange={handleInputChange}
                   className="w-full border border-gray-300 rounded px-3 py-2"
                 >
@@ -471,8 +505,8 @@ const App = () => {
                   CÓ HẠN CHẾ CHO NGƯỜI BỊ CÁC BỆNH LÝ VỀ ĐƯỜNG HUYẾT KHÔNG ?
                 </label>
                 <select
-                  name="duongHuyet"
-                  value={formData.duongHuyet}
+                  name="flagBloodGlucose"
+                  value={formData.flagBloodGlucose}
                   onChange={handleInputChange}
                   className="w-full border border-gray-300 rounded px-3 py-2"
                 >
@@ -489,8 +523,8 @@ const App = () => {
                   CÓ HẠN CHẾ CHO NGƯỜI BỊ CÁC BỆNH LÝ VỀ TIM MẠCH KHÔNG ?
                 </label>
                 <select
-                  name="timMach"
-                  value={formData.timMach}
+                  name="flagHeart"
+                  value={formData.flagHeart}
                   onChange={handleInputChange}
                   className="w-full border border-gray-300 rounded px-3 py-2"
                 >
@@ -508,20 +542,12 @@ const App = () => {
                 </label>
                 <input
                   type="text"
-                  name="videoHuongDan"
-                  value={formData.videoHuongDan}
+                  name="linkVideo"
+                  value={formData.linkVideo}
                   onChange={handleInputChange}
                   className="w-full border border-gray-300 rounded px-3 py-2"
                 />
               </div>
-            </div>
-            <div className="flex justify-center">
-              <button
-                onClick={() => handleSubmit("thongTinCoBan")}
-                className="bg-[#1445FE] hover:bg-opacity-80 text-white rounded-md px-6 py-2"
-              >
-                LƯU
-              </button>
             </div>
           </div>
 
@@ -544,15 +570,6 @@ const App = () => {
                   Thêm thành phần
                 </button>
               </div>
-            </div>
-
-            <div className="flex justify-center">
-              <button
-                onClick={() => handleSubmit("danhSachThanhPhan")}
-                className="bg-[#1445FE] hover:bg-opacity-80 text-white rounded-md px-6 py-2"
-              >
-                LƯU
-              </button>
             </div>
           </div>
 
@@ -590,15 +607,28 @@ const App = () => {
                 </button>
               )}
             </div>
-
-            <div className="flex justify-center">
-              <button
-                onClick={() => handleSubmit("danhSachHinhAnh")}
-                className="bg-[#1445FE] hover:bg-opacity-80 text-white rounded-md px-6 py-2"
-              >
-                LƯU
-              </button>
+          </div>
+          <div className="mb-8 flex flex-col gap-2">
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">
+              CÁC BƯỚC THỰC HIỆN
+            </h3>
+            <div className=" flex flex-col p-4 bg-[#F4F7F9] rounded-lg ">
+              <ol className="list-decimal list-inside text-[#202224] text-opacity-80 text-sm">
+                {steps.map((step, index) => (
+                  <li key={index} className="mb-2">
+                    {step}
+                  </li>
+                ))}
+              </ol>
             </div>
+          </div>
+          <div className="flex justify-center">
+            <button
+              onClick={handleSubmit}
+              className="bg-[#1445FE] hover:bg-opacity-80 text-white rounded-md px-6 py-2"
+            >
+              LƯU
+            </button>
           </div>
         </div>
 
@@ -647,16 +677,16 @@ const App = () => {
             </div>
             {isDescriptionEditable ? (
               <textarea
-                value={formData.gioiThieuMonAn}
+                value={formData.description}
                 onChange={(e) =>
-                  setFormData({ ...formData, gioiThieuMonAn: e.target.value })
+                  setFormData({ ...formData, description: e.target.value })
                 }
                 onBlur={handleDescriptionBlur}
                 className="w-full h-[150px] bg-gray-100 rounded p-3 text-[#9FA7B0] border border-gray-200 focus:border-[#1445FE] focus:outline-none "
               />
             ) : (
               <div className="bg-gray-100 rounded p-3 text-[#9FA7B0]">
-                {formData.gioiThieuMonAn}
+                {formData.description}
               </div>
             )}
           </div>
