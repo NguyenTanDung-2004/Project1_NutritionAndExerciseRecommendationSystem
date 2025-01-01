@@ -2,7 +2,15 @@ import React from "react";
 import "../../css/dish_details/CookingInstructions.css";
 import Video from "../../img/dish_details/video.mp4"; // Đường dẫn đến video mặc định
 
-const CookingInstructions = ({ first, second, video, img1, img2 }) => {
+const CookingInstructions = ({
+  first,
+  second,
+  video,
+  img1,
+  flagBloodPressure,
+  flagBloodGlucose,
+  flagHeart,
+}) => {
   const defaultVideo = Video;
 
   const handleVideoClick = () => {
@@ -12,6 +20,12 @@ const CookingInstructions = ({ first, second, video, img1, img2 }) => {
       window.open(defaultVideo, "_blank");
     }
   };
+
+  // Tạo chuỗi hạn chế
+  const restrictions = [flagBloodPressure, flagBloodGlucose, flagHeart]
+    .filter(Boolean)
+    .join(", ");
+  const hasRestrictions = restrictions.length > 0;
 
   return (
     <>
@@ -31,15 +45,14 @@ const CookingInstructions = ({ first, second, video, img1, img2 }) => {
             </div>
 
             <div className="cooking-instructions__text">
-              <span>Sơ chế nguyên liệu</span>
-
+              <span>Hạn chế</span>
               <ul>
-                {first?.length > 0 ? (
-                  first.map((ingredient, index) => (
-                    <li key={index}>{ingredient}</li>
-                  ))
+                {hasRestrictions ? (
+                  <li className="text-red-700 font-semiBold">
+                    Những người có bệnh về {restrictions}
+                  </li>
                 ) : (
-                  <li>Chưa có</li>
+                  <li>không có</li>
                 )}
               </ul>
             </div>
@@ -57,7 +70,7 @@ const CookingInstructions = ({ first, second, video, img1, img2 }) => {
                 {second?.length > 0 ? (
                   second.map((ingredient, index) => (
                     <li key={index}>
-                      &#x2022; Bước {index + 1}: {ingredient}
+                      • Bước {index + 1}: {ingredient}
                     </li>
                   ))
                 ) : (

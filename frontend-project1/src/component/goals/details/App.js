@@ -1,60 +1,76 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Header from "../../header/Header";
 import NavigationBar from "../../navigationBar/NavigationBar";
 import Footer from "../../footer/Footer";
 import { useNavigate, useLocation } from "react-router-dom";
 import GoalDay from "./GoalDay";
 import GoalOverview from "./GoalOverview";
-import { format } from "date-fns";
+import { format, isAfter, subDays } from "date-fns";
 
 const App = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [dailyData, setDailyData] = useState({});
+  const [goalDays, setGoalDays] = useState([]);
 
   const goal = location.state?.goal;
   const apiUrl = process.env.REACT_APP_API_URL;
+  const today = useRef(new Date()).current;
 
   const handleBackClick = () => {
     navigate("/goals");
   };
 
-  // Hàm để chuyển đổi ngày từ "dd/MM/yyyy" sang đối tượng Date
-  const convertToDate = (dateString) => {
-    const [day, month, year] = dateString.split("/");
+  const parseDate = (dateString) => {
+    if (!dateString) return null;
+    const [day, month, year] = dateString.split("/").map(Number);
     return new Date(year, month - 1, day);
   };
 
-  // Hàm để tạo danh sách các ngày từ endDate tới startDate
-  const generateGoalDays = (startDate, endDate) => {
-    if (!startDate || !endDate) {
-      return [];
-    }
-    const days = [];
-    let currentDate = convertToDate(startDate);
-    const stopDate = convertToDate(endDate);
+  const generateDays = (startDateString, endDateString) => {
+    const startDate = parseDate(startDateString);
+    const endDate = parseDate(endDateString);
 
-    while (currentDate <= stopDate) {
-      const formattedDate = `${format(currentDate, "dd/MM/yyyy")}`;
-      days.push({ date: formattedDate, dateObj: new Date(currentDate) });
-      currentDate.setDate(currentDate.getDate() + 1);
+    if (!startDate || !endDate) return [];
+
+    const days = [];
+    let currentDate = endDate;
+
+    while (currentDate >= startDate) {
+      days.push({
+        date: format(currentDate, "dd/MM/yyyy"),
+        dateObj: new Date(currentDate),
+      });
+      currentDate = subDays(currentDate, 1);
     }
 
     return days;
   };
 
-  // Lấy danh sách các ngày
-  const goalDays = generateGoalDays(goal?.startDate, goal?.endDate);
+  useEffect(() => {
+    if (goal && goal.startDate && goal.endDate) {
+      const generatedDays = generateDays(goal.startDate, goal.endDate);
+      setGoalDays(generatedDays);
+    } else {
+      // Handle case when goal or its dates are not defined
+      setGoalDays([]);
+    }
+  }, [goal]); // Run this effect when 'goal' changes
+
   useEffect(() => {
     const fetchDailyData = async () => {
       if (goalDays.length === 0) {
         return;
       }
-      const newDailyData = {};
       try {
-        for (const day of goalDays) {
+        const dailyDataPromises = goalDays.map(async (day) => {
           const dateObj = day.dateObj;
           const formattedDate = day.date;
+
+          if (isAfter(dateObj, today)) {
+            return { [formattedDate]: null }; // trả về null nếu là ngày trong tương lai
+          }
+
           try {
             const response = await fetch(
               `${apiUrl}/userHistory/getDataForDateReport?day=${dateObj.getDate()}&month=${
@@ -74,15 +90,20 @@ const App = () => {
               throw new Error(`HTTP error! status: ${response.status}`);
             }
             const data = await response.json();
-            newDailyData[formattedDate] = data;
+            return { [formattedDate]: data };
           } catch (err) {
             console.error(
               `Error fetching list user target for date ${formattedDate}:`,
               err
             );
-            continue;
+            return { [formattedDate]: null };
           }
-        }
+        });
+
+        const results = await Promise.all(dailyDataPromises);
+        const newDailyData = results.reduce((acc, curr) => {
+          return { ...acc, ...curr };
+        }, {});
         setDailyData(newDailyData);
       } catch (err) {
         console.error("Error fetching list user target:", err);
@@ -90,7 +111,7 @@ const App = () => {
     };
 
     fetchDailyData();
-  }, [goalDays, apiUrl]);
+  }, [apiUrl, goalDays, today]);
 
   return (
     <div className="bg-[#F3F2F7]">
@@ -129,12 +150,13 @@ const App = () => {
         {goal && (
           <GoalOverview goal={goal} dailyData={dailyData} goalDays={goalDays} />
         )}
+
         {/* Hiển thị từng ngày mục tiêu */}
         {goalDays.map((day, index) => (
           <GoalDay
             key={index}
             date={day.date}
-            index={index + 1}
+            index={goalDays.length - index}
             dailyData={dailyData[day.date]}
           />
         ))}

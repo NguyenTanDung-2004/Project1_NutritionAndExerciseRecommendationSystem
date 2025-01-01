@@ -20,12 +20,13 @@ const App = () => {
     window.scrollTo(0, 0);
   }, [pathname]);
 
+  const apiUrl = process.env.REACT_APP_API_URL;
   useEffect(() => {
     const fetchExerciseDetails = async () => {
       setLoading(true);
       setError(null);
       try {
-        const url = `http://localhost:8080/exercise/getExerciseDetails?exerciseId=${exerciseId}`;
+        const url = `${apiUrl}/exercise/getExerciseDetails?exerciseId=${exerciseId}`;
         const response = await fetch(url, {
           method: "GET",
           headers: {
@@ -43,7 +44,13 @@ const App = () => {
           });
         }
         const data = await response.json();
-        setExerciseDetails(data);
+        let lastImage = null;
+        let remainingImages = [];
+        if (data?.linkImages && data.linkImages.length > 0) {
+          lastImage = data.linkImages.pop();
+          remainingImages = data.linkImages;
+        }
+        setExerciseDetails({ ...data, lastImage, remainingImages });
       } catch (err) {
         setError(err);
         console.error("Error fetching exercise details:", err);
@@ -52,7 +59,7 @@ const App = () => {
       }
     };
     fetchExerciseDetails();
-  }, [pathname]);
+  }, [pathname, apiUrl, exerciseId]);
 
   if (loading) return <p>Loading workout details...</p>;
   if (error) return <p>Error: {error.message}</p>;
@@ -88,7 +95,7 @@ const App = () => {
 
       <div className="workout-details__main">
         <Left
-          image={exerciseDetails?.linkImages?.[0]}
+          image={exerciseDetails?.lastImage}
           exerciseId={exerciseId}
           vote={exerciseDetails?.stars}
         />
@@ -98,7 +105,7 @@ const App = () => {
           name={exerciseDetails?.name}
           rating={exerciseDetails?.stars}
           liked={exerciseDetails?.flagLiked}
-          images={exerciseDetails?.linkImages}
+          images={exerciseDetails?.remainingImages}
           met={exerciseDetails?.met}
           time={exerciseDetails?.time}
           calo={exerciseDetails?.calories}

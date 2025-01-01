@@ -36,16 +36,20 @@ const DishList = ({ date, dishData, requiredCalo }) => {
   const renderRow = (item, index) => (
     <tr key={index} className="text-[#202224] text-opacity-80 text-sm border-t">
       <td className="px-4 py-5">{item.foodName}</td>
-      <td className="px-4 py-5 text-center">{item.weight}g</td>
-      <td className="px-4 py-5 text-center ">{item.calories} calo</td>
-      <td className="px-4 py-5 text-center hidden md:table-cell">
-        {item.carb}g
+      <td className="px-4 py-5 text-center">
+        {parseFloat(item.weight.toFixed(2))}g
+      </td>
+      <td className="px-4 py-5 text-center ">
+        {parseFloat(item.calories.toFixed(2))} calo
       </td>
       <td className="px-4 py-5 text-center hidden md:table-cell">
-        {item.protein}g
+        {parseFloat(item.carb.toFixed(2))}g
       </td>
       <td className="px-4 py-5 text-center hidden md:table-cell">
-        {item.fat}g
+        {parseFloat(item.protein.toFixed(2))}g
+      </td>
+      <td className="px-4 py-5 text-center hidden md:table-cell">
+        {parseFloat(item.fat.toFixed(2))}g
       </td>
     </tr>
   );

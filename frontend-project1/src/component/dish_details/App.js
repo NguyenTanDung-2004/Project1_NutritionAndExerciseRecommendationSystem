@@ -106,6 +106,9 @@ const App = () => {
           realType: data?.type,
           flagLiked: data?.flagLiked,
           stars: data?.stars,
+          flagBloodPressure: data.flagBloodPressure === 1 ? "huyết áp" : "",
+          flagBloodGlucose: data.flagBloodGlucose === 1 ? "đường huyết" : "",
+          flagHeart: data.flagHeart === 1 ? "tim mạch" : "",
         });
       } catch (err) {
         setError(err);
@@ -223,6 +226,9 @@ const App = () => {
           second={dishDetails.listStep || ["Chưa có"]}
           video={dishDetails?.linkVideo || "Chưa có"}
           img1={dishDetails?.img2}
+          flagBloodPressure={dishDetails.flagBloodPressure}
+          flagBloodGlucose={dishDetails.flagBloodGlucose}
+          flagHeart={dishDetails.flagHeart}
         />
 
         <RecommendDish type={dishDetails.realType} />
