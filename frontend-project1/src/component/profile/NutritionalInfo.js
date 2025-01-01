@@ -17,7 +17,7 @@ const NutritionalInfo = ({ userData }) => {
     "Healthy",
     "Bình thường",
   ];
-  const [nutritionData, setNutritionData] = useState({
+  const initialNutritionData = {
     dailyCalories: 0,
     remainingCalories: 0,
     burnedCalories: 0,
@@ -44,7 +44,8 @@ const NutritionalInfo = ({ userData }) => {
       intake: 0,
       total: 0,
     },
-  });
+  };
+  const [nutritionData, setNutritionData] = useState(initialNutritionData);
   const apiUrl = process.env.REACT_APP_API_URL;
   const [loading, setLoading] = useState(false);
 
@@ -64,158 +65,171 @@ const NutritionalInfo = ({ userData }) => {
       }
       const data = await response.json();
       const flagDiet = parseInt(data);
-      setNutritionData((prevData) => ({
-        ...prevData,
-        diet: diets[flagDiet - 1],
-      }));
+      return diets[flagDiet - 1];
     } catch (error) {
       console.error("Error fetching current diet:", error);
+      return null;
+    }
+  };
+
+  const fetchNutritionData = async () => {
+    const isFutureDate = selectedDate > today;
+    if (isFutureDate) {
+      return {
+        dailyCalories: 0,
+        remainingCalories: 0,
+        burnedCalories: 0,
+        intakePercentage: 0,
+        meals: initialNutritionData.meals.map((meal) => ({
+          ...meal,
+          calories: 0,
+        })),
+        protein: {
+          percentage: 0,
+          intake: 0,
+          total: 0,
+        },
+        carb: {
+          percentage: 0,
+          intake: 0,
+          total: 0,
+        },
+        fat: {
+          percentage: 0,
+          intake: 0,
+          total: 0,
+        },
+        diet: initialNutritionData.diet,
+      };
+    }
+    try {
+      const [year, month, day] = selectedDate.split("-");
+
+      const response = await fetch(
+        `${apiUrl}/userHistory/getDataForDateReport?day=${day}&month=${month}&year=${year}`,
+        {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+          },
+          credentials: "include",
+        }
+      );
+
+      if (!response.ok) {
+        const text = await response.text();
+        console.log(text);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("API Data Report:", data);
+      const intakePercentage =
+        data.totalCalories > 0
+          ? parseFloat(
+              ((data.currentCalories / data.totalCalories) * 100).toFixed(2)
+            )
+          : 0;
+
+      const proteinPercentage =
+        data.totalProtein > 0
+          ? parseFloat(
+              ((data.currentProtein / data.totalProtein) * 100).toFixed(2)
+            )
+          : 0;
+      const carbPercentage =
+        data.totalCarb > 0
+          ? parseFloat(((data.currentCarb / data.totalCarb) * 100).toFixed(2))
+          : 0;
+      const fatPercentage =
+        data.totalFat > 0
+          ? parseFloat(((data.currentFat / data.totalFat) * 100).toFixed(2))
+          : 0;
+
+      const calculateMealCalories = (flag) => {
+        return data.listSavedFoods
+          ?.filter((item) => item.flag === flag)
+          .reduce((acc, item) => acc + (item.calories || 0), 0);
+      };
+      const breakfastCalories = calculateMealCalories(1);
+      const lunchCalories = calculateMealCalories(2);
+      const dinnerCalories = calculateMealCalories(3);
+      const snackCalories = calculateMealCalories(4);
+      const flagDiet = parseInt(data.flagDiet);
+      const diet = diets[flagDiet - 1];
+      return {
+        dailyCalories: parseFloat((data.totalCalories || 0).toFixed(2)),
+        remainingCalories: parseFloat(
+          (data.totalCalories - data.currentCalories || 0).toFixed(2)
+        ),
+        burnedCalories: parseFloat((data.currentBurned || 0).toFixed(2)),
+        intakePercentage: intakePercentage > 100 ? 100 : intakePercentage,
+        diet: diet,
+        meals: [
+          {
+            label: "Bữa sáng",
+            calories: parseFloat((breakfastCalories || 0).toFixed(2)),
+          },
+          {
+            label: "Bữa trưa",
+            calories: parseFloat((lunchCalories || 0).toFixed(2)),
+          },
+          {
+            label: "Bữa tối",
+            calories: parseFloat((dinnerCalories || 0).toFixed(2)),
+          },
+          {
+            label: "Bữa phụ",
+            calories: parseFloat((snackCalories || 0).toFixed(2)),
+          },
+        ],
+        protein: {
+          percentage: proteinPercentage > 100 ? 100 : proteinPercentage,
+          intake: parseFloat((data.currentProtein || 0).toFixed(2)),
+          total: parseFloat((data.totalProtein || 0).toFixed(2)),
+        },
+        carb: {
+          percentage: carbPercentage > 100 ? 100 : carbPercentage,
+          intake: parseFloat((data.currentCarb || 0).toFixed(2)),
+          total: parseFloat((data.totalCarb || 0).toFixed(2)),
+        },
+        fat: {
+          percentage: fatPercentage > 100 ? 100 : fatPercentage,
+          intake: parseFloat((data.currentFat || 0).toFixed(2)),
+          total: parseFloat((data.totalFat || 0).toFixed(2)),
+        },
+      };
+    } catch (e) {
+      console.log(e);
+      return null;
     }
   };
 
   useEffect(() => {
-    const fetchNutritionData = async () => {
-      const isFutureDate = selectedDate > today;
-      if (isFutureDate) {
-        setNutritionData((prevData) => ({
-          ...prevData,
-          dailyCalories: 0,
-          remainingCalories: 0,
-          burnedCalories: 0,
-          intakePercentage: 0,
-          meals: prevData.meals.map((meal) => ({ ...meal, calories: 0 })),
-          protein: {
-            percentage: 0,
-            intake: 0,
-            total: 0,
-          },
-          carb: {
-            percentage: 0,
-            intake: 0,
-            total: 0,
-          },
-          fat: {
-            percentage: 0,
-            intake: 0,
-            total: 0,
-          },
-        }));
-        setLoading(false);
-        return;
-      }
-      setLoading(true);
-      try {
-        const [year, month, day] = selectedDate.split("-");
+    setLoading(true);
 
-        const response = await fetch(
-          `${apiUrl}/userHistory/getDataForDateReport?day=${day}&month=${month}&year=${year}`,
-          {
-            method: "GET",
-            headers: {
-              Accept: "application/json",
-            },
-            credentials: "include",
-          }
-        );
-
-        if (!response.ok) {
-          const text = await response.text();
-          console.log(text);
-          throw new Error(`HTTP error! status: ${response.status}`);
+    Promise.all([fetchCurrentDiet(), fetchNutritionData()])
+      .then(([currentDiet, nutritionData]) => {
+        if (nutritionData) {
+          setNutritionData((prev) => ({
+            ...prev,
+            ...nutritionData,
+            diet: currentDiet || prev.diet,
+          }));
+        } else {
+          setNutritionData((prev) => ({
+            ...prev,
+            diet: currentDiet || prev.diet,
+          }));
         }
-
-        const data = await response.json();
-        console.log("API Data Report:", data);
-        const intakePercentage =
-          data.totalCalories > 0
-            ? parseFloat(
-                ((data.currentCalories / data.totalCalories) * 100).toFixed(2)
-              )
-            : 0;
-
-        const proteinPercentage =
-          data.totalProtein > 0
-            ? parseFloat(
-                ((data.currentProtein / data.totalProtein) * 100).toFixed(2)
-              )
-            : 0;
-        const carbPercentage =
-          data.totalCarb > 0
-            ? parseFloat(((data.currentCarb / data.totalCarb) * 100).toFixed(2))
-            : 0;
-        const fatPercentage =
-          data.totalFat > 0
-            ? parseFloat(((data.currentFat / data.totalFat) * 100).toFixed(2))
-            : 0;
-
-        const calculateMealCalories = (flag) => {
-          return data.listSavedFoods
-            ?.filter((item) => item.flag === flag)
-            .reduce((acc, item) => acc + (item.calories || 0), 0);
-        };
-        const breakfastCalories = calculateMealCalories(1);
-        const lunchCalories = calculateMealCalories(2);
-        const dinnerCalories = calculateMealCalories(3);
-        const snackCalories = calculateMealCalories(4);
-
-        setNutritionData({
-          dailyCalories: parseFloat((data.totalCalories || 0).toFixed(2)),
-          remainingCalories: parseFloat(
-            (data.totalCalories - data.currentCalories || 0).toFixed(2)
-          ),
-          burnedCalories: parseFloat((data.currentBurned || 0).toFixed(2)),
-          intakePercentage: intakePercentage > 100 ? 100 : intakePercentage,
-          diet: nutritionData.diet,
-          meals: [
-            {
-              label: "Bữa sáng",
-              calories: parseFloat((breakfastCalories || 0).toFixed(2)),
-            },
-            {
-              label: "Bữa trưa",
-              calories: parseFloat((lunchCalories || 0).toFixed(2)),
-            },
-            {
-              label: "Bữa tối",
-              calories: parseFloat((dinnerCalories || 0).toFixed(2)),
-            },
-            {
-              label: "Bữa phụ",
-              calories: parseFloat((snackCalories || 0).toFixed(2)),
-            },
-          ],
-          protein: {
-            percentage: proteinPercentage > 100 ? 100 : proteinPercentage,
-            intake: parseFloat((data.currentProtein || 0).toFixed(2)),
-            total: parseFloat((data.totalProtein || 0).toFixed(2)),
-          },
-          carb: {
-            percentage: carbPercentage > 100 ? 100 : carbPercentage,
-            intake: parseFloat((data.currentCarb || 0).toFixed(2)),
-            total: parseFloat((data.totalCarb || 0).toFixed(2)),
-          },
-          fat: {
-            percentage: fatPercentage > 100 ? 100 : fatPercentage,
-            intake: parseFloat((data.currentFat || 0).toFixed(2)),
-            total: parseFloat((data.totalFat || 0).toFixed(2)),
-          },
-        });
-      } catch (err) {
-        console.log(err);
-      } finally {
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      })
+      .finally(() => {
         setLoading(false);
-      }
-    };
-
-    fetchNutritionData();
-    fetchCurrentDiet();
+      });
   }, [selectedDate, apiUrl]);
-
-  const dietOptions = [
-    { label: "Ít tinh bột", bgColor: "[#A2F4F3]" },
-    { label: "Cân bằng", bgColor: "[#B2DFFF]" },
-    { label: "Nhiều đạm", bgColor: "[#6CE75B]" },
-  ];
 
   const [isDietDropdownOpen, setIsDietDropdownOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);

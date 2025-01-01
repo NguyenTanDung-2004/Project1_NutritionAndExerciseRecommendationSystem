@@ -49,10 +49,10 @@ const GoalOverview = ({ goal, dailyData, goalDays }) => {
     const kgNeed = -kgChange + targetValue;
 
     comment = {
-      calo: parseFloat(caloChange.toFixed(2)),
+      calo: parseFloat(currentCalories.toFixed(2)),
       kgChange: `${kgChange > 0 ? "+" : ""}${parseFloat(kgChange.toFixed(2))}`,
       kgNeed: `${kgNeed > 0 ? "+" : ""}${parseFloat(kgNeed.toFixed(2))}`,
-      time: `${dayLeft} ngày`,
+      time: `${dayLeft + 1} ngày`,
     };
   }
 
@@ -126,10 +126,10 @@ const GoalOverview = ({ goal, dailyData, goalDays }) => {
               - Lượng calories đã tiêu thụ: {comment.calo} calo
             </div>
             <div className="text-[#828181] ml-4 sm:ml-0">
-              - Số kg thay đổi: {comment.kgChange}kg
+              - Số kg thay đổi: {comment.kgNeed}kg
             </div>
             <div className="text-[#828181] ml-4 sm:ml-0">
-              - Số kg cần thay đổi để đạt mục tiêu: {comment.kgNeed}kg
+              - Số kg cần thay đổi để đạt mục tiêu: {comment.kgChange}kg
             </div>
             <div className="text-[#828181] ml-4 sm:ml-0">
               - Thời gian còn lại: {comment.time}

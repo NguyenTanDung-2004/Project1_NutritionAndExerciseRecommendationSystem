@@ -20,12 +20,12 @@ const EditNutritionModal = ({ onClose, mealLabel }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 ">
       <div className="bg-white rounded-lg w-11/12 max-w-5xl p-6 shadow-lg relative">
-        <div className="mb-4 flex justify-between items-center gap-8">
-          <input
+        <div className="mb-4 flex justify-end items-center gap-8">
+          {/* <input
             type="text"
             placeholder="Tìm kiếm..."
             className="border p-2 rounded-md flex-1 focus:outline-none "
-          />
+          /> */}
           <button
             onClick={onClose}
             className="text-gray-600 hover:text-gray-800"

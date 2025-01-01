@@ -63,7 +63,7 @@ const DishList = ({ date, dishData, requiredCalo }) => {
         <h1 className="text-base font-bold text-[#202224]">{date}</h1>
 
         <span className=" text-sm font-semibold text-[#00aaff] ">
-          Đã nạp {consumedCalo}/{needed}
+          Đã nạp {parseFloat(consumedCalo.toFixed(2))}/{needed}
         </span>
       </div>
       <Table columns={columns} renderRow={renderRow} data={dishData} />
