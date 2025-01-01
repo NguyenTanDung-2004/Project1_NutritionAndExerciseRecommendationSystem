@@ -4,6 +4,7 @@ import "../../css/account/FormLogin.css"
 import { EmailContext, PasswordContext, SignUpContext } from "../../context/account/Context";
 import DivBlur from "./DivBlur";
 import { RequestLogin } from "../../request/account/RequestLogin";
+import imageLogo from "../../img/account/logo.png"
 function CreateFormLogin(){
 
     var iEye = useRef(null);
@@ -55,6 +56,7 @@ function CreateFormLogin(){
     return (
         <div class="divRight">
             <div class="divFormLogin">
+            <img src={imageLogo}></img>
                 <div class="divInputEmail divInput">
                     <p class="pError">Your account is not exist!</p>
                     <input placeholder="Your Email:"></input>
@@ -66,10 +68,7 @@ function CreateFormLogin(){
                 </div>
                 <p onClick={() => clickDisplayForgot()}>Forgot password?</p>
                 <button onClick={() => clickLogin()}>Log In</button>
-                <div class="divContinueGoogle div1">
-                    <img src={imageGoogle}></img>
-                    <p>Continue with google</p>
-                </div>
+                
                 <div class="divDontHaveAccount div1 ">
                     <p>Don't have an account?</p>
                     <p onClick={clickSignUp} class="pSignUp">Sign Up</p>
