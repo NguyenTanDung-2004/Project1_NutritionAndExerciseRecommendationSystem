@@ -50,6 +50,10 @@
   background-color: transparent;
   z-index: -1;
 }
+
+.home__category-item {
+  color: white !important;
+}
 .category-item:hover {
   color: #dedede;
 }
