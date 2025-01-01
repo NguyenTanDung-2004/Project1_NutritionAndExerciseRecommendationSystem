@@ -197,9 +197,9 @@ const AppFood = () => {
         listWeightIngredient: ingredients.map((item) => item.weight),
         listCaloriesIngredient: ingredients.map((item) => item.energy),
         listStep: steps,
-        // flagBloodPressure: formData.flagBloodPressure === "Có" ? 1 : 0,
-        // flagBloodGlucose: formData.flagBloodGlucose === "Có" ? 1 : 0,
-        // flagHeart: formData.flagHeart === "Có" ? 1 : 0,
+        flagBloodPressure: formData.flagBloodPressure === "Có" ? 1 : 0,
+        flagBloodGlucose: formData.flagBloodGlucose === "Có" ? 1 : 0,
+        flagHeart: formData.flagHeart === "Có" ? 1 : 0,
       });
 
       console.log("API URL:", url);

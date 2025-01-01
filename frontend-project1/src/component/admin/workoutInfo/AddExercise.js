@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Layout from "../Layout";
 import AddImageModal from "./AddImageModal";
 import { useNavigate } from "react-router-dom";
@@ -109,7 +109,7 @@ const AddExercise = () => {
       console.log("response info", responseData);
       setNewExerciseId(responseData);
 
-      toast.success("Tạo bài tập với thông tin cơ bản thành công!", {
+      toast.success("Tạo bài tập thành công!", {
         position: "top-right",
         autoClose: 3000,
         hideProgressBar: false,
@@ -158,33 +158,32 @@ const AddExercise = () => {
 
         const responseImageData = await responseImage.json();
         console.log("response image", responseImageData);
-        if (responseImageData.code === 1000) {
-          toast.success("Tạo hình ảnh thành công cho bài tập!", {
-            position: "top-right",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-          });
-        } else {
-          toast.error(`Tạo hình ảnh thành công! ${responseImageData.message}`, {
-            position: "top-right",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-          });
+        if (responseImageData.code !== 1000) {
+          toast.error(
+            `Tạo hình ảnh cho bài tập thất bại! ${responseImageData.message}`,
+            {
+              position: "top-right",
+              autoClose: 3000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+            }
+          );
         }
+
         setWorkoutImages(newWorkoutImages);
         setNewWorkoutImages([]);
         setAvatarFile(null);
         setAvatarPreview(null);
       }
+
+      setTimeout(() => {
+        navigate(-1);
+      }, 3000);
     } catch (error) {
       console.error("Error updating data:", error);
-      toast.error("Cập nhật thông tin thất bại!", {
+      toast.error("Tạo bài tập thất bại!", {
         position: "top-right",
         autoClose: 3000,
         hideProgressBar: false,
