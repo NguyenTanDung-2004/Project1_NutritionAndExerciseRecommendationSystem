@@ -56,7 +56,7 @@ const Sidebar = ({ className }) => {
   };
 
   const handleLogout = () => {
-    console.log("Logging out...");
+    document.cookie = `jwtToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
     navigate("/home_out");
   };
 
