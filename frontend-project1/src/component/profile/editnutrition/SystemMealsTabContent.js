@@ -1,20 +1,45 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import CardInfo from "./CardInfo";
-import { systemMeals } from "./data";
 import DetailCardModal from "./DetailCardModal";
 
 const SystemMealsTabContent = ({ mealLabel }) => {
-  const [selectedMealId, setSelectedMealId] = useState(null);
+  const [selectedMeal, setSelectedMeal] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [systemMeals, setSystemMeals] = useState([]);
+  const apiUrl = process.env.REACT_APP_API_URL;
 
-  const handleCardClick = (id) => {
-    setSelectedMealId(id);
+  useEffect(() => {
+    const fetchSystemMeals = async () => {
+      try {
+        const response = await fetch(`${apiUrl}/food/getAllFoods`, {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+          },
+          credentials: "include",
+        });
+        if (!response.ok) {
+          const text = await response.text();
+          console.log(text);
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setSystemMeals(data);
+      } catch (error) {
+        console.error("Error fetching system meals:", error);
+      }
+    };
+    fetchSystemMeals();
+  }, [apiUrl]);
+
+  const handleCardClick = (item) => {
+    setSelectedMeal(item);
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setSelectedMealId(null);
+    setSelectedMeal(null);
   };
 
   return (
@@ -24,12 +49,12 @@ const SystemMealsTabContent = ({ mealLabel }) => {
           <div
             key={item.id}
             className="p-2"
-            onClick={() => handleCardClick(item.id)}
+            onClick={() => handleCardClick(item)}
           >
             <CardInfo
               name={item.name}
-              image={item.image}
-              calo={item.calo}
+              image={item.removeImage}
+              calo={item.calories}
               weight={item.weight}
               protein={item.protein}
               fat={item.fat}
@@ -41,8 +66,16 @@ const SystemMealsTabContent = ({ mealLabel }) => {
       {isModalOpen && (
         <DetailCardModal
           onClose={handleCloseModal}
-          mealId={selectedMealId}
           mealLabel={mealLabel}
+          name={selectedMeal.name}
+          foodId={selectedMeal.id}
+          weight={selectedMeal.weight}
+          calories={selectedMeal.calories}
+          fat={selectedMeal.fat}
+          protein={selectedMeal.protein}
+          carb={selectedMeal.carb}
+          flagSystem={1}
+          flagUpdate={0}
         />
       )}
     </div>
