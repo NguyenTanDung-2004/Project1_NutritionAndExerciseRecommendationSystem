@@ -34,6 +34,11 @@ const listNavigation = [
     link: "/profile",
     icon: "fa-solid fa-user",
   },
+  {
+    label: "Logout",
+    link: "/account",
+    icon: "fa-solid fa-arrow-right-from-bracket",
+  },
 ];
 
 export default listNavigation;

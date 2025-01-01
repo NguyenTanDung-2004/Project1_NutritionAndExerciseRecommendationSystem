@@ -59,7 +59,7 @@ function DivForgotPassword() {
   }, listValueCompleteSignUp);
 
   return (
-    <div class="divForgotPassword">
+    <div class="divForgotPassword divComplete">
       <div class="divHeader">
         <p>
           Thank you for signing up. To complete your profile, please fill in the

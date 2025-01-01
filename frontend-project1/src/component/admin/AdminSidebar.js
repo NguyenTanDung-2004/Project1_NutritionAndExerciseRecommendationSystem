@@ -24,7 +24,10 @@ const NavItem = ({ iconClass, label, href, isActive, onClick }) => {
 const Sidebar = ({ className }) => {
   const navigate = useNavigate();
   const location = useLocation();
-
+  const handleLogout = () => {
+    document.cookie = `jwtToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+    navigate("/home_out");
+  };
   const navItems = [
     {
       iconClass: "fa fa-chart-bar",
@@ -53,11 +56,6 @@ const Sidebar = ({ className }) => {
 
   const handleNavigation = (href) => {
     navigate(href);
-  };
-
-  const handleLogout = () => {
-    document.cookie = `jwtToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-    navigate("/home_out");
   };
 
   return (

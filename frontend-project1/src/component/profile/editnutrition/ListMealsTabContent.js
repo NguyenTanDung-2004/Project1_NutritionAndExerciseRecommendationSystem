@@ -81,7 +81,7 @@ const ListMealsTabContent = ({ mealLabel }) => {
           protein: mealToDelete.protein,
           calories: mealToDelete.calories,
           weight: mealToDelete.weight,
-          flagSystem: 1,
+          flagSystem: mealToDelete.flagSystem,
           flagMeal: flagMeal,
         }),
       });

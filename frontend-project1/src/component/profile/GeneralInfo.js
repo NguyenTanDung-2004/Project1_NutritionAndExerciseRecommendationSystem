@@ -6,7 +6,9 @@ const GeneralInfo = ({ userData }) => {
     height: 0,
     weight: 0,
     glucoseLevel: "0",
+    glucoseLevel1: "0",
     bloodPressure: "0",
+    bloodPressure1: "0",
     heartRate: "0",
     activityIndex: 0,
   });
@@ -25,7 +27,9 @@ const GeneralInfo = ({ userData }) => {
         height: userData.height || 0,
         weight: userData.weight || 0,
         glucoseLevel: userData.gluco || "0",
+        glucoseLevel1: userData.gluco1 || "0",
         bloodPressure: userData.pressure || "0",
+        bloodPressure1: userData.pressure1 || "0",
         heartRate: userData.beat || "0",
         activityIndex: userData.heSoHoatDong || 0,
       });
@@ -75,45 +79,72 @@ const GeneralInfo = ({ userData }) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
+      <div className="flex flex-col gap-4">
         {/* Glucose Level */}
-        <div className="bg-white rounded-lg p-4 flex flex-col h-[120px]">
-          <div className="text-black text-base font-semibold mb-2">
-            Đường huyết
+        <div className="flex justify-between">
+          <div className="bg-white rounded-lg p-4 flex flex-col h-[140px] w-[340px]">
+            <div className="text-black text-base font-semibold mb-2">
+              Đường huyết (trước khi ăn)
+            </div>
+            <div className="text-3xl font-bold text-[#1445FE] self-center ">
+              {healthData.glucoseLevel}
+            </div>
+            <div className="text-gray-400 text-sm self-center">mg/dl</div>
           </div>
-          <div className="text-3xl font-bold text-[#1445FE] self-center ">
-            {healthData.glucoseLevel}
+
+          <div className="bg-white rounded-lg p-4 flex flex-col h-[140px] w-[340px]">
+            <div className="text-black text-base font-semibold mb-2">
+              Đường huyết (sau khi ăn)
+            </div>
+            <div className="text-3xl font-bold text-[#1445FE] self-center ">
+              {healthData.glucoseLevel1}
+            </div>
+            <div className="text-gray-400 text-sm self-center">mg/dl</div>
           </div>
-          <div className="text-gray-400 text-sm self-center">mg/dl</div>
         </div>
+
         {/* Blood Pressure */}
-        <div className="bg-white rounded-lg p-4 flex flex-col  h-[120px]">
-          <div className="text-black text-base font-semibold mb-2">
-            Đường áp
+        <div className="flex justify-between">
+          <div className="bg-white rounded-lg p-4 flex flex-col  h-[140px] w-[340px]">
+            <div className="text-black text-base font-semibold mb-2">
+              Huyết áp (trước khi ăn)
+            </div>
+            <div className="text-3xl font-bold text-[#1445FE] self-center">
+              {healthData.bloodPressure}
+            </div>
+            <div className="text-gray-400 text-sm self-center">mmHg</div>
           </div>
-          <div className="text-3xl font-bold text-[#1445FE] self-center">
-            {healthData.bloodPressure}
+
+          <div className="bg-white rounded-lg p-4 flex flex-col  h-[140px] w-[340px]">
+            <div className="text-black text-base font-semibold mb-2">
+              Huyết áp (sau khi ăn)
+            </div>
+            <div className="text-3xl font-bold text-[#1445FE] self-center">
+              {healthData.bloodPressure1}
+            </div>
+            <div className="text-gray-400 text-sm self-center">mmHg</div>
           </div>
-          <div className="text-gray-400 text-sm self-center">mmHg</div>
         </div>
-        {/* Heart Rate */}
-        <div className="bg-white rounded-lg p-4 flex flex-col  h-[120px]">
-          <div className="text-black text-base font-semibold mb-2">
-            Nhịp tim
+
+        <div className="flex justify-between">
+          <div className="bg-white rounded-lg p-4 flex flex-col  h-[140px] w-[340px]">
+            <div className="text-black text-base font-semibold mb-2">
+              Nhịp tim
+            </div>
+            <div className="text-3xl font-bold text-[#1445FE] self-center">
+              {healthData.heartRate}
+            </div>
+            <div className="text-gray-400 text-sm self-center">nhịp/phút</div>
           </div>
-          <div className="text-3xl font-bold text-[#1445FE] self-center">
-            {healthData.heartRate}
-          </div>
-          <div className="text-gray-400 text-sm self-center">nhịp/phút</div>
-        </div>
-        {/* Activity Index */}
-        <div className="bg-white rounded-lg p-4 flex flex-col h-[120px]">
-          <div className="text-black text-base font-semibold">
-            Hệ số hoạt động
-          </div>
-          <div className="flex-1 flex justify-center items-center">
-            <div className="text-3xl font-bold text-[#1445FE]">
-              {healthData.activityIndex}
+
+          <div className="bg-white rounded-lg p-4 flex flex-col h-[140px] w-[340px]">
+            <div className="text-black text-base font-semibold">
+              Hệ số hoạt động
+            </div>
+            <div className="flex-1 flex justify-center items-center">
+              <div className="text-3xl font-bold text-[#1445FE]">
+                {healthData.activityIndex}
+              </div>
             </div>
           </div>
         </div>

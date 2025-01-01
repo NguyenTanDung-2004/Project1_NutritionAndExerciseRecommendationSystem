@@ -8,7 +8,7 @@
   flex-direction: column;
   gap: 14px;
   position: fixed;
-  margin-top: 80px;
+  margin-top: 50px;
   margin-right: 100px;
 }
 .navigation-item {

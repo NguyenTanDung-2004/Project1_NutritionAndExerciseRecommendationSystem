@@ -410,7 +410,7 @@ const EditHealthModal = ({ onClose, userData }) => {
               <input
                 type="text"
                 value={bloodPressurePreciseSystolic}
-                placeholder="Trước ăn"
+                placeholder="Trước khi ăn"
                 onChange={(e) =>
                   handleInputChange(e, setBloodPressurePreciseSystolic)
                 }
@@ -419,7 +419,7 @@ const EditHealthModal = ({ onClose, userData }) => {
               <input
                 type="text"
                 value={bloodPressurePreciseDiastolic}
-                placeholder="Sau ăn"
+                placeholder="Sau khi ăn"
                 onChange={(e) =>
                   handleInputChange(e, setBloodPressurePreciseDiastolic)
                 }

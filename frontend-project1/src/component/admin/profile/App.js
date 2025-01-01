@@ -20,6 +20,16 @@ const App = () => {
   const [nameChange, setNameChange] = useState(false);
   const [weightChange, setWeightChange] = useState(0);
   const apiUrl = process.env.REACT_APP_API_URL;
+
+  const checkImageExists = (url) => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.src = url;
+      img.onload = () => resolve(true);
+      img.onerror = () => resolve(false);
+    });
+  };
+
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -41,7 +51,16 @@ const App = () => {
         setLastName(data.lastName || "");
         setUserId(data.id);
         setUserData(data);
-        setAvatar(`${apiUrl}/UserImages/${data.id}.png`);
+
+        const avatarUrl = data.id
+          ? `${apiUrl}/UserImages/${data.id}.png`
+          : null;
+        if (avatarUrl) {
+          const imageExists = await checkImageExists(avatarUrl);
+          setAvatar(imageExists ? avatarUrl : AvatarDefault);
+        } else {
+          setAvatar(AvatarDefault);
+        }
       } catch (err) {
         console.error("Error fetching user info:", err);
       }
@@ -79,7 +98,9 @@ const App = () => {
     const file = e.target.files[0];
     if (file) {
       setWeightChange(1);
-      setAvatar(URL.createObjectURL(file));
+      const newAvatarUrl = URL.createObjectURL(file);
+      setAvatar(newAvatarUrl); // Hiển thị ảnh ngay lập tức
+
       try {
         const formData = new FormData();
         formData.append("file", file);
@@ -103,6 +124,10 @@ const App = () => {
             pauseOnHover: true,
             draggable: true,
           });
+          // Sau khi upload thành công, kiểm tra và set lại avatar nếu cần
+          const avatarUrl = `${apiUrl}/UserImages/${userData.id}.png`;
+          const imageExists = await checkImageExists(avatarUrl);
+          setAvatar(imageExists ? avatarUrl : AvatarDefault);
         } else {
           toast.error(`Cập nhật avatar thất bại! ${responseData.message}`, {
             position: "top-right",
@@ -225,15 +250,11 @@ const App = () => {
                   Ảnh đại diện
                 </h3>
                 <div className="w-60 h-60 rounded-full bg-gray-200 mx-auto mb-6 flex items-center justify-center">
-                  {avatar ? (
-                    <img
-                      src={avatar}
-                      alt="Avatar"
-                      className="w-full h-full rounded-full object-cover"
-                    />
-                  ) : (
-                    <i className="ml-4 fa-solid fa-user text-[20px] text-gray-500"></i>
-                  )}
+                  <img
+                    src={avatar}
+                    alt="Avatar"
+                    className="w-full h-full rounded-full object-cover"
+                  />
                 </div>
 
                 <label

@@ -10,6 +10,15 @@ const Header = ({ className }) => {
   const [lastName, setLastName] = useState("");
   const apiUrl = process.env.REACT_APP_API_URL;
 
+  const checkImageExists = (url) => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.src = url;
+      img.onload = () => resolve(true);
+      img.onerror = () => resolve(false);
+    });
+  };
+
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -29,13 +38,22 @@ const Header = ({ className }) => {
         console.log("API User Info response:", data);
         setFirstName(data.firstName || "");
         setLastName(data.lastName || "");
-        setAvatar(`${apiUrl}/UserImages/${data.id}.png`);
+        const avatarUrl = data.id
+          ? `${apiUrl}/UserImages/${data.id}.png`
+          : null;
+        if (avatarUrl) {
+          const imageExists = await checkImageExists(avatarUrl);
+          setAvatar(imageExists ? avatarUrl : AvatarDefault);
+        } else {
+          setAvatar(AvatarDefault);
+        }
       } catch (err) {
         console.error("Error fetching user info:", err);
       }
     };
     fetchUserData();
   }, [apiUrl]);
+
   const handleAvatarClick = () => {
     navigate("/dashboard/profile");
   };

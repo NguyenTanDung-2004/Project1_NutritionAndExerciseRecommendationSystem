@@ -10,6 +10,15 @@ const Header = (props) => {
   const [avatar, setAvatar] = useState(AvatarDefault);
   const apiUrl = process.env.REACT_APP_API_URL;
 
+  const checkImageExists = (url) => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.src = url;
+      img.onload = () => resolve(true);
+      img.onerror = () => resolve(false);
+    });
+  };
+
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -28,7 +37,15 @@ const Header = (props) => {
         const data = await response.json();
         console.log("API User Info response:", data);
         setUserName(data.firstName || "");
-        setAvatar(`${apiUrl}/UserImages/${data.id}.png`);
+        const avatarUrl = data.id
+          ? `${apiUrl}/UserImages/${data.id}.png`
+          : null;
+        if (avatarUrl) {
+          const imageExists = await checkImageExists(avatarUrl);
+          setAvatar(imageExists ? avatarUrl : AvatarDefault);
+        } else {
+          setAvatar(AvatarDefault);
+        }
       } catch (err) {
         console.error("Error fetching user info:", err);
       }
@@ -61,7 +78,7 @@ const Header = (props) => {
           className="circle-container avatar cursor-pointer"
           onClick={handleAvatarClick}
         >
-          <img className="avatar" src={avatar || AvatarDefault} alt="Avatar" />
+          <img className="avatar" src={avatar} alt="Avatar" />
         </div>
       </div>
     </div>
