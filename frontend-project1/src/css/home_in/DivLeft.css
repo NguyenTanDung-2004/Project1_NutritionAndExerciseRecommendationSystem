@@ -3,12 +3,12 @@
   margin: 0;
   box-sizing: border-box;
 }
-.divLeft {
+.divLeft__home {
   display: flex;
   flex-direction: column;
   gap: 40px;
 }
-.divLeft span {
+.divLeft__home span {
   font-family: "Inter", sans-serif;
   font-weight: bold;
   width: 400px;

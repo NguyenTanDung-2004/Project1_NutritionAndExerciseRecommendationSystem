@@ -1,12 +1,12 @@
 import React from "react";
 
-const Row = ({ stt, name, avatar, bmi, totalPoints }) => {
+const Row = ({ rank, name, avatar, bmi, totalPoints }) => {
   return (
     <div className="flex flex-wrap gap-3 w-full border-b border-gray-200 bg-white hover:bg-[#f4f7ff] h-auto items-start md:items-center p-2.5 cursor-pointer">
       <div className="w-full md:w-[150px] flex items-center justify-start md:py-3 mb-2 md:mb-0">
         <div className="text-sm text-[#202224] font-semibold  truncate">
-          <span className="md:hidden font-bold">STT: </span>
-          {stt}
+          <span className="md:hidden font-bold">RANK: </span>
+          {rank}
         </div>
       </div>
 

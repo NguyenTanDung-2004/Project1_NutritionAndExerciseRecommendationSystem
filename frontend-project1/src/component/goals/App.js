@@ -1,17 +1,21 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "../../css/workout/Main.css";
 import Header from "../header/Header";
 import NavigationBar from "../navigationBar/NavigationBar";
 import Footer from "../footer/Footer";
 import Card from "./Card";
 import AddGoalModal from "./AddGoalModal";
-import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const App = () => {
   const navigate = useNavigate();
   const [isAddActive, setIsAddActive] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [goals, setGoals] = useState([]);
+  const [loading, setLoading] = useState(true); // Thêm loading state
+  const [hasError500, setHasError500] = useState(false); // State để check lỗi 500
+  const apiUrl = process.env.REACT_APP_API_URL;
 
   // Hàm tính số ngày giữa 2 ngày
   const dateDiffInDays = (date1, date2) => {
@@ -89,20 +93,23 @@ const App = () => {
 
   useEffect(() => {
     const fetchGoals = async () => {
+      setLoading(true); // Set loading to true before fetch
+      setHasError500(false); // Reset error 500 state
       try {
-        const response = await fetch(
-          `http://localhost:8080/userTarget/getListUserTarget`,
-          {
-            method: "GET",
-            headers: {
-              Accept: "application/json",
-            },
-            credentials: "include",
-          }
-        );
+        const response = await fetch(`${apiUrl}/userTarget/getListUserTarget`, {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+          },
+          credentials: "include",
+        });
         if (!response.ok) {
           const text = await response.text();
           console.log(text);
+          if (response.status === 500) {
+            setHasError500(true);
+            return;
+          }
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const contentType = response.headers.get("content-type");
@@ -112,18 +119,29 @@ const App = () => {
         const data = await response.json();
         const transformedGoals = transformData(data);
         setGoals(transformedGoals);
-        // Check if all goals are completed
-        const allGoalsCompleted = transformedGoals.every(
-          (goal) => goal.status === "Đã kết thúc"
+        // Check if all goals are completed or the transformedGoals is empty
+
+        setIsAddActive(
+          transformedGoals.length === 0 ||
+            transformedGoals.every((goal) => goal.status === "Đã kết thúc")
         );
-        setIsAddActive(allGoalsCompleted);
       } catch (err) {
         console.error("Error fetching list user target:", err);
+        toast.error("Lỗi khi tải mục tiêu!", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+      } finally {
+        setLoading(false); // Set loading to false after fetch
       }
     };
 
     fetchGoals();
-  }, []);
+  }, [apiUrl]);
 
   const sortedGoals = [...goals].sort((a, b) => {
     if (a.status === "Đang thực hiện" && b.status !== "Đang thực hiện") {
@@ -134,6 +152,10 @@ const App = () => {
     }
     return 0;
   });
+
+  if (loading) {
+    return <div className="text-center">Loading...</div>;
+  }
 
   return (
     <div className="bg-[#F3F2F7]">
@@ -159,9 +181,9 @@ const App = () => {
           </div>
           <button
             onClick={handleOpenModal}
-            disabled={!isAddActive}
+            disabled={!isAddActive && !hasError500}
             className={`w-11 h-11 rounded-full text-white flex items-center justify-center shadow-[0px_4px_7px_0px_rgba(0,0,0,0.3)] ${
-              isAddActive
+              isAddActive || hasError500
                 ? "bg-[#1445FE] cursor-pointer"
                 : "bg-[#ABABAB] cursor-not-allowed"
             }`}

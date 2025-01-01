@@ -3,7 +3,6 @@ import "../../css/home_in/Services.css";
 import WorkOutImg from "../../img/home_out/workout.png";
 import NutritionalImg from "../../img/home_in/diet-recom.png";
 import StatisticImg from "../../img/home_in/statistic.png";
-import AccountImg from "../../img/home_in/avatar-default.png";
 import GoalImg from "../../img/home_in/goals.png";
 import { Link } from "react-router-dom";
 

@@ -15,7 +15,7 @@ const App = () => {
       ></Header>
       <div className="main">
         <NavigationBar itemClicked="Home"></NavigationBar>
-        <div className="body">
+        <div className="body ">
           <DivLeft></DivLeft>
           <Services></Services>
         </div>

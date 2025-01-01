@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import "../../css/workout/Main.css";
 import Header from "../header/Header";
 import NavigationBar from "../navigationBar/NavigationBar";
 import Footer from "../footer/Footer";
@@ -7,23 +8,26 @@ import ListChallenges from "./list/ListChallenges";
 import Rank from "./rank/Rank";
 import FilterList from "./list/Filter";
 import SortList from "./list/Sort";
+import { toast } from "react-toastify";
 
 const App = () => {
   const [activeView, setActiveView] = useState("list");
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("Lọc");
   const [sortType, setSortType] = useState("Sắp xếp");
+  const [loading, setLoading] = useState(true);
   const [currentUserRank, setCurrentUserRank] = useState({
     currentRank: 0,
     maxRank: 0,
     currentPoint: 0,
   });
   const [rankData, setRankData] = useState(null);
-  const percentage = 10;
+  const [percentage, setPercentage] = useState(0);
   const apiUrl = process.env.REACT_APP_API_URL;
 
   useEffect(() => {
     const fetchRankData = async () => {
+      setLoading(true);
       try {
         const response = await fetch(`${apiUrl}/challenge/getDataInRankTab`, {
           method: "GET",
@@ -44,8 +48,28 @@ const App = () => {
           maxRank: data.maxRank || 0,
           currentPoint: data.currentPoint || 0,
         });
+        // Calculate percentage
+        const topUserPoint = data?.listUserInRanks?.[0]?.currentPoint || 0;
+        if (data.currentPoint === 0 || topUserPoint === 0) {
+          setPercentage(0);
+        } else {
+          const calculatedPercentage = Math.round(
+            (data.currentPoint / topUserPoint) * 100
+          );
+          setPercentage(calculatedPercentage);
+        }
       } catch (err) {
         console.error("Error fetching rank data:", err);
+        toast.error("Lỗi khi tải bảng xếp hạng!", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+      } finally {
+        setLoading(false);
       }
     };
     fetchRankData();
@@ -69,6 +93,9 @@ const App = () => {
         ),
       }
     : null;
+  if (loading) {
+    return <div className="text-center">Loading...</div>;
+  }
 
   return (
     <div className="bg-[#F3F2F7]">
@@ -95,7 +122,7 @@ const App = () => {
 
           <div className="w-full flex justify-between">
             <div className="text-sm text-[#595858] font-medium ">
-              Vị trí {currentUserRank.currentRank}/{currentUserRank.maxRank}
+              Vị trí {currentUserRank.currentRank}
             </div>
             <div className="text-sm text-[#1445FE] font-semibold ">
               {currentUserRank.currentPoint} điểm
@@ -145,7 +172,6 @@ const App = () => {
           {activeView === "list" && (
             <div className="flex items-center gap-4">
               <SortList onSortChange={handleSortChange} />
-              {/* <FilterList onFilterChange={handleFilterChange} /> */}
             </div>
           )}
         </div>

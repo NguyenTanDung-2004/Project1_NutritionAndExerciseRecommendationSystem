@@ -4,7 +4,7 @@ import Pagination from "./Pagination";
 import SortRank from "./Sort";
 
 const columns = [
-  { header: "STT", className: "w-[150px] hidden md:table-cell" },
+  { header: "RANK", className: "w-[150px] hidden md:table-cell" },
   { header: "TÊN", className: "w-[450px] hidden md:table-cell" },
   { header: "BMI", className: "w-[300px] hidden md:table-cell" },
   { header: "TỔNG ĐIỂM", className: "flex-1 hidden md:table-cell " },
@@ -92,6 +92,7 @@ const Table = ({ listUserInRanks }) => {
           <Row
             key={user.name + index}
             {...user}
+            rank={user.rank}
             avatar={user.linkImage}
             stt={(currentPage - 1) * itemsPerPage + index + 1}
             bmi={user.bmi === "NaN" || !user.bmi ? "-" : user.bmi} // Xử lý BMI ở đây
