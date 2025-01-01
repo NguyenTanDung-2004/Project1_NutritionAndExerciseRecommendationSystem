@@ -3,17 +3,24 @@ import GoalChart from "../../chart/GoalChart";
 
 const GoalDay = ({ date, index, dailyData }) => {
   let comment = {
+    caloNeed: 0,
+    caloNap: 0,
     calo: 0,
     kg: "0",
   };
 
   if (dailyData) {
     const caloChange =
-      dailyData.totalCalories - (dailyData.currentCalories || 0);
+      (dailyData.currentCalories || 0) -
+      (dailyData.totalCalories || 0) -
+      (dailyData.currentBurned || 0);
     const kgChange = caloChange / 7700;
     comment = {
       calo: parseFloat(caloChange.toFixed(2)),
       kg: `${kgChange > 0 ? "+" : ""}${parseFloat(kgChange.toFixed(2))}`,
+      caloNeed: dailyData.totalCalories || 0,
+      caloNap:
+        (dailyData.currentCalories || 0) - (dailyData.currentBurned || 0),
     };
   }
 
@@ -70,6 +77,12 @@ const GoalDay = ({ date, index, dailyData }) => {
 
           {hasComment ? (
             <>
+              <div className="text-[#828181] mt-2 ml-4">
+                - Calories cần nạp: {comment.caloNeed} calo
+              </div>
+              <div className="text-[#828181] mt-2 ml-4">
+                - Calories thực sự nạp: {comment.caloNap} calo
+              </div>
               <div className="text-[#828181] mt-2 ml-4">
                 - Độ chênh lệch calories: {comment.calo} calo
               </div>

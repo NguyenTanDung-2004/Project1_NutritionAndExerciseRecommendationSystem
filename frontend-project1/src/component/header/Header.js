@@ -64,7 +64,7 @@ const Header = (props) => {
       </div>
       <div className="sliding-text-container">
         <div className="sliding-text">
-          Welcome, {userName}. {props.text}
+          Xin chào, {userName}. Chúc bạn tập luyện vui vẻ!
         </div>
       </div>
       <div className="header-in-right">

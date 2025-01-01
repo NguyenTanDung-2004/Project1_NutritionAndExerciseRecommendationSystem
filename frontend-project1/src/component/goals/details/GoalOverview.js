@@ -26,16 +26,18 @@ const GoalOverview = ({ goal, dailyData, goalDays }) => {
   if (dailyData && goalDays) {
     let totalCalories = 0;
     let currentCalories = 0;
+    let currentBurned = 0;
 
     for (const day of goalDays) {
       const formattedDate = day.date;
       if (dailyData[formattedDate]) {
         totalCalories += dailyData[formattedDate].totalCalories || 0;
         currentCalories += dailyData[formattedDate].currentCalories || 0;
+        currentBurned += dailyData[formattedDate].currentBurned || 0;
       }
     }
 
-    const caloChange = totalCalories - (currentCalories || 0);
+    const caloChange = currentCalories - currentBurned - totalCalories;
     const kgChange = caloChange / 7700;
     const today = new Date();
     const endDate = new Date(goal.endDate.split("/").reverse().join("/"));
@@ -49,7 +51,7 @@ const GoalOverview = ({ goal, dailyData, goalDays }) => {
     const kgNeed = -kgChange + targetValue;
 
     comment = {
-      calo: parseFloat(currentCalories.toFixed(2)),
+      calo: parseFloat(caloChange.toFixed(2)),
       kgChange: `${kgChange > 0 ? "+" : ""}${parseFloat(kgChange.toFixed(2))}`,
       kgNeed: `${kgNeed > 0 ? "+" : ""}${parseFloat(kgNeed.toFixed(2))}`,
       time: `${dayLeft + 1} ngày`,

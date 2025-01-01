@@ -13,40 +13,44 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
 const GoalChart = ({ data }) => {
   const chartData = {
-    labels: ["Calories cần nạp", "Calories thực sự nạp", "Calories tiêu hao"],
+    labels: [
+      "Protein - Fat - Carb cần nạp",
+      "Protein - Fat - Carb thực sự nạp",
+      "Calories tiêu hao",
+    ],
     datasets: [
       {
-        label: "Cần nạp - Protein",
+        label: "Protein",
         data: [data.requiredProtein, 0, 0],
         backgroundColor: "rgba(20, 69, 254, 0.8)",
         stack: "stack1",
       },
       {
-        label: "Cần nạp - Fat",
+        label: "Fat",
         data: [data.requiredFat, 0, 0],
         backgroundColor: "rgba(255, 99, 132, 0.8)",
         stack: "stack1",
       },
       {
-        label: "Cần nạp - Carb",
+        label: " Carb",
         data: [data.requiredCarb, 0, 0],
         backgroundColor: "rgba(75, 192, 192, 0.8)",
         stack: "stack1",
       },
       {
-        label: "Thực sự nạp - Protein",
+        label: "Protein",
         data: [0, data.consumedProtein, 0],
         backgroundColor: "rgba(20, 69, 254, 0.8)",
         stack: "stack2",
       },
       {
-        label: "Thực sự nạp - Fat",
+        label: " Fat",
         data: [0, data.consumedFat, 0],
         backgroundColor: "rgba(255, 99, 132, 0.8)",
         stack: "stack2",
       },
       {
-        label: "Thực sự nạp - Carb",
+        label: "Carb",
         data: [0, data.consumedCarb, 0],
         backgroundColor: "rgba(75, 192, 192, 0.8)",
         stack: "stack2",

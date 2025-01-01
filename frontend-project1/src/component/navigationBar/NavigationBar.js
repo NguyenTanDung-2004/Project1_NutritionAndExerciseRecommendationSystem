@@ -30,7 +30,7 @@ const NavigationBar = ({ itemClicked }) => {
           onClick={(e) => handleItemClick(item, e)}
         >
           <i className={item.icon}></i>
-          <span className="tooltip">{item.label}</span>
+          <span className="tooltip">{item.name}</span>
         </a>
       ))}
     </div>

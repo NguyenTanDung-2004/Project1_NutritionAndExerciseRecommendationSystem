@@ -4,19 +4,20 @@ import WorkOutImg from "../../img/home_out/workout.png";
 import NutritionalImg from "../../img/home_in/diet-recom.png";
 import StatisticImg from "../../img/home_in/statistic.png";
 import GoalImg from "../../img/home_in/goals.png";
+import ChallengesImg from "../../img/home_in/challenges.png";
 import { Link } from "react-router-dom";
 
 const Services = () => {
   const items = [
-    { id: 1, label: "Workout", img: WorkOutImg, link: "/workout" },
+    { id: 1, label: "Bài tập", img: WorkOutImg, link: "/workout" },
     {
       id: 2,
-      label: "Nutritional regimen",
+      label: "Món ăn",
       img: NutritionalImg,
       link: "/nutritional_regimen",
     },
-    { id: 3, label: "Goals", img: GoalImg, link: "/goals" },
-    { id: 4, label: "Statistics", img: StatisticImg, link: "/history" },
+    { id: 3, label: "Mục tiêu", img: GoalImg, link: "/goals" },
+    { id: 4, label: "Thống kê", img: StatisticImg, link: "/history" },
   ];
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -41,7 +42,7 @@ const Services = () => {
         <div className="health-data">
           <div className="label">
             <div className="blue-point"></div>
-            <span>Your health data</span>
+            <span>Thông tin sức khỏe</span>
           </div>
           <Link to="/profile" className="main-container">
             <div className="item">
@@ -85,27 +86,11 @@ const Services = () => {
         <div className="challenges">
           <div className="label">
             <div className="blue-point"></div>
-            <span>Challenges</span>
+            <span>Thử thách</span>
           </div>
           <div className="main-container">
             <Link to="/challenges">
-              {" "}
-              {/* Link only wraps content inside main-container*/}
-              <div className="day-container">
-                <i className="fa-regular fa-calendar"></i>
-                <span>{formattedDate}</span>
-              </div>
-              <div className="ranking">
-                <div className="item">
-                  <span>1. Phan Giang</span>
-                </div>
-                <div className="item">
-                  <span>2. Phan Giang</span>
-                </div>
-                <div className="item">
-                  <span>3. Phan Giang</span>
-                </div>
-              </div>
+              <img src={ChallengesImg} alt="thử thách" />
             </Link>
           </div>
         </div>

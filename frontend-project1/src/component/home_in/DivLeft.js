@@ -5,7 +5,7 @@ import "../../css/home_in/DivLeft.css";
 const DivLeft = () => {
   return (
     <div className="divLeft__home">
-      <span>SERVICES OVERVIEW</span>
+      <span>TỔNG QUAN</span>
       <div className="container-img">
         <img src={BodyImg} alt="" />
       </div>
