@@ -35,7 +35,7 @@
 }
 .category-item {
   text-decoration: none;
-  color: white;
+  color: text;
   font-size: 18px;
   position: relative;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);

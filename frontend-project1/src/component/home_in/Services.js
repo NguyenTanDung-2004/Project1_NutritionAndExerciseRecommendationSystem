@@ -18,7 +18,6 @@ const Services = () => {
     },
     { id: 3, label: "Goals", img: GoalImg, link: "/goals" },
     { id: 4, label: "Statistics", img: StatisticImg, link: "/history" },
-    { id: 5, label: "My profile", img: AccountImg, link: "/profile" },
   ];
 
   const [currentIndex, setCurrentIndex] = useState(0);
