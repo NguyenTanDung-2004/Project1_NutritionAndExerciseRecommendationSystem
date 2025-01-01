@@ -1,18 +1,34 @@
 import React, { useState, useEffect, useRef } from "react";
 import PieChartComponent from "../../chart/PieChartComponent";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-const DetailCardModal = ({ onClose, mealId, mealLabel }) => {
-  const [meal, setMeal] = useState(null);
+const DetailCardModal = ({
+  onClose,
+  mealLabel,
+  foodId,
+  weight,
+  calories,
+  fat,
+  protein,
+  carb,
+  name,
+  flagSystem,
+  flagUpdate,
+  onUpdateMeal,
+}) => {
   const [editable, setEditable] = useState(false);
-  const [modifiedWeight, setModifiedWeight] = useState(0);
-  const [modifiedCalo, setModifiedCalo] = useState(0);
-  const [modifiedProtein, setModifiedProtein] = useState(0);
-  const [modifiedFat, setModifiedFat] = useState(0);
-  const [modifiedCarb, setModifiedCarb] = useState(0);
+  const [modifiedName, setModifiedName] = useState(name || "");
+  const [modifiedWeight, setModifiedWeight] = useState(parseFloat(weight || 0));
+  const [modifiedCalo, setModifiedCalo] = useState(parseFloat(calories || 0));
+  const [modifiedProtein, setModifiedProtein] = useState(
+    parseFloat(protein || 0)
+  );
+  const [modifiedFat, setModifiedFat] = useState(parseFloat(fat || 0));
+  const [modifiedCarb, setModifiedCarb] = useState(parseFloat(carb || 0));
   const [proteinPercentage, setProteinPercentage] = useState(0);
   const [fatPercentage, setFatPercentage] = useState(0);
   const [carbPercentage, setCarbPercentage] = useState(0);
-
   const [exerciseTimes, setExerciseTimes] = useState({
     walk: 30,
     run: 20,
@@ -20,33 +36,27 @@ const DetailCardModal = ({ onClose, mealId, mealLabel }) => {
     swim: 19,
     ride: 21,
   });
+  const [meal, setMeal] = useState(null);
+  const apiUrl = process.env.REACT_APP_API_URL;
+
   const weightInputRef = useRef(null);
+  const nameInputRef = useRef(null);
 
   useEffect(() => {
-    const hardcodedMeal = {
-      id: mealId,
-      name: "Chả nấm kho tiêu",
-      weight: "150g",
-      calo: 300,
-      protein: 12,
-      fat: 2.5,
-      carb: 19.4,
-    };
-    setMeal(hardcodedMeal);
-    setModifiedWeight(
-      parseFloat(hardcodedMeal.weight.replace(/[^0-9.]/g, "")) || 0
-    );
-    setModifiedCalo(hardcodedMeal.calo);
-    setModifiedProtein(hardcodedMeal.protein);
-    setModifiedFat(hardcodedMeal.fat);
-    setModifiedCarb(hardcodedMeal.carb);
     calculatePercentages(
-      parseFloat(hardcodedMeal.weight.replace(/[^0-9.]/g, "")),
-      hardcodedMeal.fat,
-      hardcodedMeal.protein,
-      hardcodedMeal.carb
+      modifiedWeight,
+      modifiedFat,
+      modifiedProtein,
+      modifiedCarb
     );
-  }, [mealId]);
+    setMeal({
+      name: name,
+    });
+  }, [modifiedWeight, modifiedFat, modifiedProtein, modifiedCarb, name]);
+
+  const handleNameChange = (e) => {
+    setModifiedName(e.target.value);
+  };
 
   const handleWeightChange = (e) => {
     const newWeight = e.target.value;
@@ -62,42 +72,36 @@ const DetailCardModal = ({ onClose, mealId, mealLabel }) => {
       }
     }
   };
+
   const toggleEditable = () => {
     setEditable(!editable);
-    if (editable && weightInputRef.current) {
-      weightInputRef.current.blur();
-    }
-    if (!editable && weightInputRef.current) {
-      weightInputRef.current.focus();
-    }
-    if (!editable) {
-      calculatePercentages(
-        modifiedWeight,
-        modifiedFat,
-        modifiedProtein,
-        modifiedCarb
-      );
+    if (editable) {
+      if (weightInputRef.current) {
+        weightInputRef.current.blur();
+      }
+      if (nameInputRef.current) {
+        nameInputRef.current.blur();
+      }
     } else {
-      calculatePercentages(
-        parseFloat(meal.weight.replace(/[^0-9.]/g, "")),
-        meal.fat,
-        meal.protein,
-        meal.carb
-      );
+      if (weightInputRef.current) {
+        weightInputRef.current.focus();
+      }
+      if (nameInputRef.current) {
+        nameInputRef.current.focus();
+      }
     }
   };
 
   const calculateModifiedNutrients = (newWeight) => {
-    if (meal && typeof newWeight === "number" && newWeight > 0) {
-      const baseWeight = parseFloat(meal.weight.replace(/[^0-9.]/g, ""));
+    if (typeof newWeight === "number" && newWeight > 0) {
+      const baseWeight = parseFloat(weight);
       const ratio = newWeight / baseWeight;
-      const newCalo = Math.round(meal.calo * ratio);
+      const newCalo = Math.round(calories * ratio);
 
-      setModifiedCalo(newCalo);
-      setModifiedProtein((meal.protein * ratio).toFixed(1));
-      setModifiedFat((meal.fat * ratio).toFixed(1));
-      setModifiedCarb((meal.carb * ratio).toFixed(1));
-
+      setModifiedCalo(parseFloat((calories * ratio).toFixed(2)));
+      setModifiedProtein(parseFloat((protein * ratio).toFixed(2)));
+      setModifiedFat(parseFloat((fat * ratio).toFixed(2)));
+      setModifiedCarb(parseFloat((carb * ratio).toFixed(2)));
       setExerciseTimes({
         walk: Math.round(30 * ratio),
         run: Math.round(20 * ratio),
@@ -105,16 +109,8 @@ const DetailCardModal = ({ onClose, mealId, mealLabel }) => {
         swim: Math.round(19 * ratio),
         ride: Math.round(21 * ratio),
       });
-
-      calculatePercentages(
-        newWeight,
-        (meal.fat * ratio).toFixed(1),
-        (meal.protein * ratio).toFixed(1),
-        (meal.carb * ratio).toFixed(1)
-      );
     }
   };
-
   const calculatePercentages = (weight, fat, protein, carb) => {
     const total = parseFloat(fat) + parseFloat(protein) + parseFloat(carb);
     const fatPercent = (parseFloat(fat) / total) * 100 || 0;
@@ -125,12 +121,161 @@ const DetailCardModal = ({ onClose, mealId, mealLabel }) => {
     setProteinPercentage(proteinPercent);
     setCarbPercentage(carbPercent);
   };
-  const handleAddToMeal = () => {
-    alert(`Món ăn đã được thêm vào ${mealLabel}`);
-    onClose();
-  };
 
-  if (!meal) return null;
+  const handleAddToMeal = async () => {
+    try {
+      const flag =
+        mealLabel === "Bữa sáng"
+          ? 1
+          : mealLabel === "Bữa trưa"
+          ? 2
+          : mealLabel === "Bữa tối"
+          ? 3
+          : 4;
+      let response;
+      if (flagUpdate === 1) {
+        if (flagSystem === 1) {
+          response = await fetch(`${apiUrl}/userHistory/updateFoodInMeal`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify({
+              newName: name,
+              newFat: modifiedFat,
+              newCarb: modifiedCarb,
+              newProtein: modifiedProtein,
+              newCalories: modifiedCalo,
+              newWeight: modifiedWeight,
+              oldName: name,
+              oldFat: fat,
+              oldCarb: carb,
+              oldProtein: protein,
+              oldCalories: calories,
+              oldWeight: weight,
+              flagSystem: 1,
+              flagMeal: flag,
+            }),
+          });
+        } else {
+          response = await fetch(`${apiUrl}/userHistory/updateFoodInMeal`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify({
+              newName: modifiedName,
+              newFat: modifiedFat,
+              newCarb: modifiedCarb,
+              newProtein: modifiedProtein,
+              newCalories: modifiedCalo,
+              newWeight: modifiedWeight,
+              oldName: name,
+              oldFat: fat,
+              oldCarb: carb,
+              oldProtein: protein,
+              oldCalories: calories,
+              oldWeight: weight,
+              flagSystem: 0,
+              flagMeal: flag,
+            }),
+          });
+        }
+      } else {
+        if (flagSystem === 1) {
+          response = await fetch(`${apiUrl}/userHistory/userAddSystemFood`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify({
+              foodId: foodId,
+              weight: modifiedWeight,
+              flag: flag,
+            }),
+          });
+        } else {
+          response = await fetch(`${apiUrl}/userHistory/addUserFood`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify({
+              foodName: name,
+              weight: modifiedWeight,
+              flag: flag,
+            }),
+          });
+        }
+      }
+      if (!response.ok) {
+        const text = await response.text();
+        console.log(text);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const responseData = await response.json();
+
+      if (responseData.code === 1000) {
+        toast.success(
+          flagUpdate === 1
+            ? `Chỉnh sửa món ăn thành công vào ${mealLabel}!`
+            : `Thêm món ăn thành công vào ${mealLabel}!`,
+          {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          }
+        );
+        onClose();
+        if (flagUpdate === 1) {
+          const updatedMeal = {
+            name: flagSystem === 1 ? name : modifiedName,
+            weight: modifiedWeight,
+            calories: modifiedCalo,
+            protein: modifiedProtein,
+            carb: modifiedCarb,
+            fat: modifiedFat,
+          };
+          onUpdateMeal(updatedMeal);
+        }
+      } else {
+        toast.error(
+          flagUpdate === 1
+            ? `Chỉnh sửa món ăn vào ${mealLabel} thất bại! ${responseData.message}`
+            : `Thêm món ăn vào ${mealLabel} thất bại! ${responseData.message}`,
+          {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          }
+        );
+      }
+    } catch (err) {
+      toast.error("Thêm món ăn thất bại!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      console.log(err);
+    }
+  };
 
   const pieLabels = ["Chất béo", "Chất đạm", "Carb"];
 
@@ -146,7 +291,7 @@ const DetailCardModal = ({ onClose, mealId, mealLabel }) => {
               <i className="fa-solid fa-arrow-left text-xl"></i>
             </button>
             <h2 className="text-xl font-semibold text-gray-800 uppercase">
-              {meal.name}
+              {meal?.name}
             </h2>
             <i
               className={`fa-solid ${
@@ -167,8 +312,22 @@ const DetailCardModal = ({ onClose, mealId, mealLabel }) => {
 
         <div className="flex flex-col gap-4">
           <div className="text-gray-500 text-sm text-center">
-            Năng lượng: {editable ? modifiedCalo : meal.calo} kCal
+            Năng lượng: {editable ? modifiedCalo : calories} kCal
           </div>
+          {flagSystem !== 1 && (
+            <div className="flex items-center gap-2 text-center justify-center">
+              <input
+                ref={nameInputRef}
+                type="text"
+                value={modifiedName}
+                onChange={handleNameChange}
+                className={`border p-2 rounded-md w-[150px] text-center focus:outline-none ${
+                  editable ? "focus:outline-[#1445FE] border-[#1445FE]" : ""
+                }`}
+                disabled={!editable}
+              />
+            </div>
+          )}
           <div className="flex items-center gap-2 text-center justify-center">
             <input
               ref={weightInputRef}
@@ -194,26 +353,28 @@ const DetailCardModal = ({ onClose, mealId, mealLabel }) => {
               <div className="flex items-center gap-2">
                 <div className="w-[20px] h-[20px] bg-[#FF8E8B] rounded-full"></div>
                 <span className="text-gray-700 font-medium text-sm">
-                  Chất béo: {editable ? modifiedFat : meal.fat}g
+                  Chất béo:{" "}
+                  {editable ? modifiedFat : parseFloat(fat).toFixed(2)}g
                 </span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-[20px] h-[20px] bg-[#36C5E2] rounded-full"></div>
                 <span className="text-gray-700 font-medium text-sm">
-                  Chất đạm: {editable ? modifiedProtein : meal.protein}g
+                  Chất đạm:{" "}
+                  {editable ? modifiedProtein : parseFloat(protein).toFixed(2)}g
                 </span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-[20px] h-[20px] bg-[#9188FC] rounded-full"></div>
                 <span className="text-gray-700 font-medium text-sm">
-                  Carb: {editable ? modifiedCarb : meal.carb}g
+                  Carb: {editable ? modifiedCarb : parseFloat(carb).toFixed(2)}g
                 </span>
               </div>
             </div>
           </div>
 
           <span className="font-semibold text-base text-black">
-            Làm sao để tiêu hao {editable ? modifiedCalo : meal.calo} kCal
+            Làm sao để tiêu hao {editable ? modifiedCalo : calories} kCal
           </span>
           <div className="flex gap-6 justify-center bg-[#F9F9F9] shadow-[6px_6px_40px_0px_rgba(0,0,0,0.20)] rounded-xl p-4 ">
             <div className="flex-1 flex items-center justify-center flex-col">
@@ -281,7 +442,7 @@ const DetailCardModal = ({ onClose, mealId, mealLabel }) => {
             className="mt-4 py-2 px-4 rounded-md text-white font-semibold bg-[#1445FE] hover:bg-opacity-80 cursor-pointer uppercase self-center"
             onClick={handleAddToMeal}
           >
-            THÊM VÀO {mealLabel}
+            {flagUpdate === 1 ? `CHỈNH SỬA MÓN ĂN` : `THÊM VÀO ${mealLabel}`}
           </button>
         </div>
       </div>

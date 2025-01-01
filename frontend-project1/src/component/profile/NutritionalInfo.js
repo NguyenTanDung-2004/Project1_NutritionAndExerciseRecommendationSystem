@@ -48,8 +48,61 @@ const NutritionalInfo = ({ userData }) => {
   const apiUrl = process.env.REACT_APP_API_URL;
   const [loading, setLoading] = useState(false);
 
+  const fetchCurrentDiet = async () => {
+    try {
+      const response = await fetch(`${apiUrl}/user/getCurrentDiet`, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+        },
+        credentials: "include",
+      });
+      if (!response.ok) {
+        const text = await response.text();
+        console.log(text);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      const flagDiet = parseInt(data);
+      setNutritionData((prevData) => ({
+        ...prevData,
+        diet: diets[flagDiet - 1],
+      }));
+    } catch (error) {
+      console.error("Error fetching current diet:", error);
+    }
+  };
+
   useEffect(() => {
     const fetchNutritionData = async () => {
+      const isFutureDate = selectedDate > today;
+      if (isFutureDate) {
+        setNutritionData((prevData) => ({
+          ...prevData,
+          dailyCalories: 0,
+          remainingCalories: 0,
+          burnedCalories: 0,
+          intakePercentage: 0,
+          meals: prevData.meals.map((meal) => ({ ...meal, calories: 0 })),
+          protein: {
+            percentage: 0,
+            intake: 0,
+            total: 0,
+          },
+          carb: {
+            percentage: 0,
+            intake: 0,
+            total: 0,
+          },
+          fat: {
+            percentage: 0,
+            intake: 0,
+            total: 0,
+          },
+        }));
+        setLoading(false);
+        return;
+      }
       setLoading(true);
       try {
         const [year, month, day] = selectedDate.split("-");
@@ -73,6 +126,37 @@ const NutritionalInfo = ({ userData }) => {
 
         const data = await response.json();
         console.log("API Data Report:", data);
+        const intakePercentage =
+          data.totalCalories > 0
+            ? parseFloat(
+                ((data.currentCalories / data.totalCalories) * 100).toFixed(2)
+              )
+            : 0;
+
+        const proteinPercentage =
+          data.totalProtein > 0
+            ? parseFloat(
+                ((data.currentProtein / data.totalProtein) * 100).toFixed(2)
+              )
+            : 0;
+        const carbPercentage =
+          data.totalCarb > 0
+            ? parseFloat(((data.currentCarb / data.totalCarb) * 100).toFixed(2))
+            : 0;
+        const fatPercentage =
+          data.totalFat > 0
+            ? parseFloat(((data.currentFat / data.totalFat) * 100).toFixed(2))
+            : 0;
+
+        const calculateMealCalories = (flag) => {
+          return data.listSavedFoods
+            ?.filter((item) => item.flag === flag)
+            .reduce((acc, item) => acc + (item.calories || 0), 0);
+        };
+        const breakfastCalories = calculateMealCalories(1);
+        const lunchCalories = calculateMealCalories(2);
+        const dinnerCalories = calculateMealCalories(3);
+        const snackCalories = calculateMealCalories(4);
 
         setNutritionData({
           dailyCalories: parseFloat((data.totalCalories || 0).toFixed(2)),
@@ -80,46 +164,38 @@ const NutritionalInfo = ({ userData }) => {
             (data.totalCalories - data.currentCalories || 0).toFixed(2)
           ),
           burnedCalories: parseFloat((data.currentBurned || 0).toFixed(2)),
-          intakePercentage:
-            data.totalCalories > 0
-              ? parseFloat(
-                  ((data.currentCalories / data.totalCalories) * 100).toFixed(2)
-                )
-              : 0,
-          diet: "Ít tinh bột",
+          intakePercentage: intakePercentage > 100 ? 100 : intakePercentage,
+          diet: nutritionData.diet,
           meals: [
-            { label: "Bữa sáng", calories: 0 },
-            { label: "Bữa trưa", calories: 0 },
-            { label: "Bữa tối", calories: 0 },
-            { label: "Bữa phụ", calories: 0 },
+            {
+              label: "Bữa sáng",
+              calories: parseFloat((breakfastCalories || 0).toFixed(2)),
+            },
+            {
+              label: "Bữa trưa",
+              calories: parseFloat((lunchCalories || 0).toFixed(2)),
+            },
+            {
+              label: "Bữa tối",
+              calories: parseFloat((dinnerCalories || 0).toFixed(2)),
+            },
+            {
+              label: "Bữa phụ",
+              calories: parseFloat((snackCalories || 0).toFixed(2)),
+            },
           ],
           protein: {
-            percentage:
-              data.totalProtein > 0
-                ? parseFloat(
-                    ((data.currentProtein / data.totalProtein) * 100).toFixed(2)
-                  )
-                : 0,
+            percentage: proteinPercentage > 100 ? 100 : proteinPercentage,
             intake: parseFloat((data.currentProtein || 0).toFixed(2)),
             total: parseFloat((data.totalProtein || 0).toFixed(2)),
           },
           carb: {
-            percentage:
-              data.totalCarb > 0
-                ? parseFloat(
-                    ((data.currentCarb / data.totalCarb) * 100).toFixed(2)
-                  )
-                : 0,
+            percentage: carbPercentage > 100 ? 100 : carbPercentage,
             intake: parseFloat((data.currentCarb || 0).toFixed(2)),
             total: parseFloat((data.totalCarb || 0).toFixed(2)),
           },
           fat: {
-            percentage:
-              data.totalFat > 0
-                ? parseFloat(
-                    ((data.currentFat / data.totalFat) * 100).toFixed(2)
-                  )
-                : 0,
+            percentage: fatPercentage > 100 ? 100 : fatPercentage,
             intake: parseFloat((data.currentFat || 0).toFixed(2)),
             total: parseFloat((data.totalFat || 0).toFixed(2)),
           },
@@ -132,6 +208,7 @@ const NutritionalInfo = ({ userData }) => {
     };
 
     fetchNutritionData();
+    fetchCurrentDiet();
   }, [selectedDate, apiUrl]);
 
   const dietOptions = [
@@ -145,8 +222,11 @@ const NutritionalInfo = ({ userData }) => {
   const [selectedMeal, setSelectedMeal] = useState("");
 
   const handleAddMeal = (meal) => {
-    setSelectedMeal(meal.label);
-    setIsEditModalOpen(true);
+    const isToday = selectedDate === today;
+    if (isToday) {
+      setSelectedMeal(meal.label);
+      setIsEditModalOpen(true);
+    }
   };
 
   const handleDietChange = async (diet) => {
@@ -218,12 +298,15 @@ const NutritionalInfo = ({ userData }) => {
     setIsEditModalOpen(false);
     setSelectedMeal("");
   };
+  const getPercentageColor = (percentage) => {
+    return percentage >= 100 ? "text-[#FF0000]" : "text-[#1445FE]";
+  };
 
   return (
     <div className="w-full h-auto flex flex-col gap-3 ">
-      <div className="bg-[#A2F4F3]  hidden"></div>
+      <div className="text-[#FF0000]  hidden"></div>
       <div className=" bg-[#B2DFFF] hidden"></div>
-      <div className=" bg-[#6CE75B] hidden"></div>
+      <div className=" text-[#1445FE] hidden"></div>
       <div className="bg-white flex items-center gap-4 rounded-lg py-1.5 px-4">
         <div className="relative">
           <input
@@ -265,8 +348,15 @@ const NutritionalInfo = ({ userData }) => {
 
             <div className="flex flex-col items-center justify-center">
               <HeartProgress percentage={nutritionData.intakePercentage} />
-              <div className="text-lg font-bold text-[#1445FE] self-center">
-                {nutritionData.intakePercentage}%
+              <div
+                className={`text-lg font-bold self-center ${getPercentageColor(
+                  nutritionData.intakePercentage
+                )}`}
+              >
+                {nutritionData.intakePercentage > 100
+                  ? 100
+                  : nutritionData.intakePercentage}
+                %
               </div>
               <div className="text-[#595858] text-base font-semibold">
                 Đã nạp
@@ -292,20 +382,26 @@ const NutritionalInfo = ({ userData }) => {
                 <div className="text-[#595858] text-base font-semibold">
                   {meal.label}
                 </div>
-                {meal.calories > 0 ? (
-                  <div
-                    className="text-lg font-bold text-[#1445FE] cursor-pointer"
-                    onClick={() => handleAddMeal(meal)}
-                  >
+                {selectedDate === today ? (
+                  meal.calories > 0 ? (
+                    <div
+                      className="text-lg font-bold text-[#1445FE] cursor-pointer"
+                      onClick={() => handleAddMeal(meal)}
+                    >
+                      {meal.calories}
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => handleAddMeal(meal)}
+                      className="w-5 h-5 rounded-full bg-[#1445FE] text-white flex items-center justify-center"
+                    >
+                      <i className="fa-solid fa-plus text-xs"></i>
+                    </button>
+                  )
+                ) : (
+                  <div className="text-lg font-bold text-[#1445FE] ">
                     {meal.calories}
                   </div>
-                ) : (
-                  <button
-                    onClick={() => handleAddMeal(meal)}
-                    className="w-5 h-5 rounded-full bg-[#1445FE] text-white flex items-center justify-center"
-                  >
-                    <i className="fa-solid fa-plus text-xs"></i>
-                  </button>
                 )}
               </div>
             ))}
@@ -316,12 +412,25 @@ const NutritionalInfo = ({ userData }) => {
                 <div className="text-[#595858] text-sm font-semibold">
                   Protein
                 </div>
-                <div className="text-[#595858] text-sm font-medium">
-                  {nutritionData.protein.percentage}%
+                <div
+                  className={`text-[#595858] text-sm font-medium ${getPercentageColor(
+                    nutritionData.protein.percentage
+                  )}`}
+                >
+                  {nutritionData.protein.percentage > 100
+                    ? 100
+                    : nutritionData.protein.percentage}
+                  %
                 </div>
               </div>
 
-              <LineProgress percentage={nutritionData.protein.percentage} />
+              <LineProgress
+                percentage={
+                  nutritionData.protein.percentage > 100
+                    ? 100
+                    : nutritionData.protein.percentage
+                }
+              />
               <div className="text-[#595858] text-sm font-medium self-center">
                 {nutritionData.protein.intake}/{nutritionData.protein.total}g
               </div>
@@ -330,8 +439,15 @@ const NutritionalInfo = ({ userData }) => {
             <div className="w-[140px] flex flex-col gap-2">
               <div className="flex justify-between">
                 <div className="text-[#595858] text-sm font-semibold">Carb</div>
-                <div className="text-[#595858] text-sm font-medium">
-                  {nutritionData.carb.percentage}%
+                <div
+                  className={`text-[#595858] text-sm font-medium ${getPercentageColor(
+                    nutritionData.carb.percentage
+                  )}`}
+                >
+                  {nutritionData.carb.percentage > 100
+                    ? 100
+                    : nutritionData.carb.percentage}
+                  %
                 </div>
               </div>
 
@@ -344,8 +460,15 @@ const NutritionalInfo = ({ userData }) => {
             <div className="w-[140px] flex flex-col gap-2">
               <div className="flex justify-between">
                 <div className="text-[#595858] text-sm font-semibold">Fat</div>
-                <div className="text-[#595858] text-sm font-medium">
-                  {nutritionData.fat.percentage}%
+                <div
+                  className={`text-[#595858] text-sm font-medium ${getPercentageColor(
+                    nutritionData.fat.percentage
+                  )}`}
+                >
+                  {nutritionData.fat.percentage > 100
+                    ? 100
+                    : nutritionData.fat.percentage}
+                  %
                 </div>
               </div>
 
@@ -362,14 +485,11 @@ const NutritionalInfo = ({ userData }) => {
             </div>
 
             <div
-              className="relative w-[140px] cursor-pointer"
+              className="relative w-[180px] cursor-pointer"
               onClick={() => setIsDietDropdownOpen(!isDietDropdownOpen)}
             >
               <div
-                className={`bg-${
-                  dietOptions.find((diet) => diet.label === nutritionData.diet)
-                    ?.bgColor
-                } text-black text-center text-sm rounded-2xl font-semibold py-0.5`}
+                className={`bg-[#B2DFFF]  text-black text-center text-sm rounded-2xl font-semibold py-0.5 `}
               >
                 {nutritionData.diet}
               </div>

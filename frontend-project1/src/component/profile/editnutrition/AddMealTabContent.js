@@ -1,5 +1,6 @@
-// src/components/editnutrition/AddMealTabContent.jsx
 import React, { useState, useEffect } from "react";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const AddMealTabContent = ({ mealLabel }) => {
   const [mealName, setMealName] = useState("");
@@ -9,20 +10,81 @@ const AddMealTabContent = ({ mealLabel }) => {
   const [mealCarb, setMealCarb] = useState("");
   const [mealFat, setMealFat] = useState("");
   const [isFormValid, setIsFormValid] = useState(false);
+  const apiUrl = process.env.REACT_APP_API_URL;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (isFormValid) {
-      alert(
-        `Thêm vào ${mealLabel}:
-              Tên: ${mealName}, 
-              Trọng lượng: ${mealWeight}g, 
-              Năng lượng: ${mealCalories}kcal,
-              Protein: ${mealProtein}g,
-              Carb: ${mealCarb}g,
-              Fat: ${mealFat}g
-              `
-      );
+      try {
+        const flag =
+          mealLabel === "Bữa sáng"
+            ? 1
+            : mealLabel === "Bữa trưa"
+            ? 2
+            : mealLabel === "Bữa tối"
+            ? 3
+            : 4;
+        const response = await fetch(`${apiUrl}/food/userCreateFood`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            name: mealName,
+            weight: parseFloat(mealWeight),
+            calories: parseFloat(mealCalories),
+            protein: parseFloat(mealProtein),
+            carb: parseFloat(mealCarb),
+            fat: parseFloat(mealFat),
+            flag: flag,
+          }),
+        });
+
+        if (!response.ok) {
+          const text = await response.text();
+          console.log(text);
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const responseData = await response.json();
+
+        if (responseData.code === 1000) {
+          toast.success("Thêm món ăn thành công!", {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          });
+          setMealName("");
+          setMealWeight("");
+          setMealCalories("");
+          setMealProtein("");
+          setMealCarb("");
+          setMealFat("");
+        } else {
+          toast.error(`Thêm món ăn thất bại! ${responseData.message}`, {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          });
+        }
+      } catch (err) {
+        toast.error("Thêm món ăn thất bại!", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+        console.log(err);
+      }
     }
   };
 
@@ -164,7 +226,7 @@ const AddMealTabContent = ({ mealLabel }) => {
       <button
         className={`py-2 px-4 rounded-md text-white font-semibold uppercase  ${
           isFormValid
-            ? "bg-[#1445FE] hover:bg-opacity-80 cursor-pointer"
+            ? "bg-[#1445FE] hover:bg-opacity-80 cursor-pointer border-none"
             : "bg-gray-400 cursor-not-allowed"
         }`}
         onClick={handleSubmit}
