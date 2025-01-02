@@ -125,7 +125,9 @@ const Profile = () => {
         </div>
       </div>
 
-      {isModalOpen && <EditHealthModal onClose={handleCloseModal} />}
+      {isModalOpen && (
+        <EditHealthModal onClose={handleCloseModal} userData={userData} />
+      )}
 
       <Footer />
     </>

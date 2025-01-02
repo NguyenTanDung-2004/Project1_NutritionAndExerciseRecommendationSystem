@@ -51,12 +51,12 @@ function DivForgotPassword() {
   }
 
   return (
-    <div class="divForgot">
+    <div class="divForgot" style={{ height: "48%", width: "35%" }}>
       <div class="divHeader">
         <p>Forgot Password</p>
         <i onClick={() => clickTurnOfForgot()} class="fa-solid fa-xmark"></i>
       </div>
-      <div class="divMain">
+      <div class="divMain" style={{ height: "fit-content", width: "100%", position: "relative" }}>
         <div class="divEmail divChild">
           <p>Email is empty or existed!</p>
           <input placeholder="Your email:"></input>
@@ -72,6 +72,7 @@ function DivForgotPassword() {
         <div
           onClick={() => clickChangePassword()}
           class="divConfirm text-white"
+          style={{ maxWidth: "400px" }}
         >
           Change Password
         </div>
