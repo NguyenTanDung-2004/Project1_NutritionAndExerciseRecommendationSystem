@@ -85,7 +85,7 @@
   > div.divRadioButton {
   display: flex;
   justify-content: space-between;
-  max-width: 550px;
+  /* max-width: 550px; */
 }
 
 #root

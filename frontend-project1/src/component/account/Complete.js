@@ -59,21 +59,21 @@ function DivForgotPassword() {
   }, listValueCompleteSignUp);
 
   return (
-    <div class="divForgotPassword divComplete">
+    <div class="divForgotPassword divComplete" style={{ height: "80%", width: "60%" }}>
       <div class="divHeader">
         <p>
           Thank you for signing up. To complete your profile, please fill in the
           required infomation.
         </p>
       </div>
-      <div class="divMain">
-        <div class="divBMI divChild">
+      <div class="divMain" style={{ height: "80%", width: "100%", position: "relative", display: "flex", flexDirection: "column", justifyContent: "space-around" }}>
+        <div class="divBMI divChild" style={{ height: "fit-content", width: "100%" }}>
           <p>BMI index - Cm/Kg</p>
           <p ref={(e) => (list.current[5] = e)}>
             You must enter interger 67&lt;height&lt;272, 25&lt;weight&lt;638
             (Ex: 170 - 70)!
           </p>
-          <div class="divInput">
+          <div class="divInput" style={{ height: "fit-content", width: "100%" }}>
             <input
               ref={(e) => (list.current[0] = e)}
               class="inputHeight"
@@ -86,7 +86,7 @@ function DivForgotPassword() {
             ></input>
           </div>
         </div>
-        <div class="divBloodGlucose divChild">
+        <div class="divBloodGlucose divChild" style={{ height: "fit-content", width: "100%" }}>
           <p>Blood glucose level (Fasting/Non-Fasting test) - mg/dl</p>
           <div ref={(e) => (list.current[2] = e)} class="divRadioButton">
             <div class="divLevel">
@@ -101,7 +101,7 @@ function DivForgotPassword() {
                 defaultChecked
               />
             </div>
-            <div class="divLevel">
+            <div class="divLevel" >
               <label class="form-check-label" for="flexRadioDefault13">
                 100 - 125 / 140 - 199
               </label>
@@ -125,7 +125,7 @@ function DivForgotPassword() {
             </div>
           </div>
         </div>
-        <div class="divBloodPressure divChild">
+        <div class="divBloodPressure divChild" style={{ height: "fit-content", width: "100%" }}>
           <p>Blood pressure (Systolic/Disastolic) - mmHg</p>
           <div ref={(e) => (list.current[3] = e)} class="divRadioButton">
             <div class="divTop">
@@ -190,9 +190,9 @@ function DivForgotPassword() {
             </div>
           </div>
         </div>
-        <div class="divHeartRate divChild">
+        <div class="divHeartRate divChild" style={{ height: "fit-content", width: "100%", position: "relative" }}>
           <p>Heart rate - heartbeat/minute</p>
-          <div ref={(e) => (list.current[4] = e)} class="divRadioButton">
+          <div ref={(e) => (list.current[4] = e)} class="divRadioButton" style={{width: "100%"}}>
             <div class="divLevel">
               <label class="form-check-label" for="flexRadioDefault9">
                 &lt; 60

@@ -40,7 +40,12 @@ export function RequestLogin(inputEmail, inputPassword, pEmail, pPassword) {
           "none";
       } else {
         setTimeout(() => {
+          console.log(data1.role);
+          if (data1.role == "admin") {
+            window.location = "http://localhost:3000/dashboard/profile";
+          } else {
           window.location = "http://localhost:3000/home_in";
+          }
         }, 2000);
       }
     })
